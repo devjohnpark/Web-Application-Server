@@ -3,7 +3,6 @@ package org.dochi.webserver.socket;
 import org.dochi.http.api.HttpApiMapper;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.dochi.webserver.config.*;
-import org.dochi.webserver.executor.WorkerPoolExecutor;
 
 public class SocketTaskExecutorFactory {
     private static final SocketTaskExecutorFactory INSTANCE = new SocketTaskExecutorFactory();
@@ -15,24 +14,21 @@ public class SocketTaskExecutorFactory {
     }
 
     public SocketTaskExecutor createExecutor(ServerConfig serverConfig) {
-        HttpApiMapper httpApiMapper = new HttpApiMapper(serverConfig.getWebService());
-        WorkerPoolExecutor workerExecutor = new WorkerPoolExecutor(serverConfig.getThreadPool());
-        HttpConfig httpConfig = new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute());
-        HttpProtocolHandler protocolHandler = new HttpProtocolHandler(httpConfig);
-        SocketTaskPool taskPool = createTaskPool(serverConfig, protocolHandler, httpApiMapper);
-        return new SocketTaskExecutor(workerExecutor, taskPool);
+        return createSocketTaskExecutor(
+            serverConfig.getThreadPool(),
+            new HttpProtocolHandler(new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute())),
+            new HttpApiMapper(serverConfig.getWebService())
+        );
     }
 
-    private SocketTaskPool createTaskPool(
-            ServerConfig serverConfig,
-            HttpProtocolHandler protocolHandler,
-            HttpApiMapper httpApiMapper) {
-        return new SocketTaskPool(
-                serverConfig.getThreadPool(),
+    private SocketTaskExecutor createSocketTaskExecutor(ThreadPoolConfig threadPool, HttpProtocolHandler protocolHandler, HttpApiMapper httpApiMapper) {
+        return new SocketTaskExecutor(threadPool,
+            new SocketTaskPool(threadPool,
                 () -> new SocketTaskHandler(
                         protocolHandler,
                         httpApiMapper
                 )
+            )
         );
     }
 }

@@ -1,6 +1,7 @@
 package org.dochi.webserver.socket;
 
 import org.dochi.webserver.attribute.ThreadPool;
+import org.dochi.webserver.config.ThreadPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class SocketTaskPool {
     private final ConcurrentLinkedDeque<SocketTask> queue;
     private final Supplier<SocketTask> supplier;
 
-    public SocketTaskPool(ThreadPool threadPool, Supplier<SocketTask> supplier) {
+    public SocketTaskPool(ThreadPoolConfig threadPool, Supplier<SocketTask> supplier) {
         this.queue = new ConcurrentLinkedDeque<>();
         this.supplier = supplier;
         this.initPool(threadPool.getMinSpareThreads(), supplier);
