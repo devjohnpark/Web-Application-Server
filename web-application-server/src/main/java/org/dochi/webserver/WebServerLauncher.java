@@ -11,7 +11,7 @@ public class WebServerLauncher {
     public static void main(String[] args) throws IOException {
         WebServer server1 = new WebServer(8080, "localhost");
         server1.getConfig().getWebService().addService("/user/create", new LoginHttpApiHandler())
-                                   gi            .addService("/upload", new UploadFileHttpApiHandler());
+                                               .addService("/upload", new UploadFileHttpApiHandler());
         ServerExecutor.addWebServer(server1);
         ServerExecutor.execute();
     }
