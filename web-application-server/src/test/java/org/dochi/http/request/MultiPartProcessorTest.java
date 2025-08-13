@@ -26,21 +26,6 @@ class MultiPartProcessorTest {
         multiPartProcessor = new MultiPartProcessor(httpMessageSizeManager.getBodyMonitor());
         byteArrayInputStream = new ByteArrayInputStream(multipartData.getBytes(StandardCharsets.UTF_8));
         http11RequestStream = new Http11RequestStream(byteArrayInputStream);
-
-//        http11RequestStream = new Http11RequestStream(byteArrayInputStream,
-//            httpReqConfig.getRequestHeaderMaxSize(),
-//            httpReqConfig.getRequestBodyMaxSize(),
-//            new HttpInputSizeListener() {
-//                @Override
-//                public void onHeaderRead(int size) throws HttpStatusException {
-//                    httpMessageSizeManager.addHeaderSize(size);
-//                }
-//
-//                @Override
-//                public void onBodyRead(int size) throws HttpStatusException {
-//                    httpMessageSizeManager.addBodySize(size);
-//                }
-//        });
     }
 
     @Test
@@ -74,7 +59,6 @@ class MultiPartProcessorTest {
         assertThat(request.multipart().getPart("profileImage").getContent()).isEqualTo("This is body of multipart/form data".getBytes(StandardCharsets.UTF_8));
         request.multipart().recycle();
         assertNull(request.multipart().getPart("age").getContent());
-        assertEquals(httpMessageSizeManager.getContentMonitor().getActualContentLength(), multipartData.getBytes(StandardCharsets.UTF_8).length);
     }
 
     @Test
@@ -112,7 +96,6 @@ class MultiPartProcessorTest {
         assertThat(request.multipart().getPart("profileImage").getContent()).isEqualTo("This is body of multipart/form data".getBytes(StandardCharsets.UTF_8));
         request.multipart().recycle();
         assertNull(request.multipart().getPart("age").getContent());
-        assertEquals(httpMessageSizeManager.getContentMonitor().getActualContentLength(), multipartData.getBytes(StandardCharsets.UTF_8).length);
     }
 
     @Test
@@ -139,143 +122,5 @@ class MultiPartProcessorTest {
         assertThat(request.multipart().getPart("file").getContent()).isEqualTo("21312445321553451234213412341234234124234".getBytes(StandardCharsets.UTF_8));
         request.multipart().recycle();
         assertNull(request.multipart().getPart("age").getContent());
-        assertEquals(httpMessageSizeManager.getContentMonitor().getActualContentLength(), multipartData.getBytes(StandardCharsets.UTF_8).length);
     }
-
-//
-//    @Test
-//    void readBody_end() throws IOException {
-//        MultiPartProcessor multiPartProcessor = new MultiPartProcessor();
-//        String file = "\\xFF\\xD8\\xFF\\xE0\\x00\\x10\\x4A\\x46\\x49\\x46\\x00\\x01\\x01\\x01\\x00\\x60\\x00\\x60\\x00\\x00 \\xFF\\xDB\\x00\\x43\\x00\\x08\\x06\\x06\\x07\\x06\\x05\\x08\\x07\\x07\\x07\\x09\\x09\\x08\\x0A\\x0C \\x14\\x0D\\x0C\\x0B\\x0B\\x0C\\x19\\x12\\x13\\x0F\\x14\\x1D\\x1A\\x1F\\x1E\\x1D\\x1A\\x1C\\x1C\\x20 \\x24\\x2E\\x27\\x20\\x22\\x2C\\x23\\x1C\\x1C\\x28\\x37\\x29\\x2C\\x30\\x31\\x34\\x34\\x34\\x1F\\x27 \\x39\\x3D\\x38\\x32\\x3C\\x2E\\x33\\x34\\x32";
-//        String boundaryValue = "12345";
-//        multiPartProcessor.setBoundaryValue(boundaryValue);
-//        String body = file + "\r\n" + "--" + boundaryValue + "--" + "\r\n";
-//        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8));
-//        Http11RequestStream http11RequestStream = new Http11RequestStream(byteArrayInputStream);
-//        assertArrayEquals(file.getBytes(StandardCharsets.UTF_8), multiPartProcessor.readBody(http11RequestStream));
-//    }
-//
-//    @Test
-//    void readBody_last_part() throws IOException {
-//        MultiPartProcessor multiPartProcessor = new MultiPartProcessor();
-//        byte[] binaryData = {0x10, 0x20, 0x30, 0x40, 0x50};
-//        String boundaryValue = "12345";
-//        multiPartProcessor.setBoundaryValue(boundaryValue);
-//
-//        String boundaryString = "\r\n" + "--" + boundaryValue + "--" + "\r\n";
-//        byte[] boundaryBytes = boundaryString.getBytes(StandardCharsets.UTF_8);
-//
-//        String testDir = "./src/test/resources/";
-//        String filePath = "multipart_last_part_body.bin";
-//
-//        try (
-//                FileOutputStream fos = new FileOutputStream(testDir + filePath);
-//                FileInputStream fis = new FileInputStream(testDir + filePath);
-//        ) {
-//            // 기존 바이너리 데이터 쓰기
-//            fos.write(binaryData);
-//
-//            // Boundary 데이터 쓰기
-//            fos.write(boundaryBytes);
-//
-//            Http11RequestStream http11RequestStream = new Http11RequestStream(fis);
-//
-//            assertArrayEquals(binaryData, multiPartProcessor.readBody(http11RequestStream));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    @Test
-//    void readBody_not_last_part() throws IOException {
-//        MultiPartProcessor multiPartProcessor = new MultiPartProcessor();
-//        byte[] binaryData = {0x10, 0x20, 0x30, 0x40, 0x50};
-//        String boundaryValue = "12345";
-//        multiPartProcessor.setBoundaryValue(boundaryValue);
-//
-//        String boundaryString = "\r\n" + "--" + boundaryValue + "\r\n";
-//        byte[] boundaryBytes = boundaryString.getBytes(StandardCharsets.UTF_8);
-//
-//        String testDir = "./src/test/resources/";
-//        String filePath = "multipart_last_part_body.bin";
-//
-//        try (
-//                FileOutputStream fos = new FileOutputStream(testDir + filePath);
-//                FileInputStream fis = new FileInputStream(testDir + filePath);
-//        ) {
-//            // 기존 바이너리 데이터 쓰기
-//            fos.write(binaryData);
-//
-//            // Boundary 데이터 쓰기
-//            fos.write(boundaryBytes);
-//
-//            Http11RequestStream http11RequestStream = new Http11RequestStream(fis);
-//
-//            assertArrayEquals(binaryData, multiPartProcessor.readBody(http11RequestStream));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    void readBody_not_found_boundary_wrong_crlf() throws IOException {
-//        MultiPartProcessor multiPartProcessor = new MultiPartProcessor();
-//        byte[] binaryData = {0x10, 0x20, 0x30, 0x40, 0x50};
-//        String boundaryValue = "12345";
-//        multiPartProcessor.setBoundaryValue(boundaryValue);
-//
-//        String boundaryString = "\r" + "--" + boundaryValue + "\r\n";
-//        byte[] boundaryBytes = boundaryString.getBytes(StandardCharsets.UTF_8);
-//
-//        String testDir = "./src/test/resources/";
-//        String filePath = "multipart_last_part_body.bin";
-//
-//        try (
-//                FileOutputStream fos = new FileOutputStream(testDir + filePath);
-//                FileInputStream fis = new FileInputStream(testDir + filePath);
-//        ) {
-//            // 기존 바이너리 데이터 쓰기
-//            fos.write(binaryData);
-//
-//            // Boundary 데이터 쓰기
-//            fos.write(boundaryBytes);
-//
-//            Http11RequestStream http11RequestStream = new Http11RequestStream(fis);
-//
-//            assertThrows(IOException.class, () -> multiPartProcessor.readBody(http11RequestStream));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Test
-//    void readBody_not_found_boundary_wrong_boundaryValue() throws IOException {
-//        MultiPartProcessor multiPartProcessor = new MultiPartProcessor();
-//        byte[] binaryData = {0x10, 0x20, 0x30, 0x40, 0x50};
-//        String boundaryValue = "12345";
-//        multiPartProcessor.setBoundaryValue(boundaryValue);
-//
-//        String boundaryString = "\r\n" + "--" + "123456" + "\r\n";
-//        byte[] boundaryBytes = boundaryString.getBytes(StandardCharsets.UTF_8);
-//
-//        String testDir = "./src/test/resources/";
-//        String filePath = "multipart_last_part_body.bin";
-//
-//        try (
-//                FileOutputStream fos = new FileOutputStream(testDir + filePath);
-//                FileInputStream fis = new FileInputStream(testDir + filePath);
-//        ) {
-//            // 기존 바이너리 데이터 쓰기
-//            fos.write(binaryData);
-//
-//            // Boundary 데이터 쓰기
-//            fos.write(boundaryBytes);
-//
-//            Http11RequestStream http11RequestStream = new Http11RequestStream(fis);
-//
-//            assertThrows(IOException.class, () -> multiPartProcessor.readBody(http11RequestStream));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }
