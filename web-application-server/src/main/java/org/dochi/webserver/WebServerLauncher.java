@@ -9,9 +9,9 @@ import java.io.IOException;
 
 public class WebServerLauncher {
     public static void main(String[] args) throws IOException {
-        WebServer server1 = new WebServer(8080, "localhost");
-        server1.getConfig().getWebService().addService("/user/create", new LoginHttpApiHandler())
-                                               .addService("/upload", new UploadFileHttpApiHandler());
+        WebServer server1 = new WebServer(8080, "0.0.0.0");
+//        server1.getConfig().getWebService().addService("/user/create", new LoginHttpApiHandler())
+//                                               .addService("/upload", new UploadFileHttpApiHandler());
         ServerExecutor.addWebServer(server1);
         ServerExecutor.execute();
     }

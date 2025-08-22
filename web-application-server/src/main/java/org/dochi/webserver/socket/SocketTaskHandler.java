@@ -92,7 +92,7 @@ public class SocketTaskHandler implements SocketTask {
             if (!socket.isClosed()) {
                 log.debug("try socket closed");
                 socket.close();
-                log.debug("Socket closed [Client: {}, Port: {}]",
+                log.info("Socket closed [Client: {}, Port: {}]",
                         socket.getInetAddress(), socket.getPort());
             }
         } catch (IOException e) {

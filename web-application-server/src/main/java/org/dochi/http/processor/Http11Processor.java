@@ -84,7 +84,7 @@ public class Http11Processor extends AbstractHttpProcessor {
             processCount++;
             recycle();
         }
-        log.debug("Processed requests count: {}", processCount);
+        log.info("Processed requests count: {}", processCount);
         return state;
     }
 
