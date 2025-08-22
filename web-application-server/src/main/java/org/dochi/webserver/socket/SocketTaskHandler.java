@@ -3,7 +3,9 @@ package org.dochi.webserver.socket;
 import org.dochi.http.api.HttpApiMapper;
 import org.dochi.http.processor.Http11Processor;
 import org.dochi.http.processor.HttpProcessor;
+import org.dochi.http.request.stream.BufferedSocketInputStream;
 import org.dochi.http.response.HttpStatus;
+import org.dochi.http.response.stream.BufferedSocketOutputStream;
 import org.dochi.webserver.config.HttpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,7 @@ public class SocketTaskHandler implements SocketTask {
             // 추후 ProcessorHandler 객체로 처리
             // HttpProcessor을 재활용하기 위해서는 네트워크 입출력 객체를 setter로 주입해야한다.
             // BioSocketWrapper를 생성해서 Http
-            HttpProcessor httpProcessor = new Http11Processor(in, out, httpConfig);
+            HttpProcessor httpProcessor = new Http11Processor(new BufferedSocketInputStream(in), new BufferedSocketOutputStream(out), httpConfig);
 
             socketWrapper.startConnectionTimeout(socketWrapper.getKeepAliveTimeout());
 
