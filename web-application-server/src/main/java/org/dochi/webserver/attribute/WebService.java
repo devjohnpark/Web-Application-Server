@@ -1,7 +1,7 @@
 package org.dochi.webserver.attribute;
 
-import org.dochi.http.api.DefaultHttpApiHandler;
-import org.dochi.http.api.HttpApiHandler;
+import org.dochi.api.handler.DefaultHttpApiHandler;
+import org.dochi.api.handler.HttpApiHandler;
 import org.dochi.webresource.WebResourceProvider;
 import org.dochi.webserver.config.WebServiceConfig;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package org.dochi.webserver.protocol;
 
-import org.dochi.http.internal.processor.HttpProcessor;
+import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.config.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

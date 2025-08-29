@@ -1,6 +1,5 @@
 package org.dochi.http.multipart;
 
-import org.dochi.http.external.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

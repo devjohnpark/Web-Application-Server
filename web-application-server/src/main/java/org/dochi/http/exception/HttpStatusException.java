@@ -1,6 +1,6 @@
 package org.dochi.http.exception;
 
-import org.dochi.http.data.HttpStatus;
+import org.dochi.http.utils.HttpStatus;
 
 public class HttpStatusException extends RuntimeException {
     private final HttpStatus httpStatus;

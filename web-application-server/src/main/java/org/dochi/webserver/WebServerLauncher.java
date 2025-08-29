@@ -1,7 +1,7 @@
 package org.dochi.webserver;
 
-import org.dochi.http.api.example.LoginHttpApiHandler;
-import org.dochi.http.api.example.UploadFileHttpApiHandler;
+import org.dochi.api.handler.example.LoginHttpApiHandler;
+import org.dochi.api.handler.example.UploadFileHttpApiHandler;
 import org.dochi.webserver.attribute.WebServer;
 import org.dochi.webserver.executor.ServerExecutor;
 

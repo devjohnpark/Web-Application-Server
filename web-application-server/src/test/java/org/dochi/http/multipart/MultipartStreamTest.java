@@ -1,6 +1,5 @@
 package org.dochi.http.multipart;
 
-import org.dochi.http.multipart.MultipartStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

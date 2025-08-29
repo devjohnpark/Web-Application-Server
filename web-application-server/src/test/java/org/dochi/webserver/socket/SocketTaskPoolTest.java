@@ -1,6 +1,6 @@
 package org.dochi.webserver.socket;
 
-import org.dochi.http.api.HttpApiMapper;
+import org.dochi.api.mapper.HttpApiMapper;
 import org.dochi.webserver.config.*;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.junit.jupiter.api.BeforeEach;

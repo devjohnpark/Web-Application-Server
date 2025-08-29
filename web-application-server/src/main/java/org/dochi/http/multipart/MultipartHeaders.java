@@ -3,7 +3,7 @@ package org.dochi.http.multipart;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.dochi.http.util.HttpParser.*;
+import static org.dochi.http.utils.HttpParser.*;
 
 public class MultipartHeaders {
     public static final String CONTENT_DISPOSITION = "Content-Disposition";

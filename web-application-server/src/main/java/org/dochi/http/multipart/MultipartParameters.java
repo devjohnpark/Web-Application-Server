@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.dochi.http.util.HttpParser.parseContentDisposition;
+import static org.dochi.http.utils.HttpParser.parseContentDisposition;
 
 public class MultipartParameters {
     private static final Logger log = LoggerFactory.getLogger(MultipartParameters.class);
