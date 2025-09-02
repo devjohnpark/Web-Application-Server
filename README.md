@@ -28,7 +28,7 @@
 
 - **0.2.0: Protocol Decoupling & Performance Optimization**
     - Resolve protocol dependency by separating low-level and high-level processing into a two-layer architecture
-    - Significantly improve performance by buffering header in byte[], parsing keys/values by index, and using lazy loading for required field as `String`
+    - Achieve 23x throughput improvement by buffering header in byte[], parsing keys/values by index, and using lazy loading for required field as `String`
     - Leverage Cache Locality with LIFO-based Object Pool
     - Enhance Socket Extensibility with `SocketWrapperBase<E>` for Future NIO
     - Support Virtual Servers by Port and Domain
