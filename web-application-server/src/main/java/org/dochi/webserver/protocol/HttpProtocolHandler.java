@@ -1,5 +1,7 @@
 package org.dochi.webserver.protocol;
 
+import org.dochi.internal.mapper.HttpMapper;
+import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.internal.processor.Http11Processor;
 import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
@@ -8,9 +10,11 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class HttpProtocolHandler {
     private final HttpConfig config;
+    private final HttpMapper mapper;
     private final ConcurrentLinkedDeque<Http11Processor> http11Pool;
 
-    public HttpProtocolHandler(HttpConfig config) {
+    public HttpProtocolHandler(HttpMapper mapper, HttpConfig config) {
+        this.mapper = mapper;
         this.config = config;
         // 락 프리(lock-free) 알고리즘을 사용하여 높은 동시성 성능: CAS(Compare-And-Swap) 연산으로 CAS는 CPU가 메모리 위치(V)의 현재 값을 읽어서 메모리 값을 기대 값과 비교해 일치하면 새 값으로 원자적으로 교체하는 동시성 기법
         // Deque 구현체로 LIFO 방식으로 사용할 수 있음 (addFirst로 추가, pollFirst로 제거) -> 최근에 사용된 객체를 우선 재사용하여 캐시 지역성을 활용
@@ -25,7 +29,7 @@ public class HttpProtocolHandler {
     }
 
     public HttpProcessor getProcessor(String protocolName) {
-        Http11Processor processor = null;
+        AbstractHttpProcessor processor = null;
         if (protocolName.equals("HTTP/1.1")) {
             processor = http11Pool.pollFirst(); // pop()은 비어있을 때 예외를 발생시키므로 pollFirst() 사용
         }
@@ -34,7 +38,7 @@ public class HttpProtocolHandler {
 
     private HttpProcessor createProcessor(String protocolName) {
         if (protocolName.equals("HTTP/1.1")) {
-            return new Http11Processor(config);
+            return new Http11Processor(mapper, config);
         }
         throw new IllegalArgumentException("Unknown protocol: " + protocolName);
     }

@@ -1,6 +1,5 @@
 package org.dochi.webserver.socket;
 
-import org.dochi.api.mapper.HttpApiMapper;
 import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.slf4j.Logger;
@@ -10,11 +9,9 @@ import java.io.IOException;
 public class SocketTaskHandler implements SocketTask {
     private static final Logger log = LoggerFactory.getLogger(SocketTaskHandler.class);
     private SocketWrapperBase<?> socketWrapper;
-    private final HttpApiMapper apiMapper;
     private final HttpProtocolHandler protocolHandler;
 
-    public SocketTaskHandler(HttpProtocolHandler protocolHandler, HttpApiMapper ApiMapper) {
-        this.apiMapper = ApiMapper;
+    public SocketTaskHandler(HttpProtocolHandler protocolHandler) {
         this.protocolHandler = protocolHandler;
     }
 
@@ -25,7 +22,7 @@ public class SocketTaskHandler implements SocketTask {
             HttpProcessor processor = this.protocolHandler.getProcessor(); // 기본 default HTTP/1.1;
             getSocketWrapper().setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
             while (state == SocketState.OPEN) {
-                state = processor.process(socketWrapper, apiMapper);
+                state = processor.process(socketWrapper);
                 if (state == SocketState.CLOSED) {
                     protocolHandler.release(processor);
                 } else if (state == SocketState.UPGRADING) {

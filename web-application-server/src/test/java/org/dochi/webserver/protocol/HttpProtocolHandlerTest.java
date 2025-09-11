@@ -1,5 +1,6 @@
 package org.dochi.webserver.protocol;
 
+import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.config.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,11 @@ class HttpProtocolHandlerTest {
     HttpProtocolHandler protocolHandler;
     ServerConfig serverConfig = new ServerConfig();
     HttpConfig httpConfig = new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute());
-
+    HttpMapper httpMapper = new HttpMapper(serverConfig.getWebService());
 
     @BeforeEach
     void init() {
-        protocolHandler = new HttpProtocolHandler(httpConfig);
+        protocolHandler = new HttpProtocolHandler(httpMapper, httpConfig);
     }
 
     @Test

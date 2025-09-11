@@ -2,7 +2,7 @@ package org.dochi.internal.processor;
 
 import org.dochi.http.utils.ResponseHeaders;
 import org.dochi.internal.http11.Http11InputBuffer;
-import org.dochi.api.mapper.HttpApiMapper;
+import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.connector.TmpBufferedOutputStream;
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapperBase;
@@ -20,8 +20,8 @@ public class Http11Processor extends AbstractHttpProcessor {
     private final Http11InputBuffer inputBuffer;
     private final TmpBufferedOutputStream tempBufferOutputStream;
 
-    public Http11Processor(HttpConfig config) {
-        super(config);
+    public Http11Processor(HttpMapper mapper, HttpConfig config) {
+        super(mapper, config);
         this.inputBuffer = new Http11InputBuffer(config.getHttpReqConfig().getRequestHeaderMaxSize());
         this.requestHandler.setInputBuffer(this.inputBuffer);
         this.tempBufferOutputStream = new TmpBufferedOutputStream();
@@ -85,7 +85,7 @@ public class Http11Processor extends AbstractHttpProcessor {
         tempBufferOutputStream.init(socketWrapper); // later -> outputBuffer.init(socketWrapper);
     }
 
-    protected SocketState service(SocketWrapperBase<?> socketWrapper, HttpApiMapper httpApiMapper) throws IOException {
+    protected SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException {
         SocketState state = OPEN;
         while (state == OPEN) {
             if (!inputBuffer.parseHeader(requestHandler.getRequest())) {
@@ -101,7 +101,7 @@ public class Http11Processor extends AbstractHttpProcessor {
             } else if (!shouldNext(socketWrapper)) {
                 state = CLOSED;
             }
-            httpApiMapper.getHttpApiHandler(requestHandler.getPath()).service(requestHandler, responseHandler);
+            getHttpMapper().getHttpApiHandler(requestHandler.getPath()).service(requestHandler, responseHandler);
             responseHandler.flush();
             // Response object provides OutputStream object to developer, so it need flush() after processing HTTP API
             // flush() has system call cost, it needs to remove inefficient action.

@@ -1,6 +1,6 @@
 package org.dochi.webserver.socket;
 
-import org.dochi.api.mapper.HttpApiMapper;
+import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.webserver.config.*;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,12 +11,11 @@ class SocketTaskPoolTest {
     SocketTaskPool socketTaskPool;
     ServerConfig serverConfig = new ServerConfig();
     HttpConfig httpConfig = new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute());
-    HttpProtocolHandler protocolHandler = new HttpProtocolHandler(httpConfig);
-    HttpApiMapper apiMapper = new HttpApiMapper(serverConfig.getWebService());
+    HttpProtocolHandler protocolHandler = new HttpProtocolHandler(new HttpMapper(serverConfig.getWebService()), httpConfig);
 
     @BeforeEach
     void setUp() {
-        socketTaskPool = new SocketTaskPool(serverConfig.getThreadPool(), () -> new SocketTaskHandler(protocolHandler, apiMapper));
+        socketTaskPool = new SocketTaskPool(serverConfig.getThreadPool(), () -> new SocketTaskHandler(protocolHandler));
     }
 
     @Test

@@ -1,7 +1,7 @@
 package org.dochi.internal.processor;
 
+import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.connector.RequestHandler;
-import org.dochi.api.mapper.HttpApiMapper;
 import org.dochi.http.exception.HttpStatusException;
 import org.dochi.connector.Http11ResponseHandler;
 import org.dochi.connector.HttpRequestHandler;
@@ -23,14 +23,16 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpProcessor.class);
     protected final RequestHandler requestHandler;
     protected final ResponseHandler responseHandler;
+    protected final HttpMapper mapper;
 
-    protected AbstractHttpProcessor(HttpConfig config) {
+    protected AbstractHttpProcessor(HttpMapper mapper, HttpConfig config) {
+        this.mapper = mapper;
         this.requestHandler = new HttpRequestHandler(config.getHttpReqConfig());
         this.responseHandler = new Http11ResponseHandler(config.getHttpResConfig());
     }
 
     @Override
-    public SocketState process(SocketWrapperBase<?> socketWrapper, HttpApiMapper httpApiMapper) {
+    public SocketState process(SocketWrapperBase<?> socketWrapper) {
         if (socketWrapper == null) {
             throw new IllegalArgumentException("SocketWrapperBase is null");
         }
@@ -38,7 +40,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         setSocketWrapper(socketWrapper);
         try {
             recycle();
-            state = service(socketWrapper, httpApiMapper);
+            state = service(socketWrapper);
         } catch (Exception e) {
             processException(e);
             recycle(); // shouldn't call when upgrading protocol
@@ -55,9 +57,13 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         responseHandler.recycle();
     }
 
+    protected HttpMapper getHttpMapper() {
+        return mapper;
+    }
+
     abstract protected void setSocketWrapper(SocketWrapperBase<?> socketWrapper);
 
-    protected abstract SocketState service(SocketWrapperBase<?> socketWrapper, HttpApiMapper httpApiMapper) throws IOException;
+    protected abstract SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException;
 
     protected abstract boolean shouldKeepAlive(SocketWrapperBase<?> socketWrapper);
 
