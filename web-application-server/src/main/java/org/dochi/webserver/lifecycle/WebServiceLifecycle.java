@@ -5,7 +5,7 @@ import org.dochi.webserver.attribute.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebServiceLifecycle implements Lifecycle {
+public class WebServiceLifecycle extends LifecycleBase {
     private static final Logger log = LoggerFactory.getLogger(WebServiceLifecycle.class);
     private final WebService webService;
 

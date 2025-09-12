@@ -60,5 +60,185 @@ public class WebServerLauncher {
         ServerExecutor.addWebServer(remoteServer);
         ServerExecutor.execute();
     }
-}  
+} 
 ```
+
+---
+
+## Mermaid
+
+#### Total
+
+```mermaid
+classDiagram
+direction TB
+	namespace Server_Lifecycle {
+        class ServerExecutor {
+        }
+
+        class WebServer {
+        }
+
+        class ServerLifecycle {
+        }
+
+        class Lifecycle {
+        }
+
+        class LifecycleBase {
+        }
+
+        class WebServiceLifecycle {
+        }
+
+        class WebService {
+        }
+
+	}
+	namespace Socket_Abstraction {
+        class SocketWrapperBase {
+        }
+
+        class BioSocketWrapper {
+        }
+
+	}
+	namespace Socket_Task_Execution {
+        class Runnable {
+        }
+
+        class SocketTask {
+        }
+
+        class SocketTaskExecutor {
+        }
+
+        class SocketTaskPool {
+        }
+
+        class ThreadPoolExecutor {
+        }
+
+        class SocketTaskHandler {
+        }
+
+	}
+	namespace Protocol_Entry {
+        class HttpProtocolHandler {
+        }
+
+        class HttpProcessorPool {
+        }
+
+	}
+	namespace Interanl_HTTP_Processing {
+        class HttpProcessor {
+        }
+
+        class AbstractHttpProcessor {
+        }
+
+        class Http11Processor {
+        }
+
+        class HttpInputBuffer {
+        }
+
+        class Http11InputBuffer {
+        }
+
+        class Http11Parser {
+        }
+
+        class RequestHandler {
+        }
+
+        class ResponseHandler {
+        }
+
+        class HttpMapper {
+        }
+
+	}
+	namespace Connector {
+        class HttpRequestHandler {
+        }
+
+        class HttpResponseHandler {
+        }
+
+	}
+	namespace External_API {
+        class HttpExternalRequest {
+        }
+
+        class HttpExternalResponse {
+        }
+
+        class WebResourceProvider {
+        }
+
+        class HttpApiHandler {
+        }
+
+        class AbstractHttpApiHandler {
+        }
+
+	}
+
+	<<interface>> Lifecycle
+	<<abstract>> LifecycleBase
+	<<abstract>> SocketWrapperBase
+	<<interface>> Runnable
+	<<interface>> SocketTask
+	<<interface>> HttpProcessor
+	<<abstract>> AbstractHttpProcessor
+	<<interface>> HttpInputBuffer
+	<<interface>> RequestHandler
+	<<interface>> ResponseHandler
+	<<interface>> HttpExternalRequest
+	<<interface>> HttpExternalResponse
+	<<interface>> HttpApiHandler
+	<<abstract>> AbstractHttpApiHandler
+
+    ServerLifecycle ..|> LifecycleBase
+    ServerLifecycle --> WebServiceLifecycle
+    WebServiceLifecycle ..|> LifecycleBase
+    WebServiceLifecycle --> WebService
+    LifecycleBase ..|> Lifecycle
+    ServerExecutor --> ServerLifecycle
+    ServerLifecycle --> WebServer
+    ServerLifecycle --> SocketTaskExecutor
+    BioSocketWrapper ..|> SocketWrapperBase
+    SocketTaskHandler ..|> SocketTask
+    SocketTaskHandler --> SocketWrapperBase
+    SocketTask ..|> Runnable
+    SocketTaskExecutor --> SocketTaskPool
+    SocketTaskExecutor --> ThreadPoolExecutor
+    SocketTaskPool --> SocketTaskHandler
+    SocketTaskHandler --> HttpProtocolHandler
+    HttpProtocolHandler --> HttpProcessorPool
+    HttpProcessorPool --> HttpProcessor
+    Http11InputBuffer ..|> HttpInputBuffer
+    AbstractHttpProcessor ..|> HttpProcessor
+    Http11Processor ..|> AbstractHttpProcessor
+    Http11Processor --> Http11InputBuffer
+    Http11InputBuffer --> Http11Parser
+    Http11Processor --> HttpRequestHandler
+    Http11Processor --> HttpResponseHandler
+    HttpProtocolHandler --> HttpMapper
+    HttpMapper --> WebService
+    WebService --> HttpApiHandler
+    HttpApiHandler <.. HttpExternalRequest
+    HttpApiHandler <.. HttpExternalResponse
+    HttpApiHandler <|.. AbstractHttpApiHandler
+    AbstractHttpApiHandler --> WebResourceProvider
+    RequestHandler ..> HttpExternalRequest
+    ResponseHandler ..> HttpExternalResponse
+    HttpRequestHandler ..|> RequestHandler
+    HttpResponseHandler ..|> ResponseHandler
+```
+
+
+
+
