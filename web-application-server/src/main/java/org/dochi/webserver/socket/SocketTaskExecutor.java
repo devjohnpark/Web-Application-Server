@@ -28,7 +28,6 @@ public class SocketTaskExecutor {
 
         log.info("Worker Thread Pool Executor initialized [Total size: {}]", workerThreadPoolExecutor.getPoolSize());
 
-        registerShutdownHook();
         this.taskPool = taskPool;
     }
 
@@ -53,16 +52,10 @@ public class SocketTaskExecutor {
         }
     }
 
-    private void registerShutdownHook() {
-        // JVM이 종료될 때 ShutdownHook 스레드 실행
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownGracefully));
-    }
-
     // 스레드 풀에 남아 있는 대기 중인 작업을 모두 취소
     // 1. 진행 중인 작업이 완료될 때까지 일정 시간 동안 기다림
     // 2. 일정 시간 최과시 스레드 풀이 강제 종료
-    private void shutdownGracefully() {
-        log.info("Worker thread pool shutdown has started.");
+    public void shutdownGracefully() {
         try {
             // 새로운 작업 수락 중지
             workerThreadPoolExecutor.shutdown();
@@ -70,6 +63,7 @@ public class SocketTaskExecutor {
             // 진행 중인 모든 작업이 완료될 때까지 대기 (true를 반환하면 모든 작업이 종료됨었음을 의미)
             if (!workerThreadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
                 // 최대 60초 후에도 종료되지 않은 경우 강제 종료
+                log.warn("Forcing worker pool shutdownNow()");
                 workerThreadPoolExecutor.shutdownNow();
             }
         } catch (InterruptedException e) { // 스레드가 대기 중(sleep(), wait(), join() 메서드가 호출된 상태) 인터럽트 신호를 받으면 예외가 발생
@@ -81,7 +75,10 @@ public class SocketTaskExecutor {
             Thread.currentThread().interrupt();
             log.error("Worker thread pool shutdown has interrupted.", e);
         } finally {
-            log.info("Worker thread pool shutdown has completed.");
+            log.info("Worker thread pool shutdown completed. [poolSize={}, active={}, queued={}]",
+                    workerThreadPoolExecutor.getPoolSize(),
+                    workerThreadPoolExecutor.getActiveCount(),
+                    workerThreadPoolExecutor.getQueue().size());
         }
     }
 }

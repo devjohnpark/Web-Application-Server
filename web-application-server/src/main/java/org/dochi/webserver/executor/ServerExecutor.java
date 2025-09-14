@@ -18,12 +18,10 @@ public class ServerExecutor {
     private ServerExecutor() {}
 
     public static void addWebServer(WebServer webServer) {
-
         if (servers.containsKey(webServer)) {
             log.error("Web server already exists: {}", webServer);
             throw new IllegalArgumentException("Web server already exists: " + webServer);
         }
-
         servers.put(webServer, new ServerLifecycle(webServer));
         // 단일 서버 실행/종료를 위한 cli 대기 스레드 생성 후 put
     }
@@ -35,40 +33,42 @@ public class ServerExecutor {
             throw new IllegalStateException("No web servers found.");
         }
 
-        // ExecutorService 인터페이스 내부 close 메서드에서 shutdown()을 호출하고 terminated = awaitTermination(1L, TimeUnit.DAYS) 를 호출해서 하루 뒤에 ExecutorService 스레드 종료된다.
-        // ThreadPoolExecutor의 awaitTermination 메서드 내에서는 타임아웃(nanos <= 0L)이 발생하면 루프가 반복되지 않고 false를 반환하며 종료된다.
-        // 그러나 ExecutorService 인터페이스의 close() 메서드의 while (!terminated) 루프는 awaitTermination이 false를 반환해도 스레드 풀이 TERMINATED가 될 때까지 계속 반복(while(runStateLessThan())한다.
-        // 따라서 ExecutorService의 close() 전체를 고려한다면: 타임아웃되어도 TERMINATED가 되지 않으면 상위 루프가 반복되어 close() 되지 못하는 구조이다.
-        try(ExecutorService executor = Executors.newFixedThreadPool(allWebServers.size())) {
-            for (ServerLifecycle serverLifecycle : allWebServers) {
-                executor.submit(() -> {
-                    try {
-                        serverLifecycle.start();
-                    } catch (Exception e) {
-                        // 서버 인스턴스 하나라도 예외 발생하면 ExecutorService 종료됨 (모든 서버 인스턴스 종료)
-                        // ThreadPoolExecutor의 내부 클래스 Worker.runWorker()에서 예외 발생시, processWorkerExit()에서 tryTerminate() 호출하여 ExecutorService 종료
-                        log.error("Server exit - ServerLifecycle occur exception: ", e);
-                    }
-                });
+        // 1) 모두 시작 (부분 실패 시 이미 시작된 서버는 롤백 정지)
+        List<ServerLifecycle> started = new ArrayList<>();
+        try {
+            for (ServerLifecycle s : allWebServers) {
+                s.start();                 // 비차단이어야 함: 내부에서 accept 스레드 시작
+                started.add(s);
             }
-            registerShutdownHook(allWebServers, executor);
+        } catch (Exception e) {
+            log.error("Failed to start some server(s). Rolling back...", e);
+            stopAllReverse(started);
         }
-    }
 
-    private static void registerShutdownHook(List<ServerLifecycle> allWebServers, ExecutorService executor) {
+        // 2) 종료 훅: 역순으로 안전 종료
+        CountDownLatch latch = new CountDownLatch(1);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            stopServers(allWebServers, executor);
-        }));
+            stopAllReverse(started);
+            latch.countDown();
+        }, "shutdown-hook"));
+
+        log.info("All servers started: {}", started.size());
+
+        // 3) 메인 스레드 대기 (신호 오면 훅에서 stop 후 countDown)
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            stopAllReverse(started);
+        }
+        log.info("All web servers stopped.");
     }
 
-    private static void stopServers(List<ServerLifecycle> allWebServers, ExecutorService executor) {
-        for (ServerLifecycle serverLifecycle : allWebServers) {
-            try {
-                serverLifecycle.stop();
-            } catch (Exception e) {
-                log.error("ServerLifecycle occur exception: ", e);
-            }
+    private static void stopAllReverse(List<ServerLifecycle> started) {
+        for (int i = started.size() - 1; i >= 0; i--) {
+            try { started.get(i).stop(); }
+            catch (Exception e) { log.error("Stop failed", e); }
         }
-        executor.shutdown();
     }
+
 }

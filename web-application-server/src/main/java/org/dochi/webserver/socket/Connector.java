@@ -9,23 +9,47 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Connector {
+public final class Connector implements Runnable, AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
     private final ServerSocket listenSocket;
+    private final SocketTaskExecutor executor;
+    private final ServerConfig config;
+    private volatile boolean running;
 
-    public Connector(ServerSocket listenSocket) {
+    public Connector(ServerSocket listenSocket, ServerConfig config) {
         this.listenSocket = listenSocket;
+        this.executor = SocketTaskExecutorFactory.getInstance().createExecutor(config);
+        this.config = config;
     }
 
-    public void connect(SocketTaskExecutor socketTaskExecutor, String hostName, int port, ServerConfig config) throws IOException {
-        // 도메인 이름을 IP 주소로 변환해서 유효성 검증한다.
-        // IP가 시스템의 네트워크 인터페이스(eth0)에 할당되어 있어야함 (ip addr로 확인가능)
-        listenSocket.bind(new InetSocketAddress(hostName, port));
-        log.info("Listening client connection request [Host: {}, Port: {}]", hostName, port);
-        Socket establishedSocket;
-        while ((establishedSocket = listenSocket.accept()) != null) {
-            log.info("Accepted new client connection [Client IP: {}, Port: {}]", establishedSocket.getInetAddress(), establishedSocket.getPort());
-            socketTaskExecutor.execute(new BioSocketWrapper(establishedSocket, config.getKeepAlive()));
+    public void bind(String host, int port) throws IOException {
+        listenSocket.bind(new InetSocketAddress(host, port));
+        log.info("Listening [Host: {}, Port: {}]", host, port);
+    }
+
+    @Override
+    public void run() {
+        running = true;
+        try {
+            while (running) {
+                final Socket socket = listenSocket.accept(); // close() 시 SocketException 발생
+                log.info("Accepted [Client IP: {}, Port: {}]", socket.getInetAddress(), socket.getPort());
+                executor.execute(new BioSocketWrapper(socket, config.getKeepAlive()));
+            }
+        } catch (IOException e) {
+            if (running) log.error("Accept failed", e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        running = false;
+        listenSocket.close(); // accept 깨움
+        log.info("Closed listen socket");
+        try {
+            if (executor != null) executor.shutdownGracefully();
+        } catch (Exception ex) {
+            log.warn("Executor shutdown failed", ex);
         }
     }
 }
