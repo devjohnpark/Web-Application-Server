@@ -874,7 +874,7 @@ PH-->>ST: HttpXXProcessor implementation
 ST->>PXX: process(socketWrapper): SocketState
 activate PXX
 
-Note over PXX,CL: Persistent Connection (여러 요청에 대해 로직 반복적으로 사용)
+Note over PXX,CL: Persistent Connection (다중 요청/응답, close/timeout 시 종료)
 PXX->>IB: parseHeader()
 IB->>PR: parse(): request line, header fields
 Note over IB,PR: 바이트 기반 헤더 읽기 및 파싱
