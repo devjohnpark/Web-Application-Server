@@ -69,8 +69,6 @@ public class WebServerLauncher {
 
 #### Class-Diagram
 
-![](https://i.imgur.com/zrj3owG.png)
-
 ```mermaid
 classDiagram
 
