@@ -968,7 +968,8 @@ EX->>ST: setSocketWrapper(BioSocketWrapper)
 
   
 
-EX->>WT: execute(): SocketTask
+EX->>WT: execute(): SocketTask 구현체 실행 후 재활용
+WT->>ST: run()
 
   
 
@@ -995,7 +996,11 @@ ST->>PXX: process(socketWrapper): SocketState
 activate PXX
 
   
+alt Persistent Connection
 
+  
+
+Note over CN,CL: 연결 유지, 다음 요청에서 재사용
   
 
 PXX->>IB: parseHeader()
@@ -1094,34 +1099,21 @@ PXX->>HS: 응답 메세지 flush()
 
 HS->>CL: HTTP 응답 전송 (commit after flush)
 
-  
 
-  
+PXX-->>ST: SocketState (CLOSED, UPGRADNING)
 
-alt keep-alive
+ST->>PH: release(HttpProcessor)
 
-  
+PH-->>PH: pooled
 
-Note over CN,CL: 연결 유지, 다음 요청에서 재사용
+ST->>CL: close socket
 
-  
 
-else close
+Note over CN,CL: 연결 종료
 
-  
-
-EX->>CL: close socket
-
-  
+else close  
 
 end
-
-  
-
-  
-
-PXX-->>ST: SocketState (KEEP_ALIVE or CLOSE)
-
   
 
 deactivate PXX
@@ -1130,15 +1122,11 @@ deactivate PXX
 
   
 
-ST-->>EX: run() completed
+ST-->>WT: run() completed
 
-  
+WT-->>PO: recycle(SocketTask)
 
-EX->>PO: recycle(SocketTask)
-
-  
-
-PO-->>EX: pooled
+PO-->>PO: pooled
 
   
 
