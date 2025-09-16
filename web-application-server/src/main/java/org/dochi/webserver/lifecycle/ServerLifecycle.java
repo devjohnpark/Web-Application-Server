@@ -30,7 +30,7 @@ public class ServerLifecycle extends LifecycleBase {
             );
             this.connector.bind(webServer.getHostName(), webServer.getPort());
 
-            this.acceptThread = new Thread(connector, "acceptor");
+            this.acceptThread = new Thread(connector, "connector");
             this.acceptThread.start();
 
             log.info("ServerLifeCycle started [Host: {}, Port: {}]",
