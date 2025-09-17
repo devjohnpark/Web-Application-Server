@@ -22,11 +22,6 @@ public final class Connector implements Runnable, AutoCloseable {
         this.config = config;
     }
 
-    public void bind(String host, int port) throws IOException {
-        listenSocket.bind(new InetSocketAddress(host, port));
-        log.info("Listening [Host: {}, Port: {}]", host, port);
-    }
-
     @Override
     public void run() {
         running = true;

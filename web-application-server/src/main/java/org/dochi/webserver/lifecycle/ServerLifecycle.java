@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
 public class ServerLifecycle extends LifecycleBase {
@@ -24,12 +25,12 @@ public class ServerLifecycle extends LifecycleBase {
         log.info("Starting server...");
         super.start();
         try {
+            final ServerSocket serverSocket = new ServerSocket();
+            serverSocket.bind(new InetSocketAddress(webServer.getHostName(), webServer.getPort()));
             this.connector = new Connector(
-                    new ServerSocket(),
+                    serverSocket,
                     webServer.getConfig()
             );
-            this.connector.bind(webServer.getHostName(), webServer.getPort());
-
             this.acceptThread = new Thread(connector, "connector");
             this.acceptThread.start();
 

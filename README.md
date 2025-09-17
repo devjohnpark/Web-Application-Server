@@ -130,8 +130,6 @@ class Connector {
 
 +Connector(ServerSocket listenSocket, ServerConfig config)
 
-+bind(String host, int port) void
-
 +run() void
 
 +close() void
@@ -730,7 +728,7 @@ ServerLifecycle ..|> LifecycleBase
 
 ServerLifecycle --> WebServiceLifecycle
 
-WebServiceLifecycle ..|> LifecycleBase
+WebServiceLifecycle ..|> Lifecycle
 
 WebServiceLifecycle --> WebService
 
@@ -819,6 +817,7 @@ ResponseHandler ..|> HttpExternalResponse
 HttpRequestHandler ..|> RequestHandler
 
 HttpResponseHandler ..|> ResponseHandler
+
 ```
 
 #### Sequence-Diagram
@@ -826,100 +825,206 @@ HttpResponseHandler ..|> ResponseHandler
 ```mermaid
 sequenceDiagram
 
+  
+
 autonumber
+
+  
 
 %% ==== Boot ====
 
+  
+
 participant CLI as ServerExecutor
+
 participant SL as ServerLifecycle
+
+participant WSL as WebServiceLifecycle
+
 participant CN as Connector
+
 participant EX as SocketTaskExecutor
+
 participant PO as SocketTaskPool
+
 participant WT as WorkerThreadPool(Executor)
+
 participant ST as SocketTaskHandler
+
 participant PH as HttpProtocolHandler
+
 participant PXX as HttpXXProcessor
+
 participant IB as HttpXXInputBuffer
+
 participant PR as HttpXXParser
+
 participant HR as HttpRequestHandler
+
 participant HS as HttpResponseHandler
-participant WS as WebService
+
+participant HM as HttpMapper
+
 participant API as HttpApiHandler
+
 participant CL as Client(Socket)
 
+  
+
 rect rgb(245,245,255)
+
 CLI->>SL: execute(): start all ServerLifecycle
-SL->>CN: new Connector(ServerSocket, ServerConfig)
-SL->>CN: bind(host, port)
+
+SL->>WSL: init()
+
+WSL ->> API: init(WebServiceConfig config)
+
+SL->>CN: new Connector(ListenSocket, ServerConfig)
+
 SL->>CN: start(): Thread("acceptor")
+
 Note right of CN: accept 루프 준비 완료
+
 end
+
+  
 
 %% ==== Request Handling ====
+
 rect rgb(240,255,240)
+
 CL->>CN: TCP connect
+
 CN->>CN: accept()
+
 CN->>EX: execute(new BioSocketWrapper(socket, keepAlive))
 
+  
+
 EX->>PO: get(): SocketTask
+
 PO-->>EX: SocketTask instance
+
 EX->>ST: setSocketWrapper(BioSocketWrapper)
+
 EX-->>WT: execute(): SocketTask 구현체 실행 후 재활용
+
 WT->>ST: run()
 
+  
+
 activate ST
+
 ST->>PH: getProcessor() / getProcessor("HTTP/1.1")
+
 PH-->>ST: HttpXXProcessor implementation
 
+  
+
 ST->>PXX: process(socketWrapper): SocketState
+
 activate PXX
 
+  
+
 Note over PXX,CL: Persistent Connection (다중 요청/응답, close/timeout 시 종료)
+
 PXX->>IB: parseHeader()
+
 IB->>PR: parse(): request line, header fields
+
 Note over IB,PR: 바이트 기반 헤더 읽기 및 파싱
+
 PR->>IB: fillHeaderBuffer()
+
 IB->>IB: doRead(ApplicationBufferHandler handler)
+
 PR->>IB: getHeaderByteBuffer()
+
 IB-->>PR: ByteBuffer()
+
 PR->>PR: parsing()
 
+  
+
 %% 라우팅 & 애플리케이션
-PXX->>WS: HttpMapper.getHttpApiHandler(path)
-PXX->>API: HttpApiHandler.service(HttpExternalRequest, HttpExternalResponse): HTTP API 로직 수행
-API->>HR: 요청 해더 필드 가져오기
+
+PXX->>HM: getHttpApiHandler(path)
+
+PXX->>API: service(HttpExternalRequest, HttpExternalResponse): HTTP API 로직 수행
+
+API->>HR: 요청 헤더 필드 가져오기
+
 HR-->>API: 요청 헤더 필드 lazy loading
 
+  
+
 API->>HR: 요청 본문 가져오기 (바이트 단위 데이터, 파싱한 파라메터/멀티파트 객체)
+
 HR->>HR: InternalInputStream(InputBuffer inputBuffer).read()
+
 HR->>IB: 요청 본문 읽기
+
 HR->>HR: 요청 본문 파싱 (파라메터/멀티파트 파서가 수행)
+
 HR-->>API: 요청 본문 (바이트 단위 데이터, 파싱된 파라매터/멀티파트 객체 등)
+
 API->>HS: 응답 헤더, 본문 생성
 
+  
+
 %% 응답 작성 및 커밋
+
 PXX->>HS: 응답 메세지 flush()
+
 HS->>CL: HTTP 응답 전송 (commit after flush)
 
+  
+
 PXX-->>ST: SocketState (CLOSED, UPGRADNING, ...)
+
 ST->>PH: release(HttpProcessor)
+
 PH->>PH: pooled
+
 ST->>CL: close socket
 
+  
+
 deactivate PXX
+
 ST-->>WT: run() completed
+
 WT->>PO: recycle(SocketTask)
+
 PO->>PO: pooled
+
 deactivate ST
+
 end
 
+  
+
 %% ==== Shutdown ====
+
 rect rgb(255,245,245)
+
 CLI->>SL: shutdown hook / stop()
+
+SL->>WSL: destroy()
+
+WSL->>API: destroy()
+
 SL->>CN: close() (listenSocket.close, exit accept loop)
+
 CN->>EX: shutdownGracefully()
+
 EX-->>CN: terminated
+
 CN-->>SL: closed
+
 SL-->>CLI: stopped
+
 end
+
 ```
