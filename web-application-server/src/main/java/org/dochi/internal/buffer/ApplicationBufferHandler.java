@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 // 2. setByteBuffer(ByteBuffer buffer): InputBuffer 구현체에서 바디 부분도 버퍼링된 ByteBuffer에서 데이터를 복사해서 새로운 ByteBuffer 생성해서 ApplicationBufferHandler 구현체의 버퍼를 설정한다.
 // 따라서 ApplicationBufferHandler 구현체의 내부 버퍼의 핸들링이 가능하도록 인터페이스를 정의하였다.
 // 또한 ApplicationBufferHandler 구현체의 내부 버퍼가 작다면 확장할수 있는 기능이 필요했다.: expand(int size)
-
+//
 // 그러면 ApplicationBufferHandler 구현체에서 InputBuffer.doRead(ApplicationBufferHandler)를 호출할때, InputBuffer 구현체에서 ApplicationBufferHandler 구현체의 내부 버퍼로 버퍼링을 수행할수 있다.
 // 이를 통해, 바디용 버퍼가 존재하고 바디를 버퍼링하는 connector.InputBuffer 클래스에서 내부적으로 internal.InputBuffer 구현체인 Http11InputBuffer를 통해 바디용 버퍼로 버퍼링을 수행 가능하다.
 

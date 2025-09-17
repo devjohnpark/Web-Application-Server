@@ -1,5 +1,17 @@
-# Implementation of an HTTP Web Server
+# Building a Web Application Server
+
 ---
+
+## Key Features
+
+- Lazy header field loading via header buffering and byte-level parsing
+- Extensible architecture for future HTTP versions
+- Persistent connection support
+- HTTP/1.1 request/response processing
+- HTTP API services
+
+---
+
 ## VERSION
 
 - **0.0.0: Initial WAS Implementation**
