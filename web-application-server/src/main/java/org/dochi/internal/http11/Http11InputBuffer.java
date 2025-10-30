@@ -2,8 +2,6 @@ package org.dochi.internal.http11;
 
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
-import org.dochi.http.exception.HttpStatusException;
-import org.dochi.http.utils.HttpStatus;
 import org.dochi.internal.RequestMetadata;
 import org.dochi.webserver.socket.SocketWrapperBase;
 import org.slf4j.Logger;
@@ -18,14 +16,12 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     private ByteBuffer buffer;
     private final SocketInputBuffer socketInputBuffer;
     private final Http11Parser parser;
-    private final int headerMaxSize;
 
     public Http11InputBuffer(int headerMaxSize) {
-        this.headerMaxSize = headerMaxSize;
         this.buffer = ByteBuffer.allocate(headerMaxSize + DEFAULT_BUFFER_SIZE);
         this.buffer.flip();
         this.socketInputBuffer = new SocketInputBuffer();
-        this.parser = new Http11Parser(this);
+        this.parser = new Http11Parser(this, headerMaxSize);
     }
 
     // AbstractHttpProcessor 구현체로부터 Http11InputBuffer은 SocketWrapper를 주입받아 SocketInputBuffer에 주입시켜서 생성한다. -> SocketInputBuffer(BioSocketWrapper)
@@ -57,24 +53,9 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
     // 내부 구현이므로 같은 http11 패키지내의 클래스만 호출가능하도록 패키지 전용 접근 제어자로 지정
     boolean parseHeader(RequestMetadata requestMetadata) throws IOException {
-        if (!parser.parseRequestLine(requestMetadata) || !parser.parseHeaders(requestMetadata)) {
-            return false;
-        }
-        // 헤더의 끝을 읽었는데 헤더 최대 크기보다 클때, 헤더 최대 사이즈 초과 예외 던진다.
-        if (buffer.position() > headerMaxSize) {
-            log.warn("Header parsing completed but exceeded maximum header size limit: pos = {}, limit = {}", buffer.position(), buffer.limit());
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Header max size exceed");
-        }
-        return true;
+        return parser.parseRequestLine(requestMetadata) && parser.parseHeaders(requestMetadata);
     }
 
-    // ByteBuffer 사용 이유?
-    // 내부적으로 byte[]를 참조하고 있으며, position, limit, capacity 필드를 사용해서 byte[]을 이어서 읽고 재활욯하기 편하다.
-    // 동일한 byte[]을 기준으로 ByteBuffer 객체를 생성할수 있다. 따라서 ByteBuffer 인스턴스를 새로 생성하지만 기존의 동일한 byte[]를 참조할수 있도록할 수 있다.
-    // ByteBuffer는 내부적으로 heap buffer 혹은 direct buffer를 사용할수 있다.
-    // 추후 다이렉트 버퍼로 변경시 이점
-    // 읽기: 커널 영역인 TCP 버퍼에서 유저 영역(app)인 Heap 복사를 거치지 않고 다이렉트로 디스크에 저장할수있다.
-    // 쓰기: Heap 복사를 거치지 않고 OS가 바로 TCP 버퍼로 복사가 가능해서 디스크에 저장하던것을 바로 전송할수있다.
     @Override
     public int doRead(ApplicationBufferHandler handler) throws IOException {
 
@@ -93,13 +74,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
     @Override
     public boolean fillHeaderBuffer() throws IOException {
-        try {
-            return this.socketInputBuffer.doRead(this) > 0;
-        } catch (BufferOverflowException e) {
-            // 헤더 버퍼링시 오버 플로우에 대한 처리: 헤더 끝을 못읽은 채로 버퍼 사이즈 초과
-            log.warn("Buffer size exceeded before completing header parsing: limit = {}, capacity = {}", buffer.limit(), buffer.capacity());
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Header max size exceed");
-        }
+        return this.socketInputBuffer.doRead(this) > 0;
     }
 
     @Override

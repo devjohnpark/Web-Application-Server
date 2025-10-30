@@ -8,15 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class SocketTaskPoolExecutor {
     private static final Logger log = LoggerFactory.getLogger(SocketTaskPoolExecutor.class);
     private final SocketTaskPool taskPool;
-    private final ScalableThreadPoolExecutor workerThreadPoolExecutor;
+    private final ThreadPoolExecutor workerThreadPoolExecutor;
 
     public SocketTaskPoolExecutor(ThreadPoolConfig threadPool, SocketTaskPool taskPool) {
-        this.workerThreadPoolExecutor = new ScalableThreadPoolExecutor(
+        this.workerThreadPoolExecutor = new ThreadPoolExecutor(
                 threadPool.getMinSpareThreads(),
                 threadPool.getMaxThreads(),
                 60L, // corePoolSize을 초과하는 스레드가 할당된 작업이 없는 경우 keepAliveTime이 경과한 뒤 제거

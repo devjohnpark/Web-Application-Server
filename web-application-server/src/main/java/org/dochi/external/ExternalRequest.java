@@ -1,13 +1,12 @@
 package org.dochi.external;
 
-import org.dochi.http.exception.HttpStatusException;
 import org.dochi.http.multipart.Part;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public interface ExternalRequest {
-    Part getPart(String partName) throws IOException, HttpStatusException;
+    Part getPart(String partName) throws IOException;
     String getMethod();
     String getRequestURI();
     String getPath();

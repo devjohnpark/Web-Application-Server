@@ -1,7 +1,5 @@
 package org.dochi.internal.http11;
 
-import org.dochi.http.exception.HttpStatusException;
-import org.dochi.http.utils.HttpStatus;
 import org.dochi.internal.RequestMetadata;
 import org.dochi.internal.buffer.MimeHeaderField;
 import org.slf4j.Logger;
@@ -21,16 +19,22 @@ public class Http11Parser {
     private static final byte TAB = '\t';
     private static final byte QUERY_SP = '?';
     private static final byte HEADER_KEY_VALUE_SP = ':';
-
     private final HeaderDataSource source;
+    private final int headerMaxSize;
 
-    public Http11Parser(HeaderDataSource source) {
+    public Http11Parser(HeaderDataSource source, int headerMasSize) {
         this.source = source;
+        this.headerMaxSize = headerMasSize;
     }
 
     private byte getByte() throws IOException {
         if (!this.source.getHeaderByteBuffer().hasRemaining() && !this.source.fillHeaderBuffer()) {
             return -1;
+        }
+
+        System.out.println("header position, limit" + this.source.getHeaderByteBuffer().position() + " " + this.source.getHeaderByteBuffer().limit());
+        if (this.source.getHeaderByteBuffer().position() > headerMaxSize) {
+            throw new IllegalStateException("header size exceeded");
         }
         return this.source.getHeaderByteBuffer().get();
     }
@@ -64,7 +68,7 @@ public class Http11Parser {
                 querySeparator = buffer.position();
             } else if (previousByte == CR && currentByte == LF) {
                 if (elementCnt != 2) {
-                    throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Invalid requestMetadata line");
+                    throw new IllegalArgumentException("Invalid requestMetadata line");
                 }
                 requestMetadata.protocol().setBytes(buffer.array(), start, buffer.position() - start - CRLF_SIZE);
                 return true;
@@ -117,7 +121,7 @@ public class Http11Parser {
         if (currentByte == -1) {
             return HeaderParseStatus.EOF;
         }
-        throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Invalid requestMetadata header");
+        throw new IllegalArgumentException("Invalid requestMetadata header");
     }
 
     private enum HeaderParseStatus {

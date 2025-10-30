@@ -2,9 +2,7 @@ package org.dochi.connector;
 
 import org.dochi.external.ExternalRequest;
 import org.dochi.internal.RequestMetadata;
-import org.dochi.http.exception.HttpStatusException;
 import org.dochi.http.multipart.Part;
-import org.dochi.http.utils.HttpStatus;
 import org.dochi.http.utils.MediaType;
 import org.dochi.http.multipart.MultiPartParser;
 import org.dochi.http.multipart.Multipart;
@@ -20,7 +18,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     private static final Logger log = LoggerFactory.getLogger(RequestFacade.class);
 
     private final RequestMetadata requestMetadata;
-    private final InternalInputStream inputStream;
+    private InternalInputStream inputStream;
     private final InputBuffer inputBuffer;
     private final Multipart multipart;
     private final HttpReqConfig config;
@@ -31,7 +29,6 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     public RequestFacade(HttpReqConfig httpReqConfig) {
         this.requestMetadata = new RequestMetadata();
         this.inputBuffer = new InputBuffer();
-        this.inputStream = new InternalInputStream(this.inputBuffer);
         this.multipart = new Multipart();
         this.config = httpReqConfig;
     }
@@ -61,17 +58,13 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     }
 
     @Override
-    public Part getPart(String partName) throws IOException, HttpStatusException {
+    public Part getPart(String partName) throws IOException {
         if (!this.parametersParsed) {
             parseParameters();
         }
         if (!this.multipartParsed) {
             MultiPartParser parser = new MultiPartParser(new MultipartStream(getInputStream()), config.getRequestHeaderMaxSize(), config.getRequestPayloadMaxSize());
-            try {
-                parser.parseParts(getParameter("boundary"), multipart);
-            } catch (IllegalStateException e) {
-                throw new HttpStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-            }
+            parser.parseParts(getParameter("boundary"), multipart);
             multipartParsed = true;
         }
         return multipart.getPart(partName);
@@ -128,6 +121,9 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
             throw new IllegalStateException("RequestFacade.getInputStream already used");
         }
         usingInputStream = true;
+        if (this.inputStream == null) {
+            this.inputStream = new InternalInputStream(this.inputBuffer);
+        }
         return this.inputStream;
     }
 

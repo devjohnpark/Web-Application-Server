@@ -1,6 +1,5 @@
 package org.dochi.internal.http11;
 
-import org.dochi.http.exception.HttpStatusException;
 import org.dochi.internal.RequestMetadata;
 import org.dochi.webserver.socket.HttpClient;
 import org.dochi.webserver.socket.BioSocketWrapperConnectionTest;
@@ -108,12 +107,11 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length;
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
-        this.inputBuffer = new Http11InputBuffer(header.getBytes(StandardCharsets.ISO_8859_1).length - 1);
+        this.inputBuffer = new Http11InputBuffer(buf.length - 1);
         inputBuffer.init(serverConnectedSocket);
         String message = header + body;
-
-        httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
+        assertThrows(IllegalStateException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
@@ -141,21 +139,21 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
     void invalid_request_line_only_method() throws IOException {
         String message = "GET \r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_request_line_non_protocol() throws IOException {
         String message = "GET /\r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_request_line_non_protocol3() throws IOException {
         String message = "met\r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
@@ -163,13 +161,13 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         String message = "GET / HTTP/1.1\r\n: keep-alive\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
 
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_header_format_non_value() throws IOException {
         httpClient.doRequest("GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: \r\n\r\n".getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 }
 

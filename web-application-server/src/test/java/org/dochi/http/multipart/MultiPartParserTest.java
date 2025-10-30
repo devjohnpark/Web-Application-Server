@@ -1,6 +1,5 @@
 package org.dochi.http.multipart;
 
-import org.dochi.http.exception.HttpStatusException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +54,7 @@ class MultiPartParserTest {
     }
 
     @Test
-    void parseParts_include_non_body_part() throws IOException, HttpStatusException {
+    void parseParts_include_non_body_part() throws IOException {
         String multipartData =
                 "--value\r\n" +
                         "Content-Disposition: form-data; name=\"name\"\r\n" +  // name 필드
@@ -90,7 +89,7 @@ class MultiPartParserTest {
     }
 
     @Test
-    void parseParts3() throws IOException, HttpStatusException {
+    void parseParts3() throws IOException {
         String multipartData =
                 "------WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n"
                         + "Content-Disposition: form-data; name=\"username\"\r\n"

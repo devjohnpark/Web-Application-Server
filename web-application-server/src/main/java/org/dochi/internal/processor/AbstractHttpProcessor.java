@@ -1,10 +1,9 @@
 package org.dochi.internal.processor;
 
 import org.dochi.connector.*;
+import org.dochi.http.utils.HttpStatus;
 import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.connector.RequestFacade;
-import org.dochi.http.exception.HttpStatusException;
-import org.dochi.http.utils.HttpStatus;
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapperBase;
 import org.dochi.webserver.socket.SocketState;
@@ -70,7 +69,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private void processException(Exception e) {
         switch (e) {
             case SocketTimeoutException socketTimeoutException -> {
-//                SocketTimeoutException exception thrown when valid time expires while being blocked by`ㅎ read() method of SocketInputStream object (write() is not related to setSoTimeout)
+//                SocketTimeoutException exception thrown when valid time expires while being blocked by read() method of SocketInputStream object (write() is not related to setSoTimeout)
                 sendError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
             }
             case SocketException socketException -> {
@@ -78,9 +77,6 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
                 //  If call Socket.read() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Connection reset") internally in Socket
                 //  If call Socket.write() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Socket closed") internally in Socket
                 log.error("Socket was read or write after the client closed connection: ", e);
-            }
-            case HttpStatusException httpStatusException -> {
-                sendError(httpStatusException.getHttpStatus(), e.getMessage());
             }
             case RuntimeException runtimeException -> {
                 sendError(HttpStatus.BAD_REQUEST, e.getMessage());

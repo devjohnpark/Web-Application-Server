@@ -1,6 +1,5 @@
 package org.dochi.internal.parser;
 
-import org.dochi.http.exception.HttpStatusException;
 import org.dochi.internal.http11.Http11InputBufferTest;
 import org.dochi.internal.http11.Http11Parser;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,7 @@ public class Http11ParserTest extends Http11InputBufferTest {
 
     @BeforeEach
     void setUp() {
-        parser = new Http11Parser(inputBuffer);
+        parser = new Http11Parser(inputBuffer, headerMaxSize);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class Http11ParserTest extends Http11InputBufferTest {
         String requestLine = "GET\r\n";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
 
-        assertThrows(HttpStatusException.class, () -> parser.parseRequestLine(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> parser.parseRequestLine(requestMetadata));
     }
 
     @Test
@@ -101,7 +100,7 @@ public class Http11ParserTest extends Http11InputBufferTest {
     void parseHeaders_Empty() throws IOException {
         String headers = "\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertFalse( parser.parseHeaders(requestMetadata));
+        assertFalse(parser.parseHeaders(requestMetadata));
         assertEquals(0, requestMetadata.headers().size());
     }
 
@@ -109,7 +108,7 @@ public class Http11ParserTest extends Http11InputBufferTest {
     void parseHeaders_invalidFormat() throws IOException {
         String headers = "InvalidHeader\r\n\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> parser.parseHeaders(requestMetadata));
+        assertThrows(IllegalArgumentException.class, () -> parser.parseHeaders(requestMetadata));
     }
 
     @Test
