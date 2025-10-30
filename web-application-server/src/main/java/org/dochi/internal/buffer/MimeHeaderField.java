@@ -1,14 +1,14 @@
 package org.dochi.internal.buffer;
 
 public class MimeHeaderField {
-    private final MessageBytes nameMB = MessageBytes.newInstance();
-    private final MessageBytes valueMB = MessageBytes.newInstance();
+    private final HeaderBytes nameMB = HeaderBytes.newInstance();
+    private final HeaderBytes valueMB = HeaderBytes.newInstance();
 
-    public MessageBytes getName() {
+    public HeaderBytes name() {
         return nameMB;
     }
 
-    public MessageBytes getValue() {
+    public HeaderBytes getValue() {
         return valueMB;
     }
 

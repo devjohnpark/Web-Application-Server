@@ -1,6 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferTest;
+import org.dochi.internal.http11.Http11InputBufferWrapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class InputBufferTest extends Http11InputBufferTest {
     private static final Logger log = LoggerFactory.getLogger(InputBufferTest.class);
     InputBuffer inputBuffer = new InputBuffer();
+    Http11InputBufferWrapper inputBufferWrapper = new Http11InputBufferWrapper(super.inputBuffer);
 
     @BeforeEach
-    void setUp() {
-        this.inputBuffer.setInputBuffer(super.inputBuffer);
-    }
+    void setUp() { this.inputBuffer.setInputBuffer(super.inputBuffer); }
 
     @AfterEach
     void tearDown() {
@@ -35,7 +35,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(super.inputBuffer.parseHeader(request));
+        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
         assertEquals(this.inputBuffer.read(), 'n');
     }
 
@@ -49,7 +49,7 @@ class InputBufferTest extends Http11InputBufferTest {
         System.out.println("header size: " + headerSize); // 133
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(super.inputBuffer.parseHeader(request));
+        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
 
         byte[] bodyBuf = new byte[body.length()];
         int j = 0;
@@ -72,7 +72,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(super.inputBuffer.parseHeader(request));
+        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
         int n = this.inputBuffer.read(buf, 0, 2);
         assertArrayEquals(Arrays.copyOf(buf, n), "na".getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -85,7 +85,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(super.inputBuffer.parseHeader(request));
+        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
         for (byte b : buf) {
             assertEquals(this.inputBuffer.read(), b);
         }
@@ -102,7 +102,7 @@ class InputBufferTest extends Http11InputBufferTest {
 
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(super.inputBuffer.parseHeader(request));
+        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
 
         byte[] bodyBuf = new byte[contentLength];
         int n = 0;

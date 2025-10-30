@@ -1,7 +1,7 @@
 package org.dochi.internal.http11;
 
 import org.dochi.http.exception.HttpStatusException;
-import org.dochi.internal.Request;
+import org.dochi.internal.RequestMetadata;
 import org.dochi.webserver.socket.HttpClient;
 import org.dochi.webserver.socket.BioSocketWrapperConnectionTest;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
     private static final Logger log = LoggerFactory.getLogger(Http11InputBufferTest.class);
     protected final int headerMaxSize = 1024;
-    protected final Request request = new Request();
+    protected final RequestMetadata requestMetadata = new RequestMetadata();
     protected Http11InputBuffer inputBuffer = new Http11InputBuffer(headerMaxSize);
     protected HttpClient httpClient;
 
@@ -31,18 +31,18 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
     @AfterEach
     void destroy() {
         inputBuffer.recycle();
-        request.recycle();
+        requestMetadata.recycle();
     }
 
     @Test
     void valid_get() throws IOException {
         httpClient.doRequest("GET /user HTTP/1.1\r\nConnection: keep-alive\r\n\r\n".getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBuffer.parseHeader(request));
-        assertEquals("GET", request.method().toString());
-        assertEquals("/user", request.requestPath().toString());
-        assertEquals("", request.queryString().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertEquals("keep-alive", request.headers().getHeader("Connection"));
+        assertTrue(inputBuffer.parseHeader(requestMetadata));
+        assertEquals("GET", requestMetadata.method().toString());
+        assertEquals("/user", requestMetadata.requestPath().toString());
+        assertEquals("", requestMetadata.queryString().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertEquals("keep-alive", requestMetadata.headers().getHeader("Connection"));
     }
 
     @Test
@@ -67,39 +67,39 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
                 + "\r\n";
 
         httpClient.doRequest(httpRequest.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBuffer.parseHeader(request));
-        assertEquals("GET", request.method().toString());
-        assertEquals("", request.queryString().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertEquals("keep-alive", request.headers().getHeader("Connection"));
-        assertEquals("localhost:8080", request.headers().getHeader("host"));
-        assertEquals("keep-alive", request.headers().getHeader("connection"));
-        assertEquals("max-age=0", request.headers().getHeader("cache-control"));
-        assertEquals("1", request.headers().getHeader("upgrade-insecure-requests"));
-        assertTrue(request.headers().getHeader("user-agent").contains("Mozilla/5.0"));
-        assertTrue(request.headers().getHeader("accept").contains("text/html"));
-        assertEquals("gzip, deflate, br, zstd", request.headers().getHeader("accept-encoding"));
-        assertEquals("en-US,en;q=0.9,ko;q=0.8", request.headers().getHeader("accept-language"));
-        assertEquals("Idea-4a91a283=4d2152c0-f6eb-498f-a7ac-9ebbf2816f9c", request.headers().getHeader("cookie"));
-        assertEquals("document", request.headers().getHeader("sec-fetch-dest"));
-        assertEquals("navigate", request.headers().getHeader("sec-fetch-mode"));
-        assertEquals("none", request.headers().getHeader("sec-fetch-site"));
-        assertEquals("?1", request.headers().getHeader("sec-fetch-user"));
-        assertTrue(request.headers().getHeader("sec-ch-ua").contains("Chromium"));
-        assertEquals("?0", request.headers().getHeader("sec-ch-ua-mobile"));
-        assertEquals("\"macOS\"", request.headers().getHeader("sec-ch-ua-platform"));
+        assertTrue(inputBuffer.parseHeader(requestMetadata));
+        assertEquals("GET", requestMetadata.method().toString());
+        assertEquals("", requestMetadata.queryString().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertEquals("keep-alive", requestMetadata.headers().getHeader("Connection"));
+        assertEquals("localhost:8080", requestMetadata.headers().getHeader("host"));
+        assertEquals("keep-alive", requestMetadata.headers().getHeader("connection"));
+        assertEquals("max-age=0", requestMetadata.headers().getHeader("cache-control"));
+        assertEquals("1", requestMetadata.headers().getHeader("upgrade-insecure-requests"));
+        assertTrue(requestMetadata.headers().getHeader("user-agent").contains("Mozilla/5.0"));
+        assertTrue(requestMetadata.headers().getHeader("accept").contains("text/html"));
+        assertEquals("gzip, deflate, br, zstd", requestMetadata.headers().getHeader("accept-encoding"));
+        assertEquals("en-US,en;q=0.9,ko;q=0.8", requestMetadata.headers().getHeader("accept-language"));
+        assertEquals("Idea-4a91a283=4d2152c0-f6eb-498f-a7ac-9ebbf2816f9c", requestMetadata.headers().getHeader("cookie"));
+        assertEquals("document", requestMetadata.headers().getHeader("sec-fetch-dest"));
+        assertEquals("navigate", requestMetadata.headers().getHeader("sec-fetch-mode"));
+        assertEquals("none", requestMetadata.headers().getHeader("sec-fetch-site"));
+        assertEquals("?1", requestMetadata.headers().getHeader("sec-fetch-user"));
+        assertTrue(requestMetadata.headers().getHeader("sec-ch-ua").contains("Chromium"));
+        assertEquals("?0", requestMetadata.headers().getHeader("sec-ch-ua-mobile"));
+        assertEquals("\"macOS\"", requestMetadata.headers().getHeader("sec-ch-ua-platform"));
     }
 
     @Test
     void valid_get_querystring() throws IOException {
         httpClient.doRequest("GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: keep-alive\r\n\r\n".getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBuffer.parseHeader(request));
-        assertEquals("GET", request.method().toString());
-        assertEquals("/user?name=john%20park&password=1234", request.requestURI().toString());
-        assertEquals("/user", request.requestPath().toString());
-        assertEquals("name=john%20park&password=1234", request.queryString().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertEquals("keep-alive", request.headers().getHeader("Connection"));
+        assertTrue(inputBuffer.parseHeader(requestMetadata));
+        assertEquals("GET", requestMetadata.method().toString());
+        assertEquals("/user?name=john%20park&password=1234", requestMetadata.requestURI().toString());
+        assertEquals("/user", requestMetadata.requestPath().toString());
+        assertEquals("name=john%20park&password=1234", requestMetadata.queryString().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertEquals("keep-alive", requestMetadata.headers().getHeader("Connection"));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         String message = header + body;
 
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
@@ -125,37 +125,37 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         String message = header + body;
 
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBuffer.parseHeader(request));
+        assertTrue(inputBuffer.parseHeader(requestMetadata));
 
-        assertEquals("POST", request.method().toString());
-        assertEquals("/user", request.requestURI().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertEquals("keep-alive", request.headers().getHeader("Connection"));
-        assertEquals("application/x-www-form-urlencoded; charset=utf-8", request.getContentType());
-        assertEquals("utf-8", request.getCharacterEncoding());
-        assertEquals("application/x-www-form-urlencoded; charset=utf-8", request.getContentType());
-        assertEquals(contentLength, request.getContentLength());
+        assertEquals("POST", requestMetadata.method().toString());
+        assertEquals("/user", requestMetadata.requestURI().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertEquals("keep-alive", requestMetadata.headers().getHeader("Connection"));
+        assertEquals("application/x-www-form-urlencoded; charset=utf-8", requestMetadata.getContentType());
+        assertEquals("utf-8", requestMetadata.getCharacterEncoding());
+        assertEquals("application/x-www-form-urlencoded; charset=utf-8", requestMetadata.getContentType());
+        assertEquals(contentLength, requestMetadata.getContentLength());
     }
 
     @Test
     void invalid_request_line_only_method() throws IOException {
         String message = "GET \r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_request_line_non_protocol() throws IOException {
         String message = "GET /\r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_request_line_non_protocol3() throws IOException {
         String message = "met\r\nHost: localhost\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
@@ -163,13 +163,13 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         String message = "GET / HTTP/1.1\r\n: keep-alive\r\n\r\n";
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
 
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 
     @Test
     void invalid_header_format_non_value() throws IOException {
         httpClient.doRequest("GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: \r\n\r\n".getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(request));
+        assertThrows(HttpStatusException.class, () -> inputBuffer.parseHeader(requestMetadata));
     }
 }
 

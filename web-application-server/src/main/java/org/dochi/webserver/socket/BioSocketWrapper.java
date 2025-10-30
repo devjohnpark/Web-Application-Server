@@ -15,13 +15,13 @@ public class BioSocketWrapper extends SocketWrapperBase<Socket> {
         super(socket, config);
     }
 
-    // 클라와 연결된 소켓 버퍼(TCP Buffer)에 데이터가 입력될때까지 blocking (즉, 클라이언트가 보낸 데이터가 보낼때까지 blocking 됨)
+    // 클라와 연결된 소켓 버퍼(TCP Buffer)에 데이터를 읽을때까지 blocking
     @Override
     public int read(byte[] buffer, int off, int len) throws IOException {
         return socket.getInputStream().read(buffer, off, len);
     }
 
-    // 클라와 연결된 소켓 버퍼(TCP Buffer)에 데이터를 출력될때까지 blocking (즉, 소켓 버퍼가 꽉차서 못보낼때까지 blocking 됨)
+    // 클라와 연결된 소켓 버퍼(TCP Buffer)에 데이터를 출력될때까지 blocking
     @Override
     public void write(byte[] buffer, int off, int len) throws IOException {
         socket.getOutputStream().write(buffer, off, len);

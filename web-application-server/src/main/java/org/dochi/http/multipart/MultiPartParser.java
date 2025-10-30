@@ -1,6 +1,5 @@
 package org.dochi.http.multipart;
 
-//import org.dochi.http.request.multipart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +26,6 @@ public class MultiPartParser {
         this.bodyMaxSize = bodyMaxSize;
     }
 
-    // HttpProcessorAttribute -> boolean http11InputBuffer.isParseHeader() -> false -> 로깅 -> 응답 중단
-    // HttpProcessorAttribute -> boolean http11InputBuffer.isParseHeader() -> void InternalAdapter.service() -> HttpExternalRequest -> throws exception -> HttpProcessorAttribute catch
     public void parseParts(String boundaryValue, Multipart multipart) throws IOException {
         boundaryValidator.validateBoundary(boundaryValue);
         byte[] currentBoundary = stream.readCRLFLine(bodyMaxSize);

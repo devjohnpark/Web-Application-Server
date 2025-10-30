@@ -33,42 +33,43 @@ public class ServerExecutor {
             throw new IllegalStateException("No web servers found.");
         }
 
-        // 1) 모두 시작 (부분 실패 시 이미 시작된 서버는 롤백 정지)
+        // 1. 모두 시작 (부분 실패 시 이미 시작된 서버는 롤백 정지)
         List<ServerLifecycle> started = new ArrayList<>();
         try {
             for (ServerLifecycle s : allWebServers) {
-                s.start();                 // 비차단이어야 함: 내부에서 accept 스레드 시작
+                s.start(); // 비차단이어야 함: 내부에서 accept 스레드 시작
                 started.add(s);
             }
         } catch (Exception e) {
             log.error("Failed to start some server(s). Rolling back...", e);
-            stopAllReverse(started);
+            stopAll(started);
         }
 
-        // 2) 종료 훅: 역순으로 안전 종료
+        // 2. 종료 훅
         CountDownLatch latch = new CountDownLatch(1);
+
+        // 정상 종료, 외부 신호에 의한 종료시 훅으로 stop 후 메인 스레드 대기 중지
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            stopAllReverse(started);
+            stopAll(started);
             latch.countDown();
         }, "shutdown-hook"));
 
         log.info("All servers started: {}", started.size());
 
-        // 3) 메인 스레드 대기 (신호 오면 훅에서 stop 후 countDown)
+        // 3. 메인 스레드 대기
         try {
             latch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            stopAllReverse(started);
+            stopAll(started);
         }
         log.info("All web servers stopped.");
     }
 
-    private static void stopAllReverse(List<ServerLifecycle> started) {
-        for (int i = started.size() - 1; i >= 0; i--) {
+    private static void stopAll(List<ServerLifecycle> started) {
+        for (int i = 0; i < started.size(); i++) {
             try { started.get(i).stop(); }
             catch (Exception e) { log.error("Stop failed", e); }
         }
     }
-
 }

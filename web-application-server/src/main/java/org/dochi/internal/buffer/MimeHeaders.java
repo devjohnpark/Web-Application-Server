@@ -51,9 +51,9 @@ public class MimeHeaders {
         return this.count;
     }
 
-    public MessageBytes getValue(String name) {
+    public HeaderBytes getValue(String name) {
         for(int i = 0; i < this.count; i++) {
-            if (this.headers[i].getName().equalsIgnoreCase(name)) {
+            if (this.headers[i].name().equalsIgnoreCase(name)) {
                 return this.headers[i].getValue();
             }
         }
@@ -61,7 +61,7 @@ public class MimeHeaders {
     }
 
     public String getHeader(String name) {
-        MessageBytes byteValue = this.getValue(name);
+        HeaderBytes byteValue = this.getValue(name);
         return byteValue != null ? byteValue.toString() : null;
     }
 }

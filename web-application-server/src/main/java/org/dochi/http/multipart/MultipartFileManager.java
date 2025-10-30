@@ -7,7 +7,7 @@ public class MultipartFileManager {
     private static final MultipartFileManager INSTANCE = new MultipartFileManager();
     private final String rootPath = "multipart-tmp-file";
 
-    // 클래스의 static 멤버에 처음 접근할 때 호출 된다. 즉, 런타임에 getInstance() 정적 메서드가 처음 호출될 때 생성자 코드 실행을 한다.
+    // 클래스의 static 멤버에 처음 접근할때 호출된다. 즉, 런타임에 getInstance() 정적 메서드가 처음 호출될 때 생성자 코드 실행을 한다.
     private MultipartFileManager() {
         createRootDirectory();
     }

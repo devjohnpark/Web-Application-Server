@@ -1,9 +1,9 @@
 package org.dochi.connector;
 
+import org.dochi.external.ExternalResponse;
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.http.utils.ResponseHeaders;
 import org.dochi.http.utils.DateFormatter;
-import org.dochi.external.HttpExternalResponse;
 import org.dochi.http.utils.HttpVersion;
 import org.dochi.webserver.config.HttpResConfig;
 import org.dochi.webresource.ResourceType;
@@ -15,8 +15,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
-public class Http11ResponseHandler implements ResponseHandler {
-    private static final Logger log = LoggerFactory.getLogger(Http11ResponseHandler.class);
+public class Http11ResponseFacade implements InternalResponse, ExternalResponse {
+    private static final Logger log = LoggerFactory.getLogger(Http11ResponseFacade.class);
     private HttpVersion version = HttpVersion.HTTP_1_1;
     private HttpStatus status = HttpStatus.OK;
     private final ResponseHeaders headers = new ResponseHeaders();
@@ -25,7 +25,7 @@ public class Http11ResponseHandler implements ResponseHandler {
     private boolean isCommitted = false;
     private TmpBufferedOutputStream bos;
 
-    public Http11ResponseHandler(HttpResConfig httpResConfig) {
+    public Http11ResponseFacade(HttpResConfig httpResConfig) {
         this.httpResConfig = httpResConfig;
     }
 
@@ -46,42 +46,42 @@ public class Http11ResponseHandler implements ResponseHandler {
         status = HttpStatus.OK;
     }
 
-    public HttpExternalResponse addVersion(HttpVersion version) {
+    public ExternalResponse addVersion(HttpVersion version) {
         this.version = version;
         return this;
     }
 
-    public HttpExternalResponse addHeader(String key, String value) {
+    public ExternalResponse addHeader(String key, String value) {
         this.headers.addHeader(key, value);
         return this;
     }
 
-    public HttpExternalResponse addCookie(String cookie) {
+    public ExternalResponse addCookie(String cookie) {
         this.headers.addHeader(ResponseHeaders.SET_COOKIE, cookie);
         return this;
     }
 
-    public HttpExternalResponse addConnection(boolean isKeep) {
+    public ExternalResponse addConnection(boolean isKeep) {
         this.headers.addHeader(ResponseHeaders.CONNECTION, isKeep ? "keep-alive" : "close");
         return this;
     }
 
-    public HttpExternalResponse addDateHeaders(String date) {
+    public ExternalResponse addDateHeaders(String date) {
         this.headers.addHeader(ResponseHeaders.DATE, date);
         return this;
     }
 
-    public HttpExternalResponse addContentHeaders(String contentType, int contentLength) {
+    public ExternalResponse addContentHeaders(String contentType, int contentLength) {
         this.headers.addHeader(ResponseHeaders.CONTENT_TYPE, contentType);
         this.headers.addContentLength(contentLength);
         return this;
     }
 
-    public HttpExternalResponse inActiveDateHeader() {
+    public ExternalResponse inActiveDateHeader() {
         this.isDateHeader = false; return this;
     }
 
-    public HttpExternalResponse activeDateHeader() {
+    public ExternalResponse activeDateHeader() {
         this.isDateHeader = true; return this;
     }
 

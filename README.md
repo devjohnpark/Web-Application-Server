@@ -38,7 +38,7 @@
     - Refactor Internals to Support Persistent Connections and Reuse Objects
     - Support HTTP/1.1 Keep-Alive with Configurable Timeout and Max Request Count
 
-- **0.2.0: Protocol Decoupling & Performance Optimization**
+- **0.2.0: Protocol-independent design & Performance Optimization**
     - Resolve protocol dependency by separating low-level and high-level processing into a two-layer architecture
     - Achieve over 23x throughput improvement by buffering header in byte[], parsing keys/values by index, and using lazy loading for required field as `String`
     - Leverage Cache Locality with LIFO-based Object Pool

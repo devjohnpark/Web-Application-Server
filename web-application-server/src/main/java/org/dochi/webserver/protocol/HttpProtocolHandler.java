@@ -2,7 +2,7 @@ package org.dochi.webserver.protocol;
 
 import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.internal.processor.AbstractHttpProcessor;
-import org.dochi.internal.processor.Http11Processor;
+import org.dochi.internal.http11.Http11Processor;
 import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
 
@@ -44,7 +44,6 @@ public class HttpProtocolHandler {
     }
 
     public void release(HttpProcessor processor) {
-        // (instanceof는 JVM에서 최적화됨)
         if (processor instanceof Http11Processor) {
             // 맨 앞에 추가하여 LIFO 방식으로 관리
             http11Pool.addFirst((Http11Processor) processor);

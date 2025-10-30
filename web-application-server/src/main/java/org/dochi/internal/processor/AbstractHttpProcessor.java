@@ -1,11 +1,9 @@
 package org.dochi.internal.processor;
 
+import org.dochi.connector.*;
 import org.dochi.internal.mapper.HttpMapper;
-import org.dochi.connector.RequestHandler;
+import org.dochi.connector.RequestFacade;
 import org.dochi.http.exception.HttpStatusException;
-import org.dochi.connector.Http11ResponseHandler;
-import org.dochi.connector.HttpRequestHandler;
-import org.dochi.connector.ResponseHandler;
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapperBase;
@@ -21,14 +19,14 @@ import static org.dochi.webserver.socket.SocketState.CLOSED;
 
 public abstract class AbstractHttpProcessor implements HttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpProcessor.class);
-    protected final RequestHandler requestHandler;
-    protected final ResponseHandler responseHandler;
+    protected final RequestFacade requestFacade;
+    protected final Http11ResponseFacade responseFacade;
     protected final HttpMapper mapper;
 
     protected AbstractHttpProcessor(HttpMapper mapper, HttpConfig config) {
         this.mapper = mapper;
-        this.requestHandler = new HttpRequestHandler(config.getHttpReqConfig());
-        this.responseHandler = new Http11ResponseHandler(config.getHttpResConfig());
+        this.requestFacade = new RequestFacade(config.getHttpReqConfig());
+        this.responseFacade = new Http11ResponseFacade(config.getHttpResConfig());
     }
 
     @Override
@@ -52,9 +50,9 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
 
     abstract protected void recycle();
 
-    protected void recycleHandler() {
-        requestHandler.recycle();
-        responseHandler.recycle();
+    protected void recycleFacade() {
+        requestFacade.recycle();
+        responseFacade.recycle();
     }
 
     protected HttpMapper getHttpMapper() {
@@ -97,13 +95,13 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private void sendError(HttpStatus status, String errorMessage) {
         log.error("HTTP status: {} {}, Reason: {}", String.valueOf(status.getCode()), status.getMessage(), errorMessage);
         try {
-            responseHandler.addConnection(false);
+            responseFacade.addConnection(false);
             if (status.getCode() >= 500) {
-                responseHandler.sendError(status, status.getMessage());
+                responseFacade.sendError(status, status.getMessage());
             } else if (status.getCode() >= 400) {
-                responseHandler.sendError(status, errorMessage);
+                responseFacade.sendError(status, errorMessage);
             }
-            responseHandler.flush();
+            responseFacade.flush();
         } catch (IOException e) {
             log.error("Failed to send error response: {}", e.getMessage());
         }

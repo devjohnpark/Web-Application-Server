@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
+// 클라이언트(소켓)당 스레드 하나가 공유 자원이 없는 작업을 처리하기 때문에 동기화 로직은 필요없다.
 public class SocketTaskHandler implements SocketTask {
     private static final Logger log = LoggerFactory.getLogger(SocketTaskHandler.class);
     private SocketWrapperBase<?> socketWrapper;
@@ -18,6 +19,7 @@ public class SocketTaskHandler implements SocketTask {
     @Override
     public void run() {
         try {
+
             SocketState state = SocketState.OPEN;
             HttpProcessor processor = this.protocolHandler.getProcessor(); // 기본 default HTTP/1.1;
             getSocketWrapper().setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
@@ -26,7 +28,7 @@ public class SocketTaskHandler implements SocketTask {
                 if (state == SocketState.CLOSED) {
                     protocolHandler.release(processor);
                 } else if (state == SocketState.UPGRADING) {
-                    // 1. 파싱된 요청 데이터 객체(internal.Request)의 복사본을 가지고 헤더에서 h2 관련 데이터 가져와서(AbstractProcessor.getUpgradeToken()) HTTP/2 설정
+                    // 1. 파싱된 요청 데이터 객체(internal.RequestMetadata)의 복사본을 가지고 헤더에서 h2 관련 데이터 가져와서(AbstractProcessor.getUpgradeToken()) HTTP/2 설정
                     // 2. 필요한 스트림의 개수 만큼 Http2Processor 생성
                     // 3. 소켓 연결 시간 다시 설정
 

@@ -5,20 +5,20 @@ import org.dochi.http.utils.HttpStatus;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public interface HttpExternalResponse {
-    HttpExternalResponse addHeader(String key, String value);
+public interface ExternalResponse {
+    ExternalResponse addHeader(String key, String value);
 
-    HttpExternalResponse addCookie(String cookie);
+    ExternalResponse addCookie(String cookie);
 
-    HttpExternalResponse addConnection(boolean isKeep);
+    ExternalResponse addConnection(boolean isKeep);
 
-    HttpExternalResponse addDateHeaders(String date);
+    ExternalResponse addDateHeaders(String date);
 
-    HttpExternalResponse addContentHeaders(String contentType, int contentLength);
+    ExternalResponse addContentHeaders(String contentType, int contentLength);
 
-    HttpExternalResponse inActiveDateHeader();
+    ExternalResponse inActiveDateHeader();
 
-    HttpExternalResponse activeDateHeader();
+    ExternalResponse activeDateHeader();
 
     void send(HttpStatus status) throws IOException;
 

@@ -3,18 +3,18 @@ package org.dochi.internal.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-public class MessageBytes {
+public class HeaderBytes {
     private final ByteChunk byteChunk = new ByteChunk();
     private int type = 0;
     private String strValue;
     private int intValue;
     private boolean hasIntValue = false;
-    private static final MessageBytesFactory factory = new MessageBytesFactory();
+    private static final HeaderBytesFactory factory = new HeaderBytesFactory();
 
-    private MessageBytes() {
+    private HeaderBytes() {
     }
 
-    public static MessageBytes newInstance() {
+    public static HeaderBytes newInstance() {
         return factory.newInstance();
     }
 
@@ -31,8 +31,8 @@ public class MessageBytes {
         return this.type == 0;
     }
 
-    // internal.Request의 헤더의 요소(path, method, header fiedld)는 각 MessageBytes로 이루어져 있다.
-    // 헤더의 구성을 동일하므로 persistence connection에서 MessageBytes가 재사용 가능하도록 해서 GC 사이클을 줄일수 있다.
+    // internal.RequestMetadata의 헤더의 요소(path, method, header fiedld)는 각 HeaderBytes로 이루어져 있다.
+    // 헤더의 구성을 동일하므로 persistence connection에서 HeaderBytes가 재사용 가능하도록 해서 GC 사이클을 줄일수 있다.
     public void recycle() {
         this.byteChunk.recycle();
         this.strValue = null;
@@ -81,9 +81,7 @@ public class MessageBytes {
     }
 
     /*
-    Request에서 path 혹은 query string에 setCharset() -> MessageBytes
-    HeaderField에서 필드 이름은 기본 charset이다.
-    HeaderField에서 필드 값의 setCharset() -> MessageBytes
+    RequestMetadata에서 path 혹은 query-string을 설정할때 HeaderField.setCharset() 호출
      */
     public void setCharset(Charset charset) {
         this.byteChunk.setCharset(charset);
@@ -107,12 +105,12 @@ public class MessageBytes {
         }
     }
 
-    private static class MessageBytesFactory {
-        protected MessageBytesFactory() {
+    private static class HeaderBytesFactory {
+        protected HeaderBytesFactory() {
         }
 
-        public MessageBytes newInstance() {
-            return new MessageBytes();
+        public HeaderBytes newInstance() {
+            return new HeaderBytes();
         }
     }
 }

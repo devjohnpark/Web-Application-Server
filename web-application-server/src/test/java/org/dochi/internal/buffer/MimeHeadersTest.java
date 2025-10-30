@@ -68,18 +68,18 @@ class MimeHeadersTest {
     @Test
     void getValueByNameReturnsCorrectValue() {
         MimeHeaderField header1 = mimeHeaders.createHeader();
-        header1.getName().setString("Content-Type");
+        header1.name().setString("Content-Type");
         header1.getValue().setString("application/json");
 
         MimeHeaderField header2 = mimeHeaders.createHeader();
-        header2.getName().setString("Accept");
+        header2.name().setString("Accept");
         header2.getValue().setString("text/html");
 
-        MessageBytes value = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value = mimeHeaders.getValue("Content-Type");
         assertNotNull(value);
         assertEquals("application/json", value.toString());
 
-        MessageBytes value2 = mimeHeaders.getValue("Accept");
+        HeaderBytes value2 = mimeHeaders.getValue("Accept");
         assertNotNull(value2);
         assertEquals("text/html", value2.toString());
     }
@@ -87,12 +87,12 @@ class MimeHeadersTest {
     @Test
     void getValueByNameIsCaseInsensitive() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        MessageBytes value1 = mimeHeaders.getValue("content-type");
-        MessageBytes value2 = mimeHeaders.getValue("CONTENT-TYPE");
-        MessageBytes value3 = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value1 = mimeHeaders.getValue("content-type");
+        HeaderBytes value2 = mimeHeaders.getValue("CONTENT-TYPE");
+        HeaderBytes value3 = mimeHeaders.getValue("Content-Type");
 
         assertNotNull(value1);
         assertNotNull(value2);
@@ -105,33 +105,33 @@ class MimeHeadersTest {
     @Test
     void getValueByNameReturnsNullForNonExistentHeader() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        MessageBytes value = mimeHeaders.getValue("Accept");
+        HeaderBytes value = mimeHeaders.getValue("Accept");
         assertNull(value);
     }
 
     @Test
     void getValueByNameReturnsNullForEmptyHeaders() {
-        MessageBytes value = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value = mimeHeaders.getValue("Content-Type");
         assertNull(value);
     }
 
     @Test
     void getValueByNameHandlesNullParameter() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        MessageBytes value = mimeHeaders.getValue(null);
+        HeaderBytes value = mimeHeaders.getValue(null);
         assertNull(value);
     }
 
     @Test
     void getHeaderReturnsStringValue() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
         String headerValue = mimeHeaders.getHeader("Content-Type");
@@ -147,7 +147,7 @@ class MimeHeadersTest {
     @Test
     void getHeaderIsCaseInsensitive() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
         String value1 = mimeHeaders.getHeader("content-type");
@@ -162,7 +162,7 @@ class MimeHeadersTest {
     @Test
     void getHeaderHandlesNullParameter() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Content-Type");
+        header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
         String headerValue = mimeHeaders.getHeader(null);
@@ -172,14 +172,14 @@ class MimeHeadersTest {
     @Test
     void multipleHeadersWithSameNameReturnsFirst() {
         MimeHeaderField header1 = mimeHeaders.createHeader();
-        header1.getName().setString("Accept");
+        header1.name().setString("Accept");
         header1.getValue().setString("text/html");
 
         MimeHeaderField header2 = mimeHeaders.createHeader();
-        header2.getName().setString("Accept");
+        header2.name().setString("Accept");
         header2.getValue().setString("application/json");
 
-        MessageBytes value = mimeHeaders.getValue("Accept");
+        HeaderBytes value = mimeHeaders.getValue("Accept");
         assertNotNull(value);
         assertEquals("text/html", value.toString());
 
@@ -192,7 +192,7 @@ class MimeHeadersTest {
         // 여러 헤더 생성
         for (int i = 0; i < 5; i++) {
             MimeHeaderField header = mimeHeaders.createHeader();
-            header.getName().setString("Header" + i);
+            header.name().setString("Header" + i);
             header.getValue().setString("Value" + i);
         }
 
@@ -204,7 +204,7 @@ class MimeHeadersTest {
 
         // 리사이클 후 다시 헤더 생성 가능한지 확인
         MimeHeaderField newHeader = mimeHeaders.createHeader();
-        newHeader.getName().setString("NewHeader");
+        newHeader.name().setString("NewHeader");
         newHeader.getValue().setString("NewValue");
 
         assertEquals(1, mimeHeaders.size());
@@ -226,7 +226,7 @@ class MimeHeadersTest {
         // 기본 크기(8)만큼 헤더 생성
         for (int i = 0; i < 8; i++) {
             MimeHeaderField header = mimeHeaders.createHeader();
-            header.getName().setString("Header" + i);
+            header.name().setString("Header" + i);
             header.getValue().setString("Value" + i);
         }
 
@@ -235,7 +235,7 @@ class MimeHeadersTest {
 
         // 배열 확장을 유발하는 9번째 헤더 생성
         MimeHeaderField header9 = mimeHeaders.createHeader();
-        header9.getName().setString("Header8");
+        header9.name().setString("Header8");
         header9.getValue().setString("Value8");
 
         // 기존 헤더들이 여전히 유효한지 확인
@@ -248,10 +248,10 @@ class MimeHeadersTest {
     @Test
     void emptyHeaderNameAndValueHandling() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("");
+        header.name().setString("");
         header.getValue().setString("");
 
-        MessageBytes value = mimeHeaders.getValue("");
+        HeaderBytes value = mimeHeaders.getValue("");
         assertNotNull(value);
         assertEquals("", value.toString());
 
@@ -262,10 +262,10 @@ class MimeHeadersTest {
     @Test
     void headerWithNullValue() {
         MimeHeaderField header = mimeHeaders.createHeader();
-        header.getName().setString("Test-Header");
+        header.name().setString("Test-Header");
         // getValue()는 기본적으로 빈 MessageBytes를 반환하므로 null 값 설정 테스트
 
-        MessageBytes value = mimeHeaders.getValue("Test-Header");
+        HeaderBytes value = mimeHeaders.getValue("Test-Header");
         assertNotNull(value);
 
         String headerValue = mimeHeaders.getHeader("Test-Header");

@@ -3,13 +3,6 @@ package org.dochi.http.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// ResourceType -> MediaType
-// MediaType: text/html; charset=utf8는 하나의 미디어 타입(media type)
-// text/html은 그 타입(type/subtype)
-// charset=utf8은 파라미터(parameter)
-
-// class로 설계해서 ContentType을 파싱해서 type/subType/charset으로 분리
-// request, response에서 둘다 쓸수 있음
 public class MediaType {
     private static final Logger log = LoggerFactory.getLogger(MediaType.class);
     private final String type;
@@ -66,7 +59,6 @@ public class MediaType {
         return null;
     }
 
-    // 파싱 로직
     // text/html; charset=utf8
     // type, subtype 필수, parameter 선택
     public static MediaType parseMediaType(String mediaType) {

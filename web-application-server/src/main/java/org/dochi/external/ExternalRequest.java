@@ -6,7 +6,7 @@ import org.dochi.http.multipart.Part;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface HttpExternalRequest {
+public interface ExternalRequest {
     Part getPart(String partName) throws IOException, HttpStatusException;
     String getMethod();
     String getRequestURI();

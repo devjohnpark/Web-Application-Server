@@ -2,6 +2,7 @@ package org.dochi.internal.parser;
 
 import org.dochi.http.exception.HttpStatusException;
 import org.dochi.internal.http11.Http11InputBufferTest;
+import org.dochi.internal.http11.Http11Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,42 +25,42 @@ public class Http11ParserTest extends Http11InputBufferTest {
     void parseRequestLine_get() throws IOException {
         String requestLine = "GET /path HTTP/1.1\r\n";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(parser.parseRequestLine(request));
-        assertEquals("GET", request.method().toString());
-        assertEquals("/path", request.requestURI().toString());
-        assertEquals("/path", request.requestPath().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertTrue(request.queryString().isNull());
+        assertTrue(parser.parseRequestLine(requestMetadata));
+        assertEquals("GET", requestMetadata.method().toString());
+        assertEquals("/path", requestMetadata.requestURI().toString());
+        assertEquals("/path", requestMetadata.requestPath().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertTrue(requestMetadata.queryString().isNull());
     }
 
     @Test
     void parseRequestLine_withQueryString() throws IOException {
         String requestLine = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\n";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(parser.parseRequestLine(request));
-        assertEquals("GET", request.method().toString());
-        assertEquals("/user?name=john%20park&password=1234", request.requestURI().toString());
-        assertEquals("/user", request.requestPath().toString());
-        assertEquals("name=john%20park&password=1234", request.queryString().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
+        assertTrue(parser.parseRequestLine(requestMetadata));
+        assertEquals("GET", requestMetadata.method().toString());
+        assertEquals("/user?name=john%20park&password=1234", requestMetadata.requestURI().toString());
+        assertEquals("/user", requestMetadata.requestPath().toString());
+        assertEquals("name=john%20park&password=1234", requestMetadata.queryString().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
     }
 
     @Test
     void parseRequestLine_post() throws IOException {
         String requestLine = "POST /api/users HTTP/1.1\r\n";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(parser.parseRequestLine(request));
-        assertEquals("POST", request.method().toString());
-        assertEquals("/api/users", request.requestURI().toString());
-        assertEquals("/api/users", request.requestPath().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
+        assertTrue(parser.parseRequestLine(requestMetadata));
+        assertEquals("POST", requestMetadata.method().toString());
+        assertEquals("/api/users", requestMetadata.requestURI().toString());
+        assertEquals("/api/users", requestMetadata.requestPath().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
     }
 
     @Test
     void parseRequestLine_incomplete() throws IOException {
         String requestLine = "GET /path";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(SocketTimeoutException.class, () -> parser.parseRequestLine(request));
+        assertThrows(SocketTimeoutException.class, () -> parser.parseRequestLine(requestMetadata));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class Http11ParserTest extends Http11InputBufferTest {
         String requestLine = "GET\r\n";
         httpClient.doRequest(requestLine.getBytes(StandardCharsets.ISO_8859_1));
 
-        assertThrows(HttpStatusException.class, () -> parser.parseRequestLine(request));
+        assertThrows(HttpStatusException.class, () -> parser.parseRequestLine(requestMetadata));
     }
 
     @Test
@@ -77,11 +78,11 @@ public class Http11ParserTest extends Http11InputBufferTest {
                 "Content-Length: 123\r\n" +
                 "\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue( parser.parseHeaders(request));
-        assertEquals(3, request.headers().size());
-        assertEquals("localhost:8080", request.headers().getHeader("Host"));
-        assertEquals("application/json", request.headers().getHeader("Content-Type"));
-        assertEquals("123", request.headers().getHeader("Content-Length"));
+        assertTrue( parser.parseHeaders(requestMetadata));
+        assertEquals(3, requestMetadata.headers().size());
+        assertEquals("localhost:8080", requestMetadata.headers().getHeader("Host"));
+        assertEquals("application/json", requestMetadata.headers().getHeader("Content-Type"));
+        assertEquals("123", requestMetadata.headers().getHeader("Content-Length"));
     }
 
     @Test
@@ -90,25 +91,25 @@ public class Http11ParserTest extends Http11InputBufferTest {
                 "User-Agent: Mozilla/5.0\r\n" +
                 "\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(parser.parseHeaders(request));
-        assertEquals(2, request.headers().size());
-        assertEquals("Bearer token123", request.headers().getHeader("Authorization"));
-        assertEquals("Mozilla/5.0", request.headers().getHeader("User-Agent"));
+        assertTrue(parser.parseHeaders(requestMetadata));
+        assertEquals(2, requestMetadata.headers().size());
+        assertEquals("Bearer token123", requestMetadata.headers().getHeader("Authorization"));
+        assertEquals("Mozilla/5.0", requestMetadata.headers().getHeader("User-Agent"));
     }
 
     @Test
     void parseHeaders_Empty() throws IOException {
         String headers = "\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertFalse( parser.parseHeaders(request));
-        assertEquals(0, request.headers().size());
+        assertFalse( parser.parseHeaders(requestMetadata));
+        assertEquals(0, requestMetadata.headers().size());
     }
 
     @Test
     void parseHeaders_invalidFormat() throws IOException {
         String headers = "InvalidHeader\r\n\r\n";
         httpClient.doRequest(headers.getBytes(StandardCharsets.ISO_8859_1));
-        assertThrows(HttpStatusException.class, () -> parser.parseHeaders(request));
+        assertThrows(HttpStatusException.class, () -> parser.parseHeaders(requestMetadata));
     }
 
     @Test
@@ -119,13 +120,13 @@ public class Http11ParserTest extends Http11InputBufferTest {
                 "Content-Length: 25\r\n" +
                 "\r\n";
         httpClient.doRequest(header.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(parser.parseRequestLine(request));
-        assertTrue(parser.parseHeaders(request));
-        assertEquals("POST", request.method().toString());
-        assertEquals("/api/users?active=true", request.requestURI().toString());
-        assertEquals("/api/users", request.requestPath().toString());
-        assertEquals("active=true", request.queryString().toString());
-        assertEquals("HTTP/1.1", request.protocol().toString());
-        assertEquals(3, request.headers().size());
+        assertTrue(parser.parseRequestLine(requestMetadata));
+        assertTrue(parser.parseHeaders(requestMetadata));
+        assertEquals("POST", requestMetadata.method().toString());
+        assertEquals("/api/users?active=true", requestMetadata.requestURI().toString());
+        assertEquals("/api/users", requestMetadata.requestPath().toString());
+        assertEquals("active=true", requestMetadata.queryString().toString());
+        assertEquals("HTTP/1.1", requestMetadata.protocol().toString());
+        assertEquals(3, requestMetadata.headers().size());
     }
 }

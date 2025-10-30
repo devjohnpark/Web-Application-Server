@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 public class SocketTaskExecutor {
     private static final Logger log = LoggerFactory.getLogger(SocketTaskExecutor.class);
-
     private final SocketTaskPool taskPool;
     private final ThreadPoolExecutor workerThreadPoolExecutor;
 
