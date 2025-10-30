@@ -107,8 +107,7 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
 
     public void send(HttpStatus status, byte[] body, String contentType) throws IOException {
         addDefaultHeader(status, body, contentType);
-        commitHeader();
-        commitBody(body);
+        commitMessage(body);
     }
 
     public void sendError(HttpStatus status) throws IOException {
@@ -146,19 +145,25 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
     }
 
     public OutputStream getOutputStream() throws IOException {
-        checkOutputStream();
-        commitHeader();
+        commitMessage(null);
         return out;
     }
 
-    private void checkOutputStream() {
-        if (out == null) {
-            throw new IllegalStateException("OutputStream cannot be null");
+    private void commitMessage(byte[] body) throws IOException {
+        if (isCommitted) return;
+        writeHeader();
+        writeBody(body);
+        isCommitted = true;
+    }
+
+    public void flush() throws IOException {
+        if (isCommitted) {
+            checkOutputStream();
+            out.flush();
         }
     }
 
-    private void commitHeader() throws IOException {
-        if (isCommitted) return;
+    private void writeHeader() throws IOException {
         checkOutputStream();
         out.write(String.format("%s %d %s\r\n", version.getVersion(), status.getCode(), status.getMessage()).getBytes(StandardCharsets.ISO_8859_1));
         Set<String> keys = headers.getHeaders().keySet();
@@ -167,20 +172,18 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
             out.write(headerLine.getBytes(StandardCharsets.ISO_8859_1));
         }
         out.write("\r\n".getBytes(StandardCharsets.ISO_8859_1));
-        isCommitted = true;
     }
 
-    private void commitBody(byte[] body) throws IOException {
+    private void writeBody(byte[] body) throws IOException {
         checkOutputStream();
         if (body != null) {
             out.write(body, 0, body.length);
         }
     }
 
-    public void flush() throws IOException {
-        if (isCommitted) {
-            checkOutputStream();
-            out.flush();
+    private void checkOutputStream() {
+        if (out == null) {
+            throw new IllegalStateException("OutputStream cannot be null");
         }
     }
 }
