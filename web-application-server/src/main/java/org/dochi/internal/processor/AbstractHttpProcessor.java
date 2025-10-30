@@ -37,6 +37,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         setSocketWrapper(socketWrapper);
         try {
             recycle();
+            socketWrapper.setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
             state = service(socketWrapper);
         } catch (Exception e) {
             processException(e);

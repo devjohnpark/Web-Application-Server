@@ -21,7 +21,6 @@ public class SocketTaskHandler implements SocketTask {
         try {
             SocketState state = SocketState.OPEN;
             HttpProcessor processor = this.protocolHandler.getProcessor(); // 기본 default HTTP/1.1;
-            getSocketWrapper().setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
             while (state == SocketState.OPEN) {
                 state = processor.process(socketWrapper);
                 if (state == SocketState.CLOSED) {
@@ -31,16 +30,12 @@ public class SocketTaskHandler implements SocketTask {
                     // 2. 필요한 스트림의 개수 만큼 Http2Processor 생성
                     // 3. 소켓 연결 시간 다시 설정
 
-                    // 다음 코드만 추가하고, 필요한 스트림 개수만큼 while 문 반복
-                    // ulti stream 처리를 위해 process 비동기 메서드로 변환필요, process 실행 이후 동기적으로 release 메서드 호출 필요
+                    // HTTP/2.0은 다수의 스트림을 필요하므로 다수의 HttpProcessor가 필요하다.
+                    // 땨라서 반복문으로 필요한 스트림 개수만큼 HttpProcessor 생성
                     // processor = this.protocolHandler.getProcessor("HTTP/2.0");
+                    // HttpProcessor.process() 비동기로 전환 필요
                 }
-
             }
-        } catch (IOException e) {
-            log.error("Set connection timeout but socket is already closed: ", e);
-        } catch (RuntimeException e) {
-            log.error("Runtime exception occurred: ", e);
         } finally {
             terminate();
         }
