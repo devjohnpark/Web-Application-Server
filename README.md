@@ -4,46 +4,45 @@
 
 ## Key Features
 
-- Lazy header field loading via header buffering and byte-level parsing
-- Extensible architecture for future HTTP versions
-- Persistent connection support
+- Header buffering with byte-level parsing and lazy decoding of required fields 
+- A protocol-independent architecture designed for future HTTP version extensibility
+- HTTP/1.1 persistent connection (Keep-Alive) support
 - HTTP/1.1 request/response processing
-- HTTP API services
+- HTTP API request routing and handling    
 
 ---
 
-## VERSION
+## Version History
 
 - **0.0.0: Initial WAS Implementation**
-    - Process HTTP/1.1 Request Messages
-    - Process HTTP/1.1 Response Messages
-    - Handle HTTP API Requests
-    - Serve Web Resource Files (HTML, CSS, JS, Images)
-
-- 0.0.1
-    - Support Virtual Servers by Port
-
-- 0.0.2
-    - Introduce Worker Thread Pool and Socket Operation Object Pool for Efficient HTTP Request Handling
-    - Manage Lifecycle of Web Server Instances and Web Service Endpoints
-    - Parse HTML Form Data
+    - HTTP/1.1 request and response message processing
+    - HTTP API request routing and handling
+    - Static web resource serving (HTML, CSS, JS, Images)
+        
+- **0.0.1**    
+    - Virtual server support based on listening ports
+        
+- **0.0.2**    
+    - Added a worker thread pool and a socket thread pool for efficient HTTP request processing
+    - Lifecycle management for web server instances and service endpoints
+    - HTML form data parsing support
         - `application/x-www-form-urlencoded`
         - `multipart/form-data`
-    - Handle HTTP Status Errors (400, 404, 500, etc.)
-
-- 0.0.3
-    - Enable Internal Resource Loading via ClassLoader for Single JAR Deployment
-
-- **0.1.0: HTTP/1.1 Keep-Alive (Persistent Connection)**
-    - Refactor Internals to Support Persistent Connections and Reuse Objects
-    - Support HTTP/1.1 Keep-Alive with Configurable Timeout and Max Request Count
-
-- **0.2.0: Protocol-independent design & Performance Optimization**
-    - Resolve protocol dependency by separating low-level and high-level processing into a two-layer architecture
-    - Achieve over 23x throughput improvement by buffering header in byte[], parsing keys/values by index, and using lazy loading for required field as `String`
-    - Leverage Cache Locality with LIFO-based Object Pool
-    - Enhance Socket Extensibility with `SocketWrapperBase<E>` for Future NIO
-    - Support Virtual Servers by Port and Domain
+    - HTTP error handling (400, 404, 500, etc.)
+        
+- **0.0.3**
+    - Internal resource loading via `ClassLoader` for single-JAR deployment
+        
+- **0.1.0: HTTP/1.1 Keep-Alive**
+    - Internal refactoring to support persistent connections and object reuse
+    - Support configurable Keep-Alive timeout and maximum request count per connection
+        
+- **0.2.0: Protocol-independent Architecture & Performance Optimization**
+    - Protocol-level parsing is isolated from higher-level request processing
+    - Improve RPS and response latency by buffering headers in `byte[]`, parsing header fields by index intervals, and using lazy decoding to `String`/`int` upon access
+    - Enhance cache locality through a LIFO-based object pooling strategy
+    - Improve socket extensibility to prepare for non-blocking I/O
+    - Virtual server support by port and domain
 
 ---
 

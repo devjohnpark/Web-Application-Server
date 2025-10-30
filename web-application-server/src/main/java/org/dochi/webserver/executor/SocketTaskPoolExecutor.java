@@ -1,29 +1,29 @@
-package org.dochi.webserver.socket;
+package org.dochi.webserver.executor;
 
 import org.dochi.webserver.config.ThreadPoolConfig;
+import org.dochi.webserver.socket.SocketTask;
+import org.dochi.webserver.socket.SocketTaskPool;
+import org.dochi.webserver.socket.SocketWrapperBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class SocketTaskExecutor {
-    private static final Logger log = LoggerFactory.getLogger(SocketTaskExecutor.class);
+public class SocketTaskPoolExecutor {
+    private static final Logger log = LoggerFactory.getLogger(SocketTaskPoolExecutor.class);
     private final SocketTaskPool taskPool;
-    private final ThreadPoolExecutor workerThreadPoolExecutor;
+    private final ScalableThreadPoolExecutor workerThreadPoolExecutor;
 
-    public SocketTaskExecutor(ThreadPoolConfig threadPool, SocketTaskPool taskPool) {
-        this.workerThreadPoolExecutor = new ThreadPoolExecutor(
+    public SocketTaskPoolExecutor(ThreadPoolConfig threadPool, SocketTaskPool taskPool) {
+        this.workerThreadPoolExecutor = new ScalableThreadPoolExecutor(
                 threadPool.getMinSpareThreads(),
                 threadPool.getMaxThreads(),
                 60L, // corePoolSize을 초과하는 스레드가 할당된 작업이 없는 경우 keepAliveTime이 경과한 뒤 제거
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>() // 작업(Task) 대기 큐, 스레드 풀이 모두 바쁠 경우에 추가로 들어오는 작업(SocketTaskHandler)을 일시적으로 저장
-        );
+                new LinkedBlockingQueue<>()
 
-        // Core Pool 개수 만큼 스레드를 미리 생성하여 성능 최적화
-        workerThreadPoolExecutor.prestartAllCoreThreads();
+        );
 
         log.info("Worker Thread Pool Executor initialized [Total size: {}]", workerThreadPoolExecutor.getPoolSize());
 
@@ -32,13 +32,13 @@ public class SocketTaskExecutor {
 
     public void execute(SocketWrapperBase<?> socketWrapper) {
         try {
-            // 사용 가능한 SocketTask 가져오기
-            SocketTask socketTask = taskPool.get();
-
-            // 새로 연결된 소켓 설정
-            socketTask.setSocketWrapper(socketWrapper);
-
             workerThreadPoolExecutor.execute(() -> {
+                // 사용 가능한 SocketTask 가져오기
+                SocketTask socketTask = taskPool.get();
+
+                // 새로 연결된 소켓 설정
+                socketTask.setSocketWrapper(socketWrapper);
+
                 try {
                     socketTask.run();
                 } finally {

@@ -1,6 +1,8 @@
 package org.dochi.webserver.socket;
 
 import org.dochi.webserver.config.ServerConfig;
+import org.dochi.webserver.executor.SocketTaskExecutorFactory;
+import org.dochi.webserver.executor.SocketTaskPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +13,7 @@ import java.net.Socket;
 public final class Connector implements Runnable, AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
     private final ServerSocket listenSocket;
-    private final SocketTaskExecutor executor;
+    private final SocketTaskPoolExecutor executor;
     private final ServerConfig config;
     private volatile boolean running;
 
