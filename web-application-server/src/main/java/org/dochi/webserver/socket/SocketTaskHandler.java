@@ -28,7 +28,7 @@ public class SocketTaskHandler implements SocketTask {
                 if (state == SocketState.CLOSED) {
                     protocolHandler.release(processor);
                 } else if (state == SocketState.UPGRADING) {
-                    // 1. 파싱된 요청 데이터 객체(internal.RequestMetadata)의 복사본을 가지고 헤더에서 h2 관련 데이터 가져와서(AbstractProcessor.getUpgradeToken()) HTTP/2 설정
+                    // 1. 파싱된 요청 데이터 객체(internal.RequestHeader)의 복사본을 가지고 헤더에서 h2 관련 데이터 가져와서(AbstractProcessor.getUpgradeToken()) HTTP/2 설정
                     // 2. 필요한 스트림의 개수 만큼 Http2Processor 생성
                     // 3. 소켓 연결 시간 다시 설정
 

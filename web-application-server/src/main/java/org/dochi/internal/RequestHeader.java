@@ -9,55 +9,55 @@ import java.nio.charset.Charset;
 
 // 요청 메세지의 메타데이터를 파싱한것을 버퍼 구간으로 설정하고 디코딩한 메타데이터를 가져올수있는 객체
 // 헤더 필드는 메모리 주소를 직접 참조해서 처음 조회 O(N) 이후에 다음번 조회시 O(1)
-public final class RequestMetadata {
-    private final HeaderBytes methodMB;
-    private final HeaderBytes requestPathMB;
-    private final HeaderBytes queryStringMB;
-    private final HeaderBytes uriMB;
-    private final HeaderBytes protocolMB;
-    private HeaderBytes contentLengthMB;
-    private HeaderBytes contentTypeMB;
+public final class RequestHeader {
+    private final HeaderBytes method;
+    private final HeaderBytes requestPath;
+    private final HeaderBytes queryString;
+    private final HeaderBytes uri;
+    private final HeaderBytes protocol;
+    private HeaderBytes contentLength;
+    private HeaderBytes contentType;
     private final Headers headers;
     private String characterEncoding;
     private Charset charset;
     private final Parameters parameters;
 
-    public RequestMetadata() {
-        this.requestPathMB = new HeaderBytes();
-        this.queryStringMB = new HeaderBytes();
-        this.methodMB = new HeaderBytes();
-        this.uriMB = new HeaderBytes();
-        this.protocolMB = new HeaderBytes();
+    public RequestHeader() {
+        this.requestPath = new HeaderBytes();
+        this.queryString = new HeaderBytes();
+        this.method = new HeaderBytes();
+        this.uri = new HeaderBytes();
+        this.protocol = new HeaderBytes();
         this.headers = new Headers();
         this.parameters = new Parameters();
     }
 
-    public HeaderBytes method() { return this.methodMB; }
+    public HeaderBytes method() { return this.method; }
 
-    public HeaderBytes queryString() { return this.queryStringMB; }
+    public HeaderBytes queryString() { return this.queryString; }
 
-    public HeaderBytes requestPath() { return this.requestPathMB; }
+    public HeaderBytes requestPath() { return this.requestPath; }
 
-    public HeaderBytes requestURI() { return this.uriMB; }
+    public HeaderBytes requestURI() { return this.uri; }
 
-    public HeaderBytes protocol() { return this.protocolMB; }
+    public HeaderBytes protocol() { return this.protocol; }
 
     public Headers headers() { return this.headers; }
 
     public Parameters parameters() { return this.parameters; }
 
     public String getContentType() {
-        if (this.contentTypeMB == null || contentTypeMB.isNull()) {
-            this.contentTypeMB = this.headers.getValue("content-type");
+        if (this.contentType == null || contentType.isNull()) {
+            this.contentType = this.headers.getValue("content-type");
         }
-        return this.contentTypeMB != null ? this.contentTypeMB.toString() : null;
+        return this.contentType != null ? this.contentType.toString() : null;
     }
 
     public int getContentLength() {
-        if (this.contentLengthMB == null || contentLengthMB.isNull()) {
-            this.contentLengthMB = this.headers.getValue("content-length");
+        if (this.contentLength == null || contentLength.isNull()) {
+            this.contentLength = this.headers.getValue("content-length");
         }
-        return this.contentLengthMB != null ? this.contentLengthMB.toInt() : -1;
+        return this.contentLength != null ? this.contentLength.toInt() : -1;
     }
 
     public Charset getCharsetFromContentType() {
@@ -89,15 +89,15 @@ public final class RequestMetadata {
     }
 
     public void recycle() {
-        this.methodMB.recycle();
-        this.requestPathMB.recycle();
-        this.queryStringMB.recycle();
-        this.uriMB.recycle();
-        this.protocolMB.recycle();
+        this.method.recycle();
+        this.requestPath.recycle();
+        this.queryString.recycle();
+        this.uri.recycle();
+        this.protocol.recycle();
         this.headers.recycle();
         this.parameters.recycle();
-        this.contentLengthMB = null;
-        this.contentTypeMB = null;
+        this.contentLength = null;
+        this.contentType = null;
         this.characterEncoding = null;
         this.charset = null;
     }

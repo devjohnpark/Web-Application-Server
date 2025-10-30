@@ -23,15 +23,13 @@ public class HeaderBytes {
         return this.type == 0;
     }
 
-    // internal.RequestMetadata의 헤더의 요소(path, method, header fiedld)는 각 HeaderBytes로 이루어져 있다.
-    // 헤더의 구성을 동일하므로 persistence connection에서 HeaderBytes가 재사용 가능하도록 해서 GC 사이클을 줄일수 있다.
+    // 헤더 요소의 구성은 동일하므로 지속 연결에서 매요청마다 재활용해서 GC 사이클 낮춘다.
     public void recycle() {
         this.byteChunk.recycle();
         this.strValue = null;
         this.type = 0;
         this.hasIntValue = false;
     }
-
 
     public int getLength() {
         if (this.type == 1) {
@@ -72,9 +70,6 @@ public class HeaderBytes {
         }
     }
 
-    /*
-    RequestMetadata에서 path 혹은 query-string을 설정할때 HeaderField.setCharset() 호출
-     */
     public void setCharset(Charset charset) {
         this.byteChunk.setCharset(charset);
     }

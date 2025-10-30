@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.external.ExternalRequest;
-import org.dochi.internal.RequestMetadata;
+import org.dochi.internal.RequestHeader;
 import org.dochi.http.multipart.Part;
 import org.dochi.http.utils.MediaType;
 import org.dochi.http.multipart.MultiPartParser;
@@ -17,7 +17,7 @@ import java.io.InputStream;
 public class RequestFacade implements InternalRequest, ExternalRequest {
     private static final Logger log = LoggerFactory.getLogger(RequestFacade.class);
 
-    private final RequestMetadata requestMetadata;
+    private final RequestHeader requestHeader;
     private InternalInputStream inputStream;
     private final InputBuffer inputBuffer;
     private final Multipart multipart;
@@ -27,7 +27,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     private boolean usingInputStream = false;
 
     public RequestFacade(HttpReqConfig httpReqConfig) {
-        this.requestMetadata = new RequestMetadata();
+        this.requestHeader = new RequestHeader();
         this.inputBuffer = new InputBuffer();
         this.multipart = new Multipart();
         this.config = httpReqConfig;
@@ -43,13 +43,13 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     }
 
     @Override
-    public RequestMetadata getRequestMetadata() {
-        return requestMetadata;
+    public RequestHeader getRequestHeader() {
+        return requestHeader;
     }
 
     @Override
     public void recycle() {
-        this.requestMetadata.recycle();
+        this.requestHeader.recycle();
         this.inputBuffer.recycle();
         this.multipart.recycle();
         this.parametersParsed = false;
@@ -71,40 +71,40 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     }
 
     @Override
-    public String getMethod() { return requestMetadata.method().toString(); }
+    public String getMethod() { return requestHeader.method().toString(); }
 
     @Override
-    public String getRequestURI() { return requestMetadata.requestURI().toString(); }
+    public String getRequestURI() { return requestHeader.requestURI().toString(); }
 
     @Override
-    public String getPath() { return requestMetadata.requestPath().toString(); }
+    public String getPath() { return requestHeader.requestPath().toString(); }
 
     @Override
     public String getQueryString() {
-        return requestMetadata.queryString().toString();
+        return requestHeader.queryString().toString();
     }
 
     @Override
-    public String getProtocol() { return requestMetadata.protocol().toString(); }
+    public String getProtocol() { return requestHeader.protocol().toString(); }
 
     @Override
     public String getHeader(String key) {
-        return requestMetadata.headers().getHeader(key);
+        return requestHeader.headers().getHeader(key);
     }
 
     @Override
     public String getContentType() {
-        return requestMetadata.getContentType();
+        return requestHeader.getContentType();
     }
 
     @Override
     public int getContentLength() {
-        return requestMetadata.getContentLength();
+        return requestHeader.getContentLength();
     }
 
     @Override
     public String getCharacterEncoding() {
-        return requestMetadata.getCharacterEncoding();
+        return requestHeader.getCharacterEncoding();
     }
 
     @Override
@@ -112,7 +112,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
         if (!this.parametersParsed) {
             parseParameters();
         }
-        return requestMetadata.parameters().getValue(key);
+        return requestHeader.parameters().getValue(key);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
             parseBodyRequestParameters(); // header와 body의 request parameter 중복시 body 값으로 덮어씌움
         } else if ("multipart/form-data".equalsIgnoreCase(mediaType.getFullType())) {
             // getPart() 메서드 주석에서 로직에서 확인
-            requestMetadata.parameters().addParameter(mediaType.getParameterName(), mediaType.getParameterValue()); // boundary
+            requestHeader.parameters().addParameter(mediaType.getParameterName(), mediaType.getParameterValue()); // boundary
         }
         this.parametersParsed = true;
     }
@@ -150,12 +150,12 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
         while (n < contentLength) {
             n += in.read(buf, n, contentLength - n);
         }
-        requestMetadata.parameters().addRequestParameters(new String(buf, requestMetadata.getCharsetFromContentType()));
+        requestHeader.parameters().addRequestParameters(new String(buf, requestHeader.getCharsetFromContentType()));
     }
 
     private void parseHeaderRequestParameters() {
-        if (!requestMetadata.queryString().isNull()) {
-            requestMetadata.parameters().addRequestParameters(this.getQueryString());
+        if (!requestHeader.queryString().isNull()) {
+            requestHeader.parameters().addRequestParameters(this.getQueryString());
         }
     }
 }

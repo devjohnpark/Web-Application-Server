@@ -1,6 +1,6 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.RequestMetadata;
+import org.dochi.internal.RequestHeader;
 import org.dochi.internal.buffer.HeaderField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class Http11Parser {
         return this.source.getHeaderByteBuffer().get();
     }
 
-    public boolean parseRequestLine(RequestMetadata requestMetadata) throws IOException {
+    public boolean parseRequestLine(RequestHeader requestHeader) throws IOException {
         int elementCnt = 0;
         int querySeparator = -1;
         byte previousByte = -1;
@@ -48,17 +48,17 @@ public class Http11Parser {
             if (currentByte == WHITE_SPACE) {
                 elementCnt++;
                 if (elementCnt == 1) {
-                    requestMetadata.method().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                    requestHeader.method().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
                 } else if (elementCnt == 2) {
-                    requestMetadata.requestURI().setCharset(StandardCharsets.UTF_8);
-                    requestMetadata.requestURI().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
-                    requestMetadata.requestPath().setCharset(StandardCharsets.UTF_8);
+                    requestHeader.requestURI().setCharset(StandardCharsets.UTF_8);
+                    requestHeader.requestURI().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                    requestHeader.requestPath().setCharset(StandardCharsets.UTF_8);
                     if (querySeparator != -1) {
-                        requestMetadata.requestPath().setBytes(buffer.array(), start, querySeparator - start - SEPARATOR_SIZE);
-                        requestMetadata.queryString().setCharset(StandardCharsets.UTF_8);
-                        requestMetadata.queryString().setBytes(buffer.array(), querySeparator, buffer.position() - querySeparator - SEPARATOR_SIZE);
+                        requestHeader.requestPath().setBytes(buffer.array(), start, querySeparator - start - SEPARATOR_SIZE);
+                        requestHeader.queryString().setCharset(StandardCharsets.UTF_8);
+                        requestHeader.queryString().setBytes(buffer.array(), querySeparator, buffer.position() - querySeparator - SEPARATOR_SIZE);
                     } else {
-                        requestMetadata.requestPath().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                        requestHeader.requestPath().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
                     }
                 }
                 start = buffer.position();
@@ -66,9 +66,9 @@ public class Http11Parser {
                 querySeparator = buffer.position();
             } else if (previousByte == CR && currentByte == LF) {
                 if (elementCnt != 2) {
-                    throw new IllegalArgumentException("Invalid requestMetadata line");
+                    throw new IllegalArgumentException("Invalid requestHeader line");
                 }
-                requestMetadata.protocol().setBytes(buffer.array(), start, buffer.position() - start - CRLF_SIZE);
+                requestHeader.protocol().setBytes(buffer.array(), start, buffer.position() - start - CRLF_SIZE);
                 return true;
             }
             previousByte = currentByte;
@@ -76,15 +76,15 @@ public class Http11Parser {
         return false;
     }
 
-    public boolean parseHeaders(RequestMetadata requestMetadata) throws IOException {
+    public boolean parseHeaders(RequestHeader requestHeader) throws IOException {
         HeaderParseStatus status;
         do {
-            status = parseHeaderField(requestMetadata);
+            status = parseHeaderField(requestHeader);
         } while (status == HeaderParseStatus.NEED_MORE);
-        return status == HeaderParseStatus.DONE && requestMetadata.headers().size() > 0;
+        return status == HeaderParseStatus.DONE && requestHeader.headers().size() > 0;
     }
 
-    private HeaderParseStatus parseHeaderField(RequestMetadata requestMetadata) throws IOException {
+    private HeaderParseStatus parseHeaderField(RequestHeader requestHeader) throws IOException {
         byte previousByte = -1;
         byte currentByte;
         ByteBuffer buffer = source.getHeaderByteBuffer();
@@ -105,7 +105,7 @@ public class Http11Parser {
             } else if (previousByte == CR && currentByte == LF) {
                 valueEnd = buffer.position() - 2;
                 if (nameStart < nameEnd && nameEnd < valueStart && valueStart < valueEnd) {
-                    HeaderField headerField = requestMetadata.headers().createHeader();
+                    HeaderField headerField = requestHeader.headers().createHeader();
                     headerField.name().setBytes(buffer.array(), nameStart, nameEnd - nameStart);
                     headerField.getValue().setBytes(buffer.array(), valueStart, valueEnd - valueStart);
                     return HeaderParseStatus.NEED_MORE;
@@ -119,7 +119,7 @@ public class Http11Parser {
         if (currentByte == -1) {
             return HeaderParseStatus.EOF;
         }
-        throw new IllegalArgumentException("Invalid requestMetadata header");
+        throw new IllegalArgumentException("Invalid requestHeader header");
     }
 
     private enum HeaderParseStatus {

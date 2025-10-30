@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-// RequestMetadata Line: GET /user/create?userId=john&password=1234&name=john park HTTP/1.1
+// RequestHeader Line: GET /user/create?userId=john&password=1234&name=john park HTTP/1.1
 // url: /user/create?userId=john&password=1234&name=john park
 // path: /user/create
 // query string: userId=john&password=1234&name=john park

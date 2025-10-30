@@ -35,7 +35,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(inputBufferWrapper.parseHeader(requestHeader));
         assertEquals(this.inputBuffer.read(), 'n');
     }
 
@@ -49,7 +49,7 @@ class InputBufferTest extends Http11InputBufferTest {
         System.out.println("header size: " + headerSize); // 133
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(inputBufferWrapper.parseHeader(requestHeader));
 
         byte[] bodyBuf = new byte[body.length()];
         int j = 0;
@@ -72,7 +72,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(inputBufferWrapper.parseHeader(requestHeader));
         int n = this.inputBuffer.read(buf, 0, 2);
         assertArrayEquals(Arrays.copyOf(buf, n), "na".getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -85,7 +85,7 @@ class InputBufferTest extends Http11InputBufferTest {
         String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(inputBufferWrapper.parseHeader(requestHeader));
         for (byte b : buf) {
             assertEquals(this.inputBuffer.read(), b);
         }
@@ -102,7 +102,7 @@ class InputBufferTest extends Http11InputBufferTest {
 
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(inputBufferWrapper.parseHeader(requestHeader));
 
         byte[] bodyBuf = new byte[contentLength];
         int n = 0;

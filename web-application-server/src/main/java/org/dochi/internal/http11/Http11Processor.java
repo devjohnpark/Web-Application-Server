@@ -88,7 +88,7 @@ public class Http11Processor extends AbstractHttpProcessor {
     protected SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException {
         SocketState state = OPEN;
         while (state == OPEN) {
-            if (!inputBuffer.parseHeader(requestFacade.getRequestMetadata())) {
+            if (!inputBuffer.parseHeader(requestFacade.getRequestHeader())) {
                 // request line null -> false -> disconnection
                 return CLOSED;
             } else if (isUpgradeRequest(socketWrapper)) {

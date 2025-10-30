@@ -1,8 +1,8 @@
 package org.dochi.internal.http11;
 
+import org.dochi.internal.RequestHeader;
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
-import org.dochi.internal.RequestMetadata;
 import org.dochi.webserver.socket.SocketWrapperBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +44,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     }
 
     // 내부 구현이므로 같은 http11 패키지내의 클래스만 호출가능하도록 패키지 전용 접근 제어자로 지정
-    boolean parseHeader(RequestMetadata requestMetadata) throws IOException {
-        return parser.parseRequestLine(requestMetadata) && parser.parseHeaders(requestMetadata);
+    boolean parseHeader(RequestHeader requestHeader) throws IOException {
+        return parser.parseRequestLine(requestHeader) && parser.parseHeaders(requestHeader);
     }
 
     @Override

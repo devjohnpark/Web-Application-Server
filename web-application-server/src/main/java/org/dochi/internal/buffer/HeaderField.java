@@ -1,23 +1,23 @@
 package org.dochi.internal.buffer;
 
 public class HeaderField {
-    private final HeaderBytes nameMB = new HeaderBytes();
-    private final HeaderBytes valueMB = new HeaderBytes();
+    private final HeaderBytes name = new HeaderBytes();
+    private final HeaderBytes value = new HeaderBytes();
 
     public HeaderBytes name() {
-        return nameMB;
+        return name;
     }
 
     public HeaderBytes getValue() {
-        return valueMB;
+        return value;
     }
 
     public void recycle() {
-        this.nameMB.recycle();
-        this.valueMB.recycle();
+        this.name.recycle();
+        this.value.recycle();
     }
 
     public String toString() {
-        return String.valueOf(this.nameMB) + ": " + String.valueOf(this.valueMB);
+        return String.valueOf(this.name) + ": " + String.valueOf(this.value);
     }
 }

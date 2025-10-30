@@ -36,7 +36,7 @@ class InternalInputStreamTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(this.inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(this.inputBufferWrapper.parseHeader(requestHeader));
         assertEquals(internalInputStream.read(), 'n');
     }
 
@@ -48,7 +48,7 @@ class InternalInputStreamTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(this.inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(this.inputBufferWrapper.parseHeader(requestHeader));
         int n = internalInputStream.read(buf);
         assertArrayEquals(Arrays.copyOf(buf, n), body.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -62,7 +62,7 @@ class InternalInputStreamTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(this.inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(this.inputBufferWrapper.parseHeader(requestHeader));
         int n = internalInputStream.read(buf, 0, 2);
         assertArrayEquals(Arrays.copyOf(buf, n), "na".getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -76,7 +76,7 @@ class InternalInputStreamTest extends Http11InputBufferTest {
 
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(this.inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(this.inputBufferWrapper.parseHeader(requestHeader));
 
         for (byte b : buf) {
             assertEquals(internalInputStream.read(), b);
@@ -92,7 +92,7 @@ class InternalInputStreamTest extends Http11InputBufferTest {
 
         String message = header + "\r\n" + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
-        assertTrue(this.inputBufferWrapper.parseHeader(requestMetadata));
+        assertTrue(this.inputBufferWrapper.parseHeader(requestHeader));
 
         byte[] bodyBuf = new byte[contentLength];
         int n = 0;
