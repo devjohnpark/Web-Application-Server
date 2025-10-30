@@ -6,8 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-// 클라이언트(소켓)당 스레드 하나가 공유 자원이 없는 작업을 처리하기 때문에 동시성이 없어서 BufferedInputStream처럼 동기화 로직은 필요없다.
-// 따라서 동기화 기능이 없기 때문에 BufferedSocketInputStream 보다 읽기 속도가 더 빠르다.
+// 클라이언트(소켓)당 스레드 하나가 공유 자원이 없는 작업을 처리하기 때문에 동기화 로직이 필요없음
 public class InputBuffer implements ApplicationBufferHandler, Closeable {
     private org.dochi.internal.buffer.InputBuffer internalInputBuffer;
     private ByteBuffer buffer; // 시스템 콜 비용을 줄이기 위해서 내부 버퍼 사용
@@ -22,7 +21,7 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
         this.isClosed = false;
     }
 
-    // 지연 초기화(lazy init)와 internal.Request와 connector.InputBuffer의 생명주기 분리
+    // 지연 초기화(lazy init)
     public void setInputBuffer(org.dochi.internal.buffer.InputBuffer internalInputBuffer) {
         this.internalInputBuffer = internalInputBuffer;
     }
@@ -95,9 +94,6 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
             return -1;
         }
         int n = Math.min(this.buffer.remaining(), len);
-        // System.arraycopy()가 ByteBuffer.get()보다 네이티브 최적화 덕분에 실제 실행 속도가 더 빠르다.
-        // 그러나 ByteBuffer.get()은 채널 기반 입출력인 FileChannel, SocketChannel을 사용한다면, heap 영역 데이터 복사를 커치지 않고 네트워크나 파일 I/O시에 커널영역으로 직접 데이터를 복사하므로 더 빠르다.
-        // 향후 SocketChannel을 디폴트로 사용하도록 할 예정
         this.buffer.get(b, off, n);
         return n;
     }

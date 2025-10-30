@@ -13,15 +13,6 @@ public class DefaultHttpApiHandler extends AbstractHttpApiHandler {
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpApiHandler.class);
 
     @Override
-    public void service(ExternalRequest request, ExternalResponse response) throws IOException {
-        if (request.getMethod().equalsIgnoreCase("GET")) {
-            doGet(request, response);
-        } else {
-            super.service(request, response);
-        }
-    }
-
-    @Override
     public void doGet(ExternalRequest request, ExternalResponse response) throws IOException {
         Resource resource = webResourceProvider.getResource(request.getPath());
         if (!resource.isEmpty()) {

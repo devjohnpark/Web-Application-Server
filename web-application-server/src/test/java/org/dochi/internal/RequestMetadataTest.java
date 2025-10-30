@@ -2,7 +2,7 @@ package org.dochi.internal;
 
 import org.dochi.http.utils.Parameters;
 import org.dochi.internal.buffer.HeaderBytes;
-import org.dochi.internal.buffer.MimeHeaders;
+import org.dochi.internal.buffer.Headers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -78,7 +78,7 @@ class RequestMetadataTest {
 
     @Test
     void headersReturnsMimeHeadersInstance() {
-        MimeHeaders headers = requestMetadata.headers();
+        Headers headers = requestMetadata.headers();
         assertNotNull(headers);
         assertEquals(0, headers.size());
     }

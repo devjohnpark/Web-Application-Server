@@ -9,14 +9,6 @@ public class HeaderBytes {
     private String strValue;
     private int intValue;
     private boolean hasIntValue = false;
-    private static final HeaderBytesFactory factory = new HeaderBytesFactory();
-
-    private HeaderBytes() {
-    }
-
-    public static HeaderBytes newInstance() {
-        return factory.newInstance();
-    }
 
     public void setBytes(byte[] b, int off, int len) {
         this.byteChunk.setBytes(b, off, len);
@@ -102,15 +94,6 @@ public class HeaderBytes {
                 return this.strValue.equalsIgnoreCase(s);
             default:
                 return false;
-        }
-    }
-
-    private static class HeaderBytesFactory {
-        protected HeaderBytesFactory() {
-        }
-
-        public HeaderBytes newInstance() {
-            return new HeaderBytes();
         }
     }
 }

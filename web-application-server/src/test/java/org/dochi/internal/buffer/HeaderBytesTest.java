@@ -12,13 +12,13 @@ class HeaderBytesTest {
 
     @BeforeEach
     void setUp() {
-        headerBytes = HeaderBytes.newInstance();
+        headerBytes = new HeaderBytes();
     }
 
     @Test
     void newInstance() {
         // When
-        HeaderBytes mb = HeaderBytes.newInstance();
+        HeaderBytes mb = new HeaderBytes();
 
         // Then
         assertNotNull(mb);

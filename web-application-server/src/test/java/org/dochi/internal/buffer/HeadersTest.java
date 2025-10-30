@@ -5,94 +5,94 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MimeHeadersTest {
+class HeadersTest {
 
-    private MimeHeaders mimeHeaders;
+    private Headers headers;
 
     @BeforeEach
     void setUp() {
-        mimeHeaders = new MimeHeaders();
+        headers = new Headers();
     }
 
     @Test
     void defaultConstructorInitializesWithDefaultSize() {
-        MimeHeaders headers = new MimeHeaders();
+        Headers headers = new Headers();
         assertEquals(0, headers.size());
     }
 
     @Test
     void constructorWithCustomSizeInitializesCorrectly() {
-        MimeHeaders headers = new MimeHeaders(16);
+        Headers headers = new Headers(16);
         assertEquals(0, headers.size());
     }
 
     @Test
     void createHeaderIncreasesSize() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         assertNotNull(header);
-        assertEquals(1, mimeHeaders.size());
+        assertEquals(1, headers.size());
 
-        MimeHeaderField header2 = mimeHeaders.createHeader();
+        HeaderField header2 = headers.createHeader();
         assertNotNull(header2);
-        assertEquals(2, mimeHeaders.size());
+        assertEquals(2, headers.size());
     }
 
     @Test
     void createHeaderExpandsArrayWhenNeeded() {
         // 기본 크기는 8이므로 9개 생성해서 배열 확장 테스트
         for (int i = 0; i < 9; i++) {
-            mimeHeaders.createHeader();
+            headers.createHeader();
         }
-        assertEquals(9, mimeHeaders.size());
+        assertEquals(9, headers.size());
     }
 
     @Test
     void createHeaderWithLargeNumberOfHeaders() {
         // 100개의 헤더 생성으로 배열 확장 여러 번 테스트
         for (int i = 0; i < 100; i++) {
-            mimeHeaders.createHeader();
+            headers.createHeader();
         }
-        assertEquals(100, mimeHeaders.size());
+        assertEquals(100, headers.size());
     }
 
     @Test
     void recycleResetsCountToZero() {
-        mimeHeaders.createHeader();
-        mimeHeaders.createHeader();
-        assertEquals(2, mimeHeaders.size());
+        headers.createHeader();
+        headers.createHeader();
+        assertEquals(2, headers.size());
 
-        mimeHeaders.recycle();
-        assertEquals(0, mimeHeaders.size());
+        headers.recycle();
+        assertEquals(0, headers.size());
     }
 
     @Test
     void getValueByNameReturnsCorrectValue() {
-        MimeHeaderField header1 = mimeHeaders.createHeader();
+        HeaderField header1 = headers.createHeader();
         header1.name().setString("Content-Type");
         header1.getValue().setString("application/json");
 
-        MimeHeaderField header2 = mimeHeaders.createHeader();
+        HeaderField header2 = headers.createHeader();
         header2.name().setString("Accept");
         header2.getValue().setString("text/html");
 
-        HeaderBytes value = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value = headers.getValue("Content-Type");
         assertNotNull(value);
         assertEquals("application/json", value.toString());
 
-        HeaderBytes value2 = mimeHeaders.getValue("Accept");
+        HeaderBytes value2 = headers.getValue("Accept");
         assertNotNull(value2);
         assertEquals("text/html", value2.toString());
     }
 
     @Test
     void getValueByNameIsCaseInsensitive() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        HeaderBytes value1 = mimeHeaders.getValue("content-type");
-        HeaderBytes value2 = mimeHeaders.getValue("CONTENT-TYPE");
-        HeaderBytes value3 = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value1 = headers.getValue("content-type");
+        HeaderBytes value2 = headers.getValue("CONTENT-TYPE");
+        HeaderBytes value3 = headers.getValue("Content-Type");
 
         assertNotNull(value1);
         assertNotNull(value2);
@@ -104,55 +104,55 @@ class MimeHeadersTest {
 
     @Test
     void getValueByNameReturnsNullForNonExistentHeader() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        HeaderBytes value = mimeHeaders.getValue("Accept");
+        HeaderBytes value = headers.getValue("Accept");
         assertNull(value);
     }
 
     @Test
     void getValueByNameReturnsNullForEmptyHeaders() {
-        HeaderBytes value = mimeHeaders.getValue("Content-Type");
+        HeaderBytes value = headers.getValue("Content-Type");
         assertNull(value);
     }
 
     @Test
     void getValueByNameHandlesNullParameter() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        HeaderBytes value = mimeHeaders.getValue(null);
+        HeaderBytes value = headers.getValue(null);
         assertNull(value);
     }
 
     @Test
     void getHeaderReturnsStringValue() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        String headerValue = mimeHeaders.getHeader("Content-Type");
+        String headerValue = headers.getHeader("Content-Type");
         assertEquals("application/json", headerValue);
     }
 
     @Test
     void getHeaderReturnsNullForNonExistentHeader() {
-        String headerValue = mimeHeaders.getHeader("Non-Existent");
+        String headerValue = headers.getHeader("Non-Existent");
         assertNull(headerValue);
     }
 
     @Test
     void getHeaderIsCaseInsensitive() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        String value1 = mimeHeaders.getHeader("content-type");
-        String value2 = mimeHeaders.getHeader("CONTENT-TYPE");
-        String value3 = mimeHeaders.getHeader("Content-Type");
+        String value1 = headers.getHeader("content-type");
+        String value2 = headers.getHeader("CONTENT-TYPE");
+        String value3 = headers.getHeader("Content-Type");
 
         assertEquals("application/json", value1);
         assertEquals("application/json", value2);
@@ -161,29 +161,29 @@ class MimeHeadersTest {
 
     @Test
     void getHeaderHandlesNullParameter() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        String headerValue = mimeHeaders.getHeader(null);
+        String headerValue = headers.getHeader(null);
         assertNull(headerValue);
     }
 
     @Test
     void multipleHeadersWithSameNameReturnsFirst() {
-        MimeHeaderField header1 = mimeHeaders.createHeader();
+        HeaderField header1 = headers.createHeader();
         header1.name().setString("Accept");
         header1.getValue().setString("text/html");
 
-        MimeHeaderField header2 = mimeHeaders.createHeader();
+        HeaderField header2 = headers.createHeader();
         header2.name().setString("Accept");
         header2.getValue().setString("application/json");
 
-        HeaderBytes value = mimeHeaders.getValue("Accept");
+        HeaderBytes value = headers.getValue("Accept");
         assertNotNull(value);
         assertEquals("text/html", value.toString());
 
-        String headerValue = mimeHeaders.getHeader("Accept");
+        String headerValue = headers.getHeader("Accept");
         assertEquals("text/html", headerValue);
     }
 
@@ -191,30 +191,30 @@ class MimeHeadersTest {
     void recycleAfterMultipleOperations() {
         // 여러 헤더 생성
         for (int i = 0; i < 5; i++) {
-            MimeHeaderField header = mimeHeaders.createHeader();
+            HeaderField header = headers.createHeader();
             header.name().setString("Header" + i);
             header.getValue().setString("Value" + i);
         }
 
-        assertEquals(5, mimeHeaders.size());
+        assertEquals(5, headers.size());
 
         // 리사이클 후 크기 확인
-        mimeHeaders.recycle();
-        assertEquals(0, mimeHeaders.size());
+        headers.recycle();
+        assertEquals(0, headers.size());
 
         // 리사이클 후 다시 헤더 생성 가능한지 확인
-        MimeHeaderField newHeader = mimeHeaders.createHeader();
+        HeaderField newHeader = headers.createHeader();
         newHeader.name().setString("NewHeader");
         newHeader.getValue().setString("NewValue");
 
-        assertEquals(1, mimeHeaders.size());
-        assertEquals("NewValue", mimeHeaders.getHeader("NewHeader"));
+        assertEquals(1, headers.size());
+        assertEquals("NewValue", headers.getHeader("NewHeader"));
     }
 
     @Test
     void createHeaderReturnsUniqueInstances() {
-        MimeHeaderField header1 = mimeHeaders.createHeader();
-        MimeHeaderField header2 = mimeHeaders.createHeader();
+        HeaderField header1 = headers.createHeader();
+        HeaderField header2 = headers.createHeader();
 
         assertNotSame(header1, header2);
         assertNotNull(header1);
@@ -225,50 +225,50 @@ class MimeHeadersTest {
     void arrayExpansionPreservesExistingHeaders() {
         // 기본 크기(8)만큼 헤더 생성
         for (int i = 0; i < 8; i++) {
-            MimeHeaderField header = mimeHeaders.createHeader();
+            HeaderField header = headers.createHeader();
             header.name().setString("Header" + i);
             header.getValue().setString("Value" + i);
         }
 
         // 첫 번째 헤더 확인
-        assertEquals("Value0", mimeHeaders.getHeader("Header0"));
+        assertEquals("Value0", headers.getHeader("Header0"));
 
         // 배열 확장을 유발하는 9번째 헤더 생성
-        MimeHeaderField header9 = mimeHeaders.createHeader();
+        HeaderField header9 = headers.createHeader();
         header9.name().setString("Header8");
         header9.getValue().setString("Value8");
 
         // 기존 헤더들이 여전히 유효한지 확인
-        assertEquals("Value0", mimeHeaders.getHeader("Header0"));
-        assertEquals("Value7", mimeHeaders.getHeader("Header7"));
-        assertEquals("Value8", mimeHeaders.getHeader("Header8"));
-        assertEquals(9, mimeHeaders.size());
+        assertEquals("Value0", headers.getHeader("Header0"));
+        assertEquals("Value7", headers.getHeader("Header7"));
+        assertEquals("Value8", headers.getHeader("Header8"));
+        assertEquals(9, headers.size());
     }
 
     @Test
     void emptyHeaderNameAndValueHandling() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("");
         header.getValue().setString("");
 
-        HeaderBytes value = mimeHeaders.getValue("");
+        HeaderBytes value = headers.getValue("");
         assertNotNull(value);
         assertEquals("", value.toString());
 
-        String headerValue = mimeHeaders.getHeader("");
+        String headerValue = headers.getHeader("");
         assertEquals("", headerValue);
     }
 
     @Test
     void headerWithNullValue() {
-        MimeHeaderField header = mimeHeaders.createHeader();
+        HeaderField header = headers.createHeader();
         header.name().setString("Test-Header");
         // getValue()는 기본적으로 빈 MessageBytes를 반환하므로 null 값 설정 테스트
 
-        HeaderBytes value = mimeHeaders.getValue("Test-Header");
+        HeaderBytes value = headers.getValue("Test-Header");
         assertNotNull(value);
 
-        String headerValue = mimeHeaders.getHeader("Test-Header");
+        String headerValue = headers.getHeader("Test-Header");
         // MessageBytes의 toString() 구현에 따라 결과가 달라질 수 있음
         assertNotNull(headerValue);
     }

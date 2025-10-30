@@ -1,7 +1,7 @@
 package org.dochi.internal.http11;
 
 import org.dochi.internal.RequestMetadata;
-import org.dochi.internal.buffer.MimeHeaderField;
+import org.dochi.internal.buffer.HeaderField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,6 @@ public class Http11Parser {
         if (!this.source.getHeaderByteBuffer().hasRemaining() && !this.source.fillHeaderBuffer()) {
             return -1;
         }
-
-        System.out.println("header position, limit" + this.source.getHeaderByteBuffer().position() + " " + this.source.getHeaderByteBuffer().limit());
         if (this.source.getHeaderByteBuffer().position() > headerMaxSize) {
             throw new IllegalStateException("header size exceeded");
         }
@@ -107,7 +105,7 @@ public class Http11Parser {
             } else if (previousByte == CR && currentByte == LF) {
                 valueEnd = buffer.position() - 2;
                 if (nameStart < nameEnd && nameEnd < valueStart && valueStart < valueEnd) {
-                    MimeHeaderField headerField = requestMetadata.headers().createHeader();
+                    HeaderField headerField = requestMetadata.headers().createHeader();
                     headerField.name().setBytes(buffer.array(), nameStart, nameEnd - nameStart);
                     headerField.getValue().setBytes(buffer.array(), valueStart, valueEnd - valueStart);
                     return HeaderParseStatus.NEED_MORE;

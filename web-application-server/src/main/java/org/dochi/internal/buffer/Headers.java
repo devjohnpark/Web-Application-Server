@@ -1,25 +1,25 @@
 package org.dochi.internal.buffer;
 
-public class MimeHeaders {
+public class Headers {
     private static final int DEFAULT_HEADER_FIELD_COUNT = 8;
     private int len = 0;
     private int count = 0;
 
-    private MimeHeaderField[] headers;
+    private HeaderField[] headers;
     
-    public MimeHeaders() {
+    public Headers() {
         initHeaders(DEFAULT_HEADER_FIELD_COUNT);
     }
 
-    public MimeHeaders(int length) {
+    public Headers(int length) {
         initHeaders(length);
     }
 
     private void initHeaders(int len) {
-        this.headers = new MimeHeaderField[len];
+        this.headers = new HeaderField[len];
         // 배열의 각 요소 초기화
         for (int i = 0; i < this.headers.length; i++) {
-            this.headers[i] = new MimeHeaderField();
+            this.headers[i] = new HeaderField();
         }
         this.len = len;
     }
@@ -31,16 +31,16 @@ public class MimeHeaders {
         this.count = 0;
     }
 
-    public MimeHeaderField createHeader() {
+    public HeaderField createHeader() {
         if (this.count >= this.len) {
             int newLength = this.count * 2;
             if (this.len > 0 && newLength > this.len) {
                 this.len = newLength;
             }
-            MimeHeaderField[] tmp = new MimeHeaderField[len];
+            HeaderField[] tmp = new HeaderField[len];
             System.arraycopy(this.headers, 0, tmp, 0, count);
             for (int i = count; i < len; i++) {
-                tmp[i] = new MimeHeaderField();
+                tmp[i] = new HeaderField();
             }
             this.headers = tmp;
         }

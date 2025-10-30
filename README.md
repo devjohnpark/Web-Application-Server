@@ -1,3 +1,4 @@
+
 # Building a Web Application Server
 
 ---
@@ -37,9 +38,9 @@
     - Internal refactoring to support persistent connections and object reuse
     - Support configurable Keep-Alive timeout and maximum request count per connection
         
-- **0.2.0: Protocol-independent Architecture & Performance Optimization**
+- **0.2.0: Protocol-independent Architecture & Optimized Request Header Processing**
     - Protocol-level parsing is isolated from higher-level request processing
-    - Improve RPS and response latency by buffering headers in `byte[]`, parsing header fields by index intervals, and using lazy decoding to `String`/`int` upon access
+    - Optimized request header processing by applying byte-level parsing and lazy decoding with buffer index ranges
     - Enhance cache locality through a LIFO-based object pooling strategy
     - Improve socket extensibility to prepare for non-blocking I/O
     - Virtual server support by port and domain
@@ -1039,3 +1040,4 @@ SL-->>CLI: stopped
 end
 
 ```
+

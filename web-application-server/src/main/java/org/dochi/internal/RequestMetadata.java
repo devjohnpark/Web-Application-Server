@@ -3,7 +3,7 @@ package org.dochi.internal;
 import org.dochi.http.utils.MediaType;
 import org.dochi.http.utils.Parameters;
 import org.dochi.internal.buffer.HeaderBytes;
-import org.dochi.internal.buffer.MimeHeaders;
+import org.dochi.internal.buffer.Headers;
 
 import java.nio.charset.Charset;
 
@@ -17,18 +17,18 @@ public final class RequestMetadata {
     private final HeaderBytes protocolMB;
     private HeaderBytes contentLengthMB;
     private HeaderBytes contentTypeMB;
-    private final MimeHeaders headers;
+    private final Headers headers;
     private String characterEncoding;
     private Charset charset;
     private final Parameters parameters;
 
     public RequestMetadata() {
-        this.requestPathMB = HeaderBytes.newInstance();
-        this.queryStringMB = HeaderBytes.newInstance();
-        this.methodMB = HeaderBytes.newInstance();
-        this.uriMB = HeaderBytes.newInstance();
-        this.protocolMB = HeaderBytes.newInstance();
-        this.headers = new MimeHeaders();
+        this.requestPathMB = new HeaderBytes();
+        this.queryStringMB = new HeaderBytes();
+        this.methodMB = new HeaderBytes();
+        this.uriMB = new HeaderBytes();
+        this.protocolMB = new HeaderBytes();
+        this.headers = new Headers();
         this.parameters = new Parameters();
     }
 
@@ -42,7 +42,7 @@ public final class RequestMetadata {
 
     public HeaderBytes protocol() { return this.protocolMB; }
 
-    public MimeHeaders headers() { return this.headers; }
+    public Headers headers() { return this.headers; }
 
     public Parameters parameters() { return this.parameters; }
 

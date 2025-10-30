@@ -24,16 +24,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
         this.parser = new Http11Parser(this, headerMaxSize);
     }
 
-    // AbstractHttpProcessor 구현체로부터 Http11InputBuffer은 SocketWrapper를 주입받아 SocketInputBuffer에 주입시켜서 생성한다. -> SocketInputBuffer(BioSocketWrapper)
-    // 여러 종류(non-blocking/blocking)의 소켓을 커버하기 위해 추상 클래스 SocketWrapperBase<E socket>을 정의한다.
-    // 단, SocketWrapper가 소켓 읽기/쓰기 기능을 감싸서 수행할수 있어야한다. Ex. SocketWrapperBase<E socket>: read(byte[], int off, int len)
-    // InputBuffer 인터페이스를 이용해서 SocketWrapperBase 객체를 매개변수로 전달한다. init(SocketWrapperBase<?> socketWrapper)
     @Override
     public void init(SocketWrapperBase<?> socketWrapper) {
-        if (socketWrapper == null) {
-            log.debug("socketWrapper cannot be null");
-            throw new IllegalArgumentException("socketWrapper cannot be null");
-        }
         this.socketInputBuffer.init(socketWrapper);
     }
 
@@ -88,6 +80,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
         @Override
         public void init(SocketWrapperBase<?> socketWrapper) {
+            if (socketWrapper == null) {
+                log.debug("socketWrapper cannot be null");
+                throw new IllegalArgumentException("socketWrapper cannot be null");
+            }
             this.socketWrapper = socketWrapper;
         }
 
