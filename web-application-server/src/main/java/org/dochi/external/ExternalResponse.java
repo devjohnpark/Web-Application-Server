@@ -9,7 +9,7 @@ public interface ExternalResponse {
     ExternalResponse setStatus(HttpStatus status);
     ExternalResponse setHeader(String key, String value);
     ExternalResponse setCookie(String cookie);
-    ExternalResponse setConnection(boolean isKeep);
+    ExternalResponse setConnection(String connection);
     ExternalResponse setContentType(String contentType);
     ExternalResponse setContentLength(int contentLength);
     ExternalResponse setDateHeader(String date);

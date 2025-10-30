@@ -65,9 +65,9 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
         return this;
     }
 
-    public ExternalResponse setConnection(boolean isKeep) {
+    public ExternalResponse setConnection(String connection) {
         checkCommit();
-        this.headers.addHeader(ResponseHeaders.CONNECTION, isKeep ? "keep-alive" : "close");
+        this.headers.addHeader(ResponseHeaders.CONNECTION, connection);
         return this;
     }
 

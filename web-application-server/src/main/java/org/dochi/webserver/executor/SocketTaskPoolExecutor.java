@@ -26,6 +26,8 @@ public class SocketTaskPoolExecutor {
 
         );
 
+        workerThreadPoolExecutor.prestartCoreThread();
+
         log.info("Worker Thread Pool Executor initialized [Total size: {}]", workerThreadPoolExecutor.getPoolSize());
 
         this.taskPool = taskPool;

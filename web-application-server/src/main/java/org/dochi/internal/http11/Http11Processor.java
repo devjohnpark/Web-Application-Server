@@ -32,16 +32,16 @@ public class Http11Processor extends AbstractHttpProcessor {
     protected void recycle() {
         inputBuffer.recycle();
         tempBufferOutputStream.recycle();
-        super.recycleFacade();
+        super.recycle();
     }
 
-    protected boolean shouldKeepAlive(SocketWrapper<?> socketWrapper) {
+    protected boolean isKeepAlive(SocketWrapper<?> socketWrapper) {
         return isRequestKeepAlive() && isSeverKeepAlive(socketWrapper);
     }
 
-    private boolean shouldNext(SocketWrapper<?> socketWrapper) {
-        boolean isKeepAlive = shouldKeepAlive(socketWrapper);
-        responseFacade.setConnection(isKeepAlive);
+    private boolean shouldKeepAlive(SocketWrapper<?> socketWrapper) {
+        boolean isKeepAlive = isKeepAlive(socketWrapper);
+        responseFacade.setConnection(isKeepAlive ? "keep-alive" : "close");
         if (isKeepAlive) {
             int timeout = socketWrapper.getConfigKeepAliveTimeout();
             int maxRequests = socketWrapper.getConfigMaxKeepAliveRequests();
@@ -74,21 +74,28 @@ public class Http11Processor extends AbstractHttpProcessor {
     }
 
     protected SocketState service(SocketWrapper<?> socketWrapper) throws IOException {
-        SocketState state = OPEN;
-        while (state == OPEN) {
+        boolean isKeepAlive = true;
+        while (isKeepAlive) {
+            socketWrapper.setConnectionTimeout(socketWrapper.getConfigKeepAliveTimeout());
+
             if (!inputBuffer.parseHeader(requestFacade.getRequestHeader())) {
-                // request line null -> false -> disconnection
+                // EOF -> read -1 -> false -> client close -> disconnection
                 return CLOSED;
-            } else if (isUpgradeRequest(socketWrapper)) {
-                // Current ignore HTTP/1.1 upgrade request, processing as HTTP/1.1 (Later support HTTP/2.0)
-                state = UPGRADING;
-                // 1. upgradeToken(); // upgradeToken = getHeader(Upgrade) & getHeader(HTTP2-Settings);
-                // 2. sendUpgrade(); // HTTP/1.1 response 101 status
-                // 3. break;
-                // After client preface request -> response as HTTP/2.0 using Http2Processor
-            } else if (!shouldNext(socketWrapper)) {
-                state = CLOSED;
             }
+
+            if (isUpgradeRequest(socketWrapper)) {
+                // Current ignore HTTP/1.1 upgrade request, processing as HTTP/1.1 (Later support HTTP/2.0)
+                // 1. After client preface request
+                    // (1) upgradeToken(); // upgradeToken = getHeader(Upgrade) & getHeader(HTTP2-Settings);
+                    // (2) sendUpgrade(); // HTTP/1.1 response 101 Switching Protocols
+                // 2. response as HTTP/2.0 using Http2Processor
+                return UPGRADING; // not need http api
+            }
+
+            if (!shouldKeepAlive(socketWrapper)) {
+                isKeepAlive = false;
+            }
+
             getHttpMapper().getHttpApiHandler(requestFacade.getPath()).service(requestFacade, responseFacade);
             responseFacade.flush();
             // Response object provides OutputStream object to developer, so it need flush() after processing HTTP API
@@ -97,22 +104,18 @@ public class Http11Processor extends AbstractHttpProcessor {
             // 2. The custom OutputStream declares boolean-isFlushed variable.
             // 3. If call rapped flush method, According to isFlushed value(true/false), flush() to be called or not.
             recycle();
-            resetKeepAliveTimeout(socketWrapper, state);
         }
-        return state;
-    }
-
-    private void resetKeepAliveTimeout(SocketWrapper<?> socketWrapper, SocketState state) throws IOException {
-        if (state == OPEN) {
-            socketWrapper.setConnectionTimeout(socketWrapper.getConfigKeepAliveTimeout());
-        }
+        return CLOSED;
     }
 
     private boolean isUpgradeRequest(SocketWrapper<?> socketWrapper) {
-        return requestFacade.getHeader("upgrade") != null;
+        return requestFacade.getHeader("connection") != null &&
+                requestFacade.getHeader("connection").equalsIgnoreCase("upgrade") &&
+                requestFacade.getHeader("upgrade") != null &&
+                requestFacade.getHeader("upgrade").equalsIgnoreCase("h2c");
     }
 
-    //    private void sendUpgrade() {
+//    private void sendUpgrade() {
 //
 //    }
 }

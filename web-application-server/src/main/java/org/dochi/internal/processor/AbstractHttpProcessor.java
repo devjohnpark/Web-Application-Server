@@ -30,27 +30,19 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
 
     @Override
     public SocketState process(SocketWrapper<?> socketWrapper) {
-        if (socketWrapper == null) {
-            throw new IllegalArgumentException("SocketWrapper is null");
-        }
-        SocketState state = CLOSED;
         setSocketWrapper(socketWrapper);
         try {
             recycle();
-            socketWrapper.setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
-            state = service(socketWrapper);
+            return service(socketWrapper);
         } catch (Exception e) {
-            processException(e);
-            recycle(); // shouldn't call when upgrading protocol
+            resolveException(e);
         } finally {
             log.info("Process count: {}", socketWrapper.getKeepAliveCount());
         }
-        return state;
+        return CLOSED;
     }
 
-    abstract protected void recycle();
-
-    protected void recycleFacade() {
+    protected void recycle() {
         requestFacade.recycle();
         responseFacade.recycle();
     }
@@ -63,17 +55,17 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
 
     protected abstract SocketState service(SocketWrapper<?> socketWrapper) throws IOException;
 
-    protected abstract boolean shouldKeepAlive(SocketWrapper<?> socketWrapper);
-
-    // Because the developer has the option to handle RuntimeException, RuntimeException propagated by not catching it is considered to be an invalid request from the client and a 400 response is sent.
-    // Unexpected IOException on input/output, 500 response because Exception is a server problem.
-    private void processException(Exception e) {
+    protected abstract boolean isKeepAlive(SocketWrapper<?> socketWrapper);
+    
+    private void resolveException(Exception e) {
         switch (e) {
             case IllegalArgumentException illegalArgumentException -> { // wrong input from client
-                sendError(HttpStatus.BAD_REQUEST, e.getMessage());
+                // WAS internal input or parsing exception, I decide close connection
+                sendClosedError(HttpStatus.BAD_REQUEST, e.getMessage());
             } case SocketTimeoutException socketTimeoutException -> {
-//                SocketTimeoutException exception thrown when valid time expires while being blocked by read() method of SocketInputStream object (write() is not related to setSoTimeout)
-                sendError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
+                // SocketTimeoutException exception thrown when valid time expires while being blocked by read() method of SocketInputStream object (write() is not related to setSoTimeout)
+                // 408 must be closed
+                sendClosedError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
             } case SocketException socketException -> {
                 // reference: NioSocketImpl.implRead()
                 //  If call Socket.read() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Connection reset") internally in Socket
@@ -81,20 +73,17 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
                 log.error("Socket was read or write after the client closed connection: ", e);
             } case null, default -> { // IOException, RuntimeException, Exception
                 assert e != null;
-                sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+                // All other exceptions as internal server error then close
+                sendClosedError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             }
         }
     }
 
-    private void sendError(HttpStatus status, String errorMessage) {
+    private void sendClosedError(HttpStatus status, String errorMessage) {
         log.error("HTTP status: {} {}, Reason: {}", String.valueOf(status.getCode()), status.getMessage(), errorMessage);
         try {
-            responseFacade.setConnection(false);
-            if (status.getCode() >= 500) {
-                responseFacade.sendError(status, status.getMessage());
-            } else if (status.getCode() >= 400) {
-                responseFacade.sendError(status, errorMessage);
-            }
+            responseFacade.setConnection("close"); // 408, 500 close 
+            responseFacade.sendError(status, errorMessage);
             responseFacade.flush();
         } catch (IOException e) {
             log.error("Failed to send error response: {}", e.getMessage());
