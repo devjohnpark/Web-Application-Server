@@ -45,20 +45,8 @@ public class Http11Processor extends AbstractHttpProcessor {
         if (isKeepAlive) {
             int timeout = socketWrapper.getConfigKeepAliveTimeout();
             int maxRequests = socketWrapper.getConfigMaxKeepAliveRequests();
-
-            StringBuilder keepAlive = new StringBuilder();
-
-            if (timeout > 0) {
-                keepAlive.append("timeout=").append(timeout / 1000);
-            }
-
-            if (maxRequests > 0) {
-                if (!keepAlive.isEmpty()) {
-                    keepAlive.append(", ");
-                }
-                keepAlive.append("max=").append(maxRequests);
-            }
-            responseFacade.addHeader(ResponseHeaders.KEEP_ALIVE, keepAlive.toString());
+            String keepAliveValue = "timeout=" + (timeout / 1000) + ", max=" + maxRequests;
+            responseFacade.addHeader(ResponseHeaders.KEEP_ALIVE, keepAliveValue);
         }
         return isKeepAlive;
     }
