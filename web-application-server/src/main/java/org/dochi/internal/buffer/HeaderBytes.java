@@ -23,7 +23,6 @@ public class HeaderBytes {
         return this.type == 0;
     }
 
-    // 헤더 요소의 구성은 동일하므로 지속 연결에서 매요청마다 재활용해서 GC 사이클 낮춘다.
     public void recycle() {
         this.byteChunk.recycle();
         this.strValue = null;

@@ -47,6 +47,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
         return requestHeader;
     }
 
+    // 지속 연결에서 매요청마다 요청 관련 객체를 재활용해서 GC 사이클 낮춘다.
     @Override
     public void recycle() {
         this.requestHeader.recycle();

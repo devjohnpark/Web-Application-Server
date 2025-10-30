@@ -23,9 +23,9 @@ public abstract class AbstractHttpApiHandler implements HttpApiHandler {
 
     @Override
     public void destroy() {
-        if (this.webResourceProvider != null) {
-            this.webResourceProvider.close();
-        }
+//        if (this.webResourceProvider != null) {
+//            this.webResourceProvider.close();
+//        }
         log.info("{} destroy", this.getClass().getSimpleName());
     }
 
