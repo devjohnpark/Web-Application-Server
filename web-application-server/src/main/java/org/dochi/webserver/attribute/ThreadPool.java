@@ -3,8 +3,8 @@ package org.dochi.webserver.attribute;
 import org.dochi.webserver.config.ThreadPoolConfig;
 
 public class ThreadPool implements ThreadPoolConfig {
-    private static final int DEFAULT_CORE_POOL_SIZE = 10; // default 1000
-    private static final int DEFAULT_MAX_POOL_SIZE = 200; // default 20000
+    private static final int DEFAULT_CORE_POOL_SIZE = 500; // default 1000
+    private static final int DEFAULT_MAX_POOL_SIZE = 2000; // default 20000
 
     private int minSpareThreads = DEFAULT_CORE_POOL_SIZE;
     private int maxThreads = DEFAULT_MAX_POOL_SIZE;

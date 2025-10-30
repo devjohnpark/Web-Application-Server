@@ -1,5 +1,7 @@
 package org.dochi.webserver.lifecycle;
 
+import java.io.IOException;
+
 public interface Lifecycle {
 
     default void start() throws LifecycleException { }
