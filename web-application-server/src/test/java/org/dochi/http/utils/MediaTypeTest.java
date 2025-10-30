@@ -2,6 +2,8 @@ package org.dochi.http.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.channels.IllegalChannelGroupException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MediaTypeTest {
@@ -81,12 +83,12 @@ class MediaTypeTest {
 
     @Test
     void parseMediaTypeReturnsNullWhenMissingSubtype() {
-        assertThrows(IllegalStateException.class, () -> MediaType.parseMediaType("text"));
+        assertThrows(IllegalArgumentException.class, () -> MediaType.parseMediaType("text"));
     }
 
     @Test
     void parseMediaTypeThrowsExceptionOnInvalidParameterFormat() {
-        assertThrows(IllegalStateException.class, () -> MediaType.parseMediaType("text/html; charset"));
+        assertThrows(IllegalArgumentException.class, () -> MediaType.parseMediaType("text/html; charset"));
     }
 
     @Test

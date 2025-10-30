@@ -70,7 +70,7 @@ public class MediaType {
 
         String[] typeSubtype = typeSubtypePart.split("/");
         if (typeSubtype.length != 2) {
-            throw new IllegalStateException("Invalid media type format: missing type or subtype");
+            throw new IllegalArgumentException("Invalid media type format: missing type or subtype");
         }
 
         String type = typeSubtype[0].trim();
@@ -83,7 +83,7 @@ public class MediaType {
             String parameterPart = parts[1].trim();
             String[] param = parameterPart.split("=", 2);
             if (param.length != 2) {
-                throw new IllegalStateException("Invalid parameter format in media type:" + mediaType);
+                throw new IllegalArgumentException("Invalid parameter format in media type:" + mediaType);
             }
             parameterName = param[0].trim().toLowerCase();
             parameterValue = param[1].trim();

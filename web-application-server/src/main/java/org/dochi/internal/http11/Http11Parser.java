@@ -32,7 +32,7 @@ public class Http11Parser {
             return -1;
         }
         if (this.source.getHeaderByteBuffer().position() > headerMaxSize) {
-            throw new IllegalStateException("header size exceeded");
+            throw new IllegalArgumentException("header size exceeded");
         }
         return this.source.getHeaderByteBuffer().get();
     }

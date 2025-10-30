@@ -41,7 +41,7 @@ public class MultiPartParser {
 
     private void validateMultipartData(byte[] currentBoundary) {
         if (!boundaryValidator.isEndBoundary(currentBoundary)) {
-            throw new IllegalStateException("End of boundary not found from multipart/form-data.");
+            throw new IllegalArgumentException("End of boundary not found from multipart/form-data.");
         }
     }
 
@@ -63,8 +63,8 @@ public class MultiPartParser {
                 headers.addHeader(new String(bytes, StandardCharsets.US_ASCII));
             }
             return false;
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Multipart headers " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Multipart headers " + e.getMessage());
         }
     }
 
@@ -75,29 +75,25 @@ public class MultiPartParser {
             parameters.addContentDispositionParameters(contentDisposition);
             return;
         }
-        throw new IllegalStateException("Content-Disposition header not include for part from multipart/form-data format");
+        throw new IllegalArgumentException("Content-Disposition header not include for part from multipart/form-data format");
     }
 
     private boolean parseBodyUntilBoundary(MultipartBodyUntilBoundary bodyUntilBoundary) throws IOException {
         byte[] bytes;
-        try {
-            while ((bytes = stream.readCRLFLine(bodyMaxSize)) != null) {
-                if (boundaryValidator.isBoundary(bytes)|| boundaryValidator.isEndBoundary(bytes)) {
-                    bodyUntilBoundary.setBoundary(bytes);
-                    return true;
-                }
-                bodyUntilBoundary.setBody(bytes);
+        while ((bytes = stream.readCRLFLine(bodyMaxSize)) != null) {
+            if (boundaryValidator.isBoundary(bytes)|| boundaryValidator.isEndBoundary(bytes)) {
+                bodyUntilBoundary.setBoundary(bytes);
+                return true;
             }
-            return false;
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Multipart body " + e.getMessage());
+            bodyUntilBoundary.setBody(bytes);
         }
+        return false;
     }
 
     private void storePart(Multipart multipart) throws IOException {
         String name = section.getParameters().getNameParamValue();
         if (name == null) {
-            throw new IllegalStateException("Header has no name for part from multipart/form-data format.");
+            throw new IllegalArgumentException("Header has no name for part from multipart/form-data format.");
         }
         multipart.addPart(name, createPart(section.getHeaders(), section.getParameters(), section.getBody()));
     }
@@ -120,7 +116,7 @@ public class MultiPartParser {
 
         public void validateBoundary(String boundaryValue) {
             if (isInvalid(boundaryValue)) {
-                throw new IllegalStateException("Invalid multipart/form-data boundary value: " + boundaryValue);
+                throw new IllegalArgumentException("Invalid multipart/form-data boundary value: " + boundaryValue);
             }
             this.boundary = (BOUNDARY_PREFIX + boundaryValue).getBytes(StandardCharsets.US_ASCII);
             this.endBoundary = (BOUNDARY_PREFIX + boundaryValue + BOUNDARY_PREFIX).getBytes(StandardCharsets.US_ASCII);

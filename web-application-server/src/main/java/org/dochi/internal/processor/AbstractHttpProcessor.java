@@ -68,20 +68,17 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     // Unexpected IOException on input/output, 500 response because Exception is a server problem.
     private void processException(Exception e) {
         switch (e) {
-            case SocketTimeoutException socketTimeoutException -> {
+            case IllegalArgumentException illegalArgumentException -> { // wrong input from client
+                sendError(HttpStatus.BAD_REQUEST, e.getMessage());
+            } case SocketTimeoutException socketTimeoutException -> {
 //                SocketTimeoutException exception thrown when valid time expires while being blocked by read() method of SocketInputStream object (write() is not related to setSoTimeout)
                 sendError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
-            }
-            case SocketException socketException -> {
+            } case SocketException socketException -> {
                 // reference: NioSocketImpl.implRead()
                 //  If call Socket.read() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Connection reset") internally in Socket
                 //  If call Socket.write() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Socket closed") internally in Socket
                 log.error("Socket was read or write after the client closed connection: ", e);
-            }
-            case RuntimeException runtimeException -> {
-                sendError(HttpStatus.BAD_REQUEST, e.getMessage());
-            }
-            case null, default -> { // IOException, Exception
+            } case null, default -> { // IOException, RuntimeException, Exception
                 assert e != null;
                 sendError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             }

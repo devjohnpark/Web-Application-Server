@@ -96,16 +96,12 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
         public int doRead(ApplicationBufferHandler handler) throws IOException {
             ByteBuffer buffer = handler.getByteBuffer();
             if (buffer == null) {
-                throw new IllegalArgumentException("buffer is null");
-            }
-            int bufferingLimitSize = buffer.capacity() - buffer.limit();
-            if (bufferingLimitSize <= 0) { // 버퍼 용량 초과하기 이전에 예외 발생
-                throw new BufferOverflowException();
+                throw new IllegalStateException("buffer is null");
             }
             if (this.socketWrapper == null) {
                 throw new IllegalStateException("No socket wrapper is initialized");
             }
-            int bytesRead = this.socketWrapper.read(buffer.array(), buffer.limit(), bufferingLimitSize);
+            int bytesRead = this.socketWrapper.read(buffer.array(), buffer.limit(), buffer.capacity() - buffer.limit());
             if (bytesRead > 0) {
                 // 읽은 데이터 크기만큼 기존 limit 증가
                 buffer.limit(buffer.limit() + bytesRead);

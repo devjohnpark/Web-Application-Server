@@ -34,7 +34,7 @@ public class MultipartStream {
 
             if (previousByte != -1) {
                 if (lineBuffer.size() >= maxSize) {
-                    throw new IllegalStateException("max size exceeds the limit bytes: " + maxSize);
+                    throw new IllegalArgumentException("max size exceeds the multipart limit bytes: " + maxSize);
                 }
                 lineBuffer.write(previousByte);
             }

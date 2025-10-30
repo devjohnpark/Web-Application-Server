@@ -111,7 +111,7 @@ public class Http11InputBufferTest extends BioSocketWrapperConnectionTest {
         inputBuffer.init(serverConnectedSocket);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
-        assertThrows(IllegalStateException.class, () -> inputBuffer.parseHeader(requestHeader));
+        assertThrows(IllegalArgumentException.class, () -> inputBuffer.parseHeader(requestHeader));
     }
 
     @Test

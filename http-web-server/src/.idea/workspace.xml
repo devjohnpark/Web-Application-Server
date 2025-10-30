@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7c367726-2c41-4866-a384-8c65dec393fd" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/multipart/MultiPartParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/multipart/MultiPartParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/multipart/MultipartStream.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/multipart/MultipartStream.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/utils/MediaType.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/http/utils/MediaType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/http11/Http11InputBuffer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/http11/Http11InputBuffer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/http11/Http11Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/http11/Http11Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/processor/AbstractHttpProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/internal/processor/AbstractHttpProcessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/webserver/socket/SocketTaskHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/main/java/org/dochi/webserver/socket/SocketTaskHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/http/multipart/MultipartStreamTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/http/multipart/MultipartStreamTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/http/utils/MediaTypeTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/http/utils/MediaTypeTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/internal/http11/Http11InputBufferTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../web-application-server/src/test/java/org/dochi/internal/http11/Http11InputBufferTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="38BKnknZFMfAiEB9ICYJmMEUCqa" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/junseopark/Documents/dev/backend/server/web-application-server/http-web-server/src",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="GroovyScriptRunConfiguration" factoryName="Groovy">
+      <setting name="path" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workDir" value="file://$PROJECT_DIR$" />
+      <setting name="debug" value="false" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7c367726-2c41-4866-a384-8c65dec393fd" name="Changes" comment="" />
+      <created>1768267693079</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768267693079</updated>
+      <workItem from="1768267694114" duration="92000" />
+      <workItem from="1768267794207" duration="3594000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

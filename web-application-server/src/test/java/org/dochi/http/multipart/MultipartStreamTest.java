@@ -48,7 +48,7 @@ class MultipartStreamTest {
         String input = "ThisIsTooLong\r\n";
         InputStream inputStream = new ByteArrayInputStream(input.getBytes());
         multipartStream = new MultipartStream(inputStream);
-        assertThrows(IllegalStateException.class, () -> multipartStream.readCRLFLine(5));
+        assertThrows(IllegalArgumentException.class, () -> multipartStream.readCRLFLine(5));
     }
 
     @Test

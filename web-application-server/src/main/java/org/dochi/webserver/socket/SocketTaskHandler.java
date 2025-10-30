@@ -19,7 +19,6 @@ public class SocketTaskHandler implements SocketTask {
     @Override
     public void run() {
         try {
-
             SocketState state = SocketState.OPEN;
             HttpProcessor processor = this.protocolHandler.getProcessor(); // 기본 default HTTP/1.1;
             getSocketWrapper().setConnectionTimeout(socketWrapper.getConfigConnectionTimeout());
@@ -40,6 +39,8 @@ public class SocketTaskHandler implements SocketTask {
             }
         } catch (IOException e) {
             log.error("Set connection timeout but socket is already closed: ", e);
+        } catch (RuntimeException e) {
+            log.error("Runtime exception occurred: ", e);
         } finally {
             terminate();
         }
