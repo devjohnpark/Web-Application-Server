@@ -5,7 +5,7 @@ import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.connector.TmpBufferedOutputStream;
 import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
-import org.dochi.webserver.socket.SocketWrapperBase;
+import org.dochi.webserver.socket.SocketWrapper;
 import org.dochi.webserver.socket.SocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +35,11 @@ public class Http11Processor extends AbstractHttpProcessor {
         super.recycleFacade();
     }
 
-    protected boolean shouldKeepAlive(SocketWrapperBase<?> socketWrapper) {
+    protected boolean shouldKeepAlive(SocketWrapper<?> socketWrapper) {
         return isRequestKeepAlive() && isSeverKeepAlive(socketWrapper);
     }
 
-    private boolean shouldNext(SocketWrapperBase<?> socketWrapper) {
+    private boolean shouldNext(SocketWrapper<?> socketWrapper) {
         boolean isKeepAlive = shouldKeepAlive(socketWrapper);
         responseFacade.addConnection(isKeepAlive);
         if (isKeepAlive) {
@@ -63,7 +63,7 @@ public class Http11Processor extends AbstractHttpProcessor {
         return isKeepAlive;
     }
 
-    private boolean isSeverKeepAlive(SocketWrapperBase<?> socketWrapper) {
+    private boolean isSeverKeepAlive(SocketWrapper<?> socketWrapper) {
         return !isReachedMax(socketWrapper.incrementKeepAliveCount(), socketWrapper.getConfigMaxKeepAliveRequests());
     }
 
@@ -80,12 +80,12 @@ public class Http11Processor extends AbstractHttpProcessor {
     }
 
     @Override
-    protected void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
+    protected void setSocketWrapper(SocketWrapper<?> socketWrapper) {
         inputBuffer.init(socketWrapper);
         tempBufferOutputStream.init(socketWrapper); // later -> outputBuffer.init(socketWrapper);
     }
 
-    protected SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException {
+    protected SocketState service(SocketWrapper<?> socketWrapper) throws IOException {
         SocketState state = OPEN;
         while (state == OPEN) {
             if (!inputBuffer.parseHeader(requestFacade.getRequestHeader())) {
@@ -114,13 +114,13 @@ public class Http11Processor extends AbstractHttpProcessor {
         return state;
     }
 
-    private void resetKeepAliveTimeout(SocketWrapperBase<?> socketWrapper, SocketState state) throws IOException {
+    private void resetKeepAliveTimeout(SocketWrapper<?> socketWrapper, SocketState state) throws IOException {
         if (state == OPEN) {
             socketWrapper.setConnectionTimeout(socketWrapper.getConfigKeepAliveTimeout());
         }
     }
 
-    private boolean isUpgradeRequest(SocketWrapperBase<?> socketWrapper) {
+    private boolean isUpgradeRequest(SocketWrapper<?> socketWrapper) {
         return requestFacade.getHeader("upgrade") != null;
     }
 

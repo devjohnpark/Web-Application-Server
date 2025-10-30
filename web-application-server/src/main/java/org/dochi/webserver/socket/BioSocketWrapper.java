@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class BioSocketWrapper extends SocketWrapperBase<Socket> {
+public class BioSocketWrapper extends SocketWrapper<Socket> {
     private static final Logger log = LoggerFactory.getLogger(BioSocketWrapper.class);
 
     public BioSocketWrapper(Socket socket, SocketAttribute config) throws SocketException {

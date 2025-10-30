@@ -6,14 +6,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public abstract class SocketWrapperBase<E> {
-    private static final Logger log = LoggerFactory.getLogger(SocketWrapperBase.class);
+public abstract class SocketWrapper<E> {
+    private static final Logger log = LoggerFactory.getLogger(SocketWrapper.class);
     protected final E socket;
     private final SocketConfig config;
     private int keepAliveCount = 0;
 
-    // 추후 config -> endpoint로 변경
-    protected SocketWrapperBase(E socket, SocketConfig config) {
+    protected SocketWrapper(E socket, SocketConfig config) {
         this.socket = socket;
         this.config = config;
     }

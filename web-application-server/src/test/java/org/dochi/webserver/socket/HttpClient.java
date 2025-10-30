@@ -3,9 +3,9 @@ package org.dochi.webserver.socket;
 import java.io.IOException;
 
 public class HttpClient {
-    private final SocketWrapperBase<?> clientSocket;
+    private final SocketWrapper<?> clientSocket;
 
-    public HttpClient(SocketWrapperBase<?> clientSocketWrapper) {
+    public HttpClient(SocketWrapper<?> clientSocketWrapper) {
         this.clientSocket = clientSocketWrapper;
     }
 

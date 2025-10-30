@@ -5,7 +5,7 @@ import org.dochi.http.utils.HttpStatus;
 import org.dochi.internal.mapper.HttpMapper;
 import org.dochi.connector.RequestFacade;
 import org.dochi.webserver.config.HttpConfig;
-import org.dochi.webserver.socket.SocketWrapperBase;
+import org.dochi.webserver.socket.SocketWrapper;
 import org.dochi.webserver.socket.SocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +29,9 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     }
 
     @Override
-    public SocketState process(SocketWrapperBase<?> socketWrapper) {
+    public SocketState process(SocketWrapper<?> socketWrapper) {
         if (socketWrapper == null) {
-            throw new IllegalArgumentException("SocketWrapperBase is null");
+            throw new IllegalArgumentException("SocketWrapper is null");
         }
         SocketState state = CLOSED;
         setSocketWrapper(socketWrapper);
@@ -58,11 +58,11 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         return mapper;
     }
 
-    abstract protected void setSocketWrapper(SocketWrapperBase<?> socketWrapper);
+    abstract protected void setSocketWrapper(SocketWrapper<?> socketWrapper);
 
-    protected abstract SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException;
+    protected abstract SocketState service(SocketWrapper<?> socketWrapper) throws IOException;
 
-    protected abstract boolean shouldKeepAlive(SocketWrapperBase<?> socketWrapper);
+    protected abstract boolean shouldKeepAlive(SocketWrapper<?> socketWrapper);
 
     // Because the developer has the option to handle RuntimeException, RuntimeException propagated by not catching it is considered to be an invalid request from the client and a 400 response is sent.
     // Unexpected IOException on input/output, 500 response because Exception is a server problem.

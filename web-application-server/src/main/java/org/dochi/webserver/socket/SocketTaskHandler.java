@@ -9,7 +9,7 @@ import java.io.IOException;
 // 클라이언트(소켓)당 스레드 하나가 공유 자원이 없는 작업을 처리하기 때문에 동기화 로직은 필요없다.
 public class SocketTaskHandler implements SocketTask {
     private static final Logger log = LoggerFactory.getLogger(SocketTaskHandler.class);
-    private SocketWrapperBase<?> socketWrapper;
+    private SocketWrapper<?> socketWrapper;
     private final HttpProtocolHandler protocolHandler;
 
     public SocketTaskHandler(HttpProtocolHandler protocolHandler) {
@@ -51,12 +51,12 @@ public class SocketTaskHandler implements SocketTask {
         } catch (IOException e) {
             log.error("Failed to close socket - Socket State CLOSED: {}", e.getMessage());
         } finally {
-            socketWrapper = null; // SocketTaskHandler 구현체는 풀링되어 큐에 저장되므로 SocketWrapperBase 구현체가 메모리 낭비되므로 null 값 할당
+            socketWrapper = null; // SocketTaskHandler 구현체는 풀링되어 큐에 저장되므로 SocketWrapper 구현체가 메모리 낭비되므로 null 값 할당
         }
     }
 
     @Override
-    public SocketWrapperBase<?> getSocketWrapper() {
+    public SocketWrapper<?> getSocketWrapper() {
         if (socketWrapper == null) {
             throw new IllegalStateException("Socket wrapper is not initialized");
         }
@@ -64,7 +64,7 @@ public class SocketTaskHandler implements SocketTask {
     }
 
     @Override
-    public void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
+    public void setSocketWrapper(SocketWrapper<?> socketWrapper) {
         if (socketWrapper == null) {
             throw new IllegalStateException(getClass().getName() + ": Socket wrapper is null");
         }

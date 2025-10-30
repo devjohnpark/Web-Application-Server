@@ -1,9 +1,9 @@
 package org.dochi.webserver.executor;
 
 import org.dochi.webserver.config.ThreadPoolConfig;
+import org.dochi.webserver.socket.SocketWrapper;
 import org.dochi.webserver.socket.SocketTask;
 import org.dochi.webserver.socket.SocketTaskPool;
-import org.dochi.webserver.socket.SocketWrapperBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class SocketTaskPoolExecutor {
         this.taskPool = taskPool;
     }
 
-    public void execute(SocketWrapperBase<?> socketWrapper) {
+    public void execute(SocketWrapper<?> socketWrapper) {
         try {
             workerThreadPoolExecutor.execute(() -> {
                 // 사용 가능한 SocketTask 가져오기

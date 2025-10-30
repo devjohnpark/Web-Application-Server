@@ -3,7 +3,7 @@ package org.dochi.internal.http11;
 import org.dochi.internal.RequestHeader;
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
-import org.dochi.webserver.socket.SocketWrapperBase;
+import org.dochi.webserver.socket.SocketWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     }
 
     @Override
-    public void init(SocketWrapperBase<?> socketWrapper) {
+    public void init(SocketWrapper<?> socketWrapper) {
         this.socketInputBuffer.init(socketWrapper);
     }
 
@@ -76,10 +76,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
     private static class SocketInputBuffer implements InputBuffer {
 
-        private SocketWrapperBase<?> socketWrapper;
+        private SocketWrapper<?> socketWrapper;
 
         @Override
-        public void init(SocketWrapperBase<?> socketWrapper) {
+        public void init(SocketWrapper<?> socketWrapper) {
             if (socketWrapper == null) {
                 log.debug("socketWrapper cannot be null");
                 throw new IllegalArgumentException("socketWrapper cannot be null");
