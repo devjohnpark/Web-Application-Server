@@ -89,7 +89,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private void sendError(HttpStatus status, String errorMessage) {
         log.error("HTTP status: {} {}, Reason: {}", String.valueOf(status.getCode()), status.getMessage(), errorMessage);
         try {
-            responseFacade.addConnection(false);
+            responseFacade.setConnection(false);
             if (status.getCode() >= 500) {
                 responseFacade.sendError(status, status.getMessage());
             } else if (status.getCode() >= 400) {

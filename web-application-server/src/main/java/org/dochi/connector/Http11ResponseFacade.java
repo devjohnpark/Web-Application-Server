@@ -1,12 +1,12 @@
 package org.dochi.connector;
 
 import org.dochi.external.ExternalResponse;
+import org.dochi.http.utils.DateFormatter;
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.http.utils.ResponseHeaders;
-import org.dochi.http.utils.DateFormatter;
 import org.dochi.http.utils.HttpVersion;
-import org.dochi.webserver.config.HttpResConfig;
 import org.dochi.webresource.ResourceType;
+import org.dochi.webserver.config.HttpResConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,18 +23,18 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
     private final HttpResConfig httpResConfig;
     private boolean isDateHeader = true;
     private boolean isCommitted = false;
-    private TmpBufferedOutputStream bos;
+    private OutputStream out;
 
     public Http11ResponseFacade(HttpResConfig httpResConfig) {
         this.httpResConfig = httpResConfig;
     }
 
     @Override
-    public void setOutputStream(TmpBufferedOutputStream outputStream) {
-        if (outputStream == null) {
+    public void setOutputStream(OutputStream out) {
+        if (out == null) {
             throw new IllegalArgumentException("OutputStream cannot be null");
         }
-        this.bos = outputStream;
+        this.out = out;
     }
 
     @Override
@@ -46,34 +46,46 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
         status = HttpStatus.OK;
     }
 
-    public ExternalResponse addVersion(HttpVersion version) {
-        this.version = version;
+    public ExternalResponse setStatus(HttpStatus status) {
+        checkCommit();
+        if (status == null) { throw new IllegalArgumentException("HTTP Response Status cannot be null"); }
+        this.status = status;
         return this;
     }
 
-    public ExternalResponse addHeader(String key, String value) {
+    public ExternalResponse setHeader(String key, String value) {
+        checkCommit();
         this.headers.addHeader(key, value);
         return this;
     }
 
-    public ExternalResponse addCookie(String cookie) {
+    public ExternalResponse setCookie(String cookie) {
+        checkCommit();
         this.headers.addHeader(ResponseHeaders.SET_COOKIE, cookie);
         return this;
     }
 
-    public ExternalResponse addConnection(boolean isKeep) {
+    public ExternalResponse setConnection(boolean isKeep) {
+        checkCommit();
         this.headers.addHeader(ResponseHeaders.CONNECTION, isKeep ? "keep-alive" : "close");
         return this;
     }
 
-    public ExternalResponse addDateHeaders(String date) {
-        this.headers.addHeader(ResponseHeaders.DATE, date);
+    public ExternalResponse setContentType(String contentType) {
+        checkCommit();
+        this.headers.addHeader(ResponseHeaders.CONTENT_TYPE, contentType);
         return this;
     }
 
-    public ExternalResponse addContentHeaders(String contentType, int contentLength) {
-        this.headers.addHeader(ResponseHeaders.CONTENT_TYPE, contentType);
+    public ExternalResponse setContentLength(int contentLength) {
+        checkCommit();
         this.headers.addContentLength(contentLength);
+        return this;
+    }
+
+    public ExternalResponse setDateHeader(String date) {
+        checkCommit();
+        this.headers.addHeader(ResponseHeaders.DATE, date);
         return this;
     }
 
@@ -85,13 +97,30 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
         this.isDateHeader = true; return this;
     }
 
+    private void checkCommit() {
+        if(isCommitted) throw new IllegalStateException("Cannot add header after header is commited");
+    }
+
     public void send(HttpStatus status) throws IOException {
         send(status, null, null);
     }
 
     public void send(HttpStatus status, byte[] body, String contentType) throws IOException {
         addDefaultHeader(status, body, contentType);
-        writeMessage(body);
+        commitHeader();
+        commitBody(body);
+    }
+
+    public void sendError(HttpStatus status) throws IOException {
+        sendError(status, status.getDescription());
+    }
+
+    public void sendError(HttpStatus status, String errorMessage) throws IOException {
+        if (status.getCode() < 400) throw new IllegalStateException("HTTP status code is not error" + status.getCode());;
+        if (errorMessage == null) {
+            errorMessage = status.getDescription();
+        }
+        send(status, errorMessage.getBytes(), ResourceType.TEXT.getContentType(null));
     }
 
     private void addDefaultHeader(HttpStatus status, byte[] body, String contentType) {
@@ -102,7 +131,7 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
         this.status = status;
 
         if (this.isDateHeader && headers.getHeaders().get(ResponseHeaders.DATE) == null) {
-            addDateHeaders(DateFormatter.getCurrentDate());
+            setDateHeader(DateFormatter.getCurrentDate());
         }
 
         if (status != HttpStatus.NO_CONTENT) {
@@ -116,60 +145,42 @@ public class Http11ResponseFacade implements InternalResponse, ExternalResponse 
         }
     }
 
-    public void sendError(HttpStatus status) throws IOException {
-        sendError(status, status.getDescription());
+    public OutputStream getOutputStream() throws IOException {
+        checkOutputStream();
+        commitHeader();
+        return out;
     }
 
-    public void sendError(HttpStatus status, String errorMessage) throws IOException {
-        if (errorMessage == null) {
-            errorMessage = status.getDescription();
-        }
-        send(status, errorMessage.getBytes(), ResourceType.TEXT.getContentType(null));
-    }
-
-    public OutputStream getOutputStream() {
-        if (bos == null) {
-            throw new IllegalArgumentException("OutputStream cannot be null");
-        }
-        return bos.getOutputStream();
-    }
-
-    private void writeMessage(byte[] body) throws IOException {
-        if (bos == null) {
-            throw new IllegalArgumentException("OutputStream cannot be null");
-        }
-        try {
-            writeHeader();
-            writePayload(body);
-        } catch (IOException e) {
-            log.error("Failed to write HTTP Response Message: {}", e.getMessage(), e);
-            throw e;
+    private void checkOutputStream() {
+        if (out == null) {
+            throw new IllegalStateException("OutputStream cannot be null");
         }
     }
 
-    private void writeHeader() throws IOException {
-        bos.write(String.format("%s %d %s\r\n", version.getVersion(), status.getCode(), status.getMessage()).getBytes(StandardCharsets.ISO_8859_1));
+    private void commitHeader() throws IOException {
+        if (isCommitted) return;
+        checkOutputStream();
+        out.write(String.format("%s %d %s\r\n", version.getVersion(), status.getCode(), status.getMessage()).getBytes(StandardCharsets.ISO_8859_1));
         Set<String> keys = headers.getHeaders().keySet();
         for (String key: keys) {
             String headerLine = key + ": " + headers.getHeaders().get(key) + "\r\n";
-            bos.write(headerLine.getBytes(StandardCharsets.ISO_8859_1));
+            out.write(headerLine.getBytes(StandardCharsets.ISO_8859_1));
         }
-        bos.write("\r\n".getBytes(StandardCharsets.ISO_8859_1));
+        out.write("\r\n".getBytes(StandardCharsets.ISO_8859_1));
+        isCommitted = true;
     }
 
-    private void writePayload(byte[] body) throws IOException {
+    private void commitBody(byte[] body) throws IOException {
+        checkOutputStream();
         if (body != null) {
-            bos.write(body, 0, body.length);
+            out.write(body, 0, body.length);
         }
     }
 
     public void flush() throws IOException {
-        if (!isCommitted) {
-            if (bos == null) {
-                throw new IllegalArgumentException("OutputStream cannot be null");
-            }
-            bos.flush();
-            isCommitted = true;
+        if (isCommitted) {
+            checkOutputStream();
+            out.flush();
         }
     }
 }

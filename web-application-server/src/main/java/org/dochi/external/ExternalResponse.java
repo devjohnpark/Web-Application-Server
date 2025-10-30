@@ -6,27 +6,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public interface ExternalResponse {
-    ExternalResponse addHeader(String key, String value);
-
-    ExternalResponse addCookie(String cookie);
-
-    ExternalResponse addConnection(boolean isKeep);
-
-    ExternalResponse addDateHeaders(String date);
-
-    ExternalResponse addContentHeaders(String contentType, int contentLength);
-
+    ExternalResponse setStatus(HttpStatus status);
+    ExternalResponse setHeader(String key, String value);
+    ExternalResponse setCookie(String cookie);
+    ExternalResponse setConnection(boolean isKeep);
+    ExternalResponse setContentType(String contentType);
+    ExternalResponse setContentLength(int contentLength);
+    ExternalResponse setDateHeader(String date);
     ExternalResponse inActiveDateHeader();
-
     ExternalResponse activeDateHeader();
 
     void send(HttpStatus status) throws IOException;
-
     void send(HttpStatus status, byte[] body, String contentType) throws IOException;
 
     void sendError(HttpStatus status) throws IOException;
-
     void sendError(HttpStatus status, String errorMessage) throws IOException;
 
-    OutputStream getOutputStream();
+    OutputStream getOutputStream() throws IOException;
 }

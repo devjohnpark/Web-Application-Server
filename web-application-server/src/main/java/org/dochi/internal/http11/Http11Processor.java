@@ -41,12 +41,12 @@ public class Http11Processor extends AbstractHttpProcessor {
 
     private boolean shouldNext(SocketWrapper<?> socketWrapper) {
         boolean isKeepAlive = shouldKeepAlive(socketWrapper);
-        responseFacade.addConnection(isKeepAlive);
+        responseFacade.setConnection(isKeepAlive);
         if (isKeepAlive) {
             int timeout = socketWrapper.getConfigKeepAliveTimeout();
             int maxRequests = socketWrapper.getConfigMaxKeepAliveRequests();
             String keepAliveValue = "timeout=" + (timeout / 1000) + ", max=" + maxRequests;
-            responseFacade.addHeader(ResponseHeaders.KEEP_ALIVE, keepAliveValue);
+            responseFacade.setHeader(ResponseHeaders.KEEP_ALIVE, keepAliveValue);
         }
         return isKeepAlive;
     }

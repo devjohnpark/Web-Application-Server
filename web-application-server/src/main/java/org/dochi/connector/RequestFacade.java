@@ -24,7 +24,6 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
     private final HttpReqConfig config;
     private boolean parametersParsed = false;
     private boolean multipartParsed = false;
-    private boolean usingInputStream = false;
 
     public RequestFacade(HttpReqConfig httpReqConfig) {
         this.requestHeader = new RequestHeader();
@@ -55,7 +54,6 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
         this.multipart.recycle();
         this.parametersParsed = false;
         this.multipartParsed = false;
-        this.usingInputStream = false;
     }
 
     @Override
@@ -118,10 +116,6 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
 
     @Override
     public InputStream getInputStream() {
-        if (usingInputStream) {
-            throw new IllegalStateException("RequestFacade.getInputStream already used");
-        }
-        usingInputStream = true;
         if (this.inputStream == null) {
             this.inputStream = new InternalInputStream(this.inputBuffer);
         }

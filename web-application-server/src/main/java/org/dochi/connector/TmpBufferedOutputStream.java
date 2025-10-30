@@ -51,9 +51,4 @@ public class TmpBufferedOutputStream extends OutputStream {
     public void recycle() {
         bufferPosition = 0;
     }
-
-    // 일반 출력 스트림 사용
-    public TmpBufferedOutputStream getOutputStream() {
-        return this;
-    }
 }
