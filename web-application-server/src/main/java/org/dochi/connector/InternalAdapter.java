@@ -10,13 +10,15 @@ import java.io.IOException;
 
 public class InternalAdapter implements Adapter {
     private static final Logger log = LoggerFactory.getLogger(InternalAdapter.class);
-    private final WebService webService;
+
+    private final Connector connector;
 
     // HttpDispatcher를 HttpAdapter로 변경 (service 메서드 정의한 Adapter 인터페이스 정의)
     // WebService: 컨테이너와 요청/응답 설정 정보를 포함한 객체로 변경
-    // Connector: WebService 컨테이너와 요청/응답 설정 정보를 포함한 객체로 생성
-    public InternalAdapter(WebService webService) {
-        this.webService = webService;
+    // Connector: WebService 컨테이너와 요청/응답 설정 정보를 포함한 connector 계층의 객체
+
+    public InternalAdapter(Connector connector) {
+        this.connector = connector;
     }
 
     // HttpApiHandler 타입 의존성
@@ -55,9 +57,9 @@ public class InternalAdapter implements Adapter {
         Request request = ensureRequestFacade(req);
         Response response = ensureResponseFacade(res);
 
-        HttpApiHandler httpApiHandler = webService.getServices().get(request.getPath());
+        HttpApiHandler httpApiHandler = connector.getServices().get(request.getPath());
         if (httpApiHandler == null) {
-            httpApiHandler = webService.getServices().get("/");
+            httpApiHandler = connector.getServices().get("/");
         }
         httpApiHandler.service(request, response);
         recycle(request, response);

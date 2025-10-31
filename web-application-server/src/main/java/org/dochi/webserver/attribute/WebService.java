@@ -14,11 +14,11 @@ import java.util.Map;
 
 public class WebService {
     private static final Logger log = LoggerFactory.getLogger(WebService.class);
-    private static final Path DEFAULT_ROOT_DIR = Path.of("webapp");
+    private static final String DEFAULT_ROOT_DIR = "webapp";
     private static final String rootPath = "/";
 
     private final Map<String, HttpApiHandler> services = new HashMap<>();
-    private Path rootResourcePath = DEFAULT_ROOT_DIR;
+    private String rootResourcePath = DEFAULT_ROOT_DIR;
     private WebServiceConfig webServiceConfig = null;
 
     public WebService() {
@@ -26,7 +26,7 @@ public class WebService {
     }
 
     public void setWebResourceRootPath(String webResourceRootPath) {
-        this.rootResourcePath = Path.of(webResourceRootPath);
+        this.rootResourcePath = webResourceRootPath;
     }
 
     public WebService addService(String path, HttpApiHandler service) {
@@ -40,7 +40,7 @@ public class WebService {
 
     public WebServiceConfig getServiceConfig() {
         if (webServiceConfig == null) {
-            webServiceConfig = new WebServiceConfig(new WebResourceProvider(rootResourcePath));
+            webServiceConfig = new WebServiceConfig(new WebResourceProvider(Path.of(rootResourcePath)));
         }
         return webServiceConfig;
     }

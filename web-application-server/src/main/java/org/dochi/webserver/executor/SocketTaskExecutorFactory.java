@@ -1,5 +1,6 @@
 package org.dochi.webserver.executor;
 
+import org.dochi.connector.Connector;
 import org.dochi.connector.InternalAdapter;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.dochi.webserver.config.*;
@@ -22,7 +23,9 @@ public class SocketTaskExecutorFactory {
     public SocketTaskPoolExecutor createExecutor(ServerConfig serverConfig) {
         return createSocketTaskExecutor(
             serverConfig.getThreadPool(),
-            new HttpProtocolHandler(new InternalAdapter(serverConfig.getWebService()), new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute()))
+            new HttpProtocolHandler(new InternalAdapter(
+                    new Connector(serverConfig.getWebService(), serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute())),
+                    new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute()))
         );
     }
 
