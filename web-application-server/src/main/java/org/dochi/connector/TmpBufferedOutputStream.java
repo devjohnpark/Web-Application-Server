@@ -23,6 +23,9 @@ public class TmpBufferedOutputStream extends OutputStream {
     }
 
     public void init(SocketWrapper<?> socketWrapper) {
+        if (socketWrapper == null) {
+            throw new IllegalStateException("socketWrapper is null");
+        }
         this.socketWrapper = socketWrapper;
     }
 
@@ -34,7 +37,6 @@ public class TmpBufferedOutputStream extends OutputStream {
         buffer[bufferPosition++] = (byte) b;
     }
 
-
     @Override
     public void flush() throws IOException {
         flushBuffer();
@@ -44,7 +46,7 @@ public class TmpBufferedOutputStream extends OutputStream {
         if (bufferPosition > 0) {
             socketWrapper.write(buffer, 0, bufferPosition);
             socketWrapper.flush(); // 스트림 버퍼의 데이터를 OS의 네트워크 스택인 TCP(socket) 버퍼에 즉시 전달 보장
-            bufferPosition = 0;
+            bufferPosition = 0; // flush 하면 recycle도미
         }
     }
 

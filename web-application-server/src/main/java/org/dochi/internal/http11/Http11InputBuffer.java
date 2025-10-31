@@ -1,6 +1,6 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.RequestHeader;
+import org.dochi.internal.request.Request;
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
 import org.dochi.webserver.socket.SocketWrapper;
@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler, Http11Parser.HeaderDataSource {
@@ -44,8 +43,8 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     }
 
     // 내부 구현이므로 같은 http11 패키지내의 클래스만 호출가능하도록 패키지 전용 접근 제어자로 지정
-    boolean parseHeader(RequestHeader requestHeader) throws IOException {
-        return parser.parseRequestLine(requestHeader) && parser.parseHeaders(requestHeader);
+    boolean parseHeader(Request request) throws IOException {
+        return parser.parseRequestLine(request) && parser.parseHeaders(request);
     }
 
     @Override
@@ -89,7 +88,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
         @Override
         public void recycle() {
-            this.socketWrapper = null;
+
         }
 
         @Override

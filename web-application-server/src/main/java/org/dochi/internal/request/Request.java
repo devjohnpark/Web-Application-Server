@@ -1,15 +1,14 @@
-package org.dochi.internal;
+package org.dochi.internal.request;
 
 import org.dochi.http.utils.MediaType;
-import org.dochi.http.utils.Parameters;
 import org.dochi.internal.buffer.HeaderBytes;
 import org.dochi.internal.buffer.Headers;
-
+import org.dochi.internal.buffer.InputBuffer;
 import java.nio.charset.Charset;
 
 // 요청 메세지의 메타데이터를 파싱한것을 버퍼 구간으로 설정하고 디코딩한 메타데이터를 가져올수있는 객체
 // 헤더 필드는 메모리 주소를 직접 참조해서 처음 조회 O(N) 이후에 다음번 조회시 O(1)
-public final class RequestHeader {
+public final class Request implements RequestContext {
     private final HeaderBytes method;
     private final HeaderBytes requestPath;
     private final HeaderBytes queryString;
@@ -18,18 +17,39 @@ public final class RequestHeader {
     private HeaderBytes contentLength;
     private HeaderBytes contentType;
     private final Headers headers;
+    private InputBuffer inputBuffer;
     private String characterEncoding;
     private Charset charset;
-    private final Parameters parameters;
 
-    public RequestHeader() {
+    public Request() {
         this.requestPath = new HeaderBytes();
         this.queryString = new HeaderBytes();
         this.method = new HeaderBytes();
         this.uri = new HeaderBytes();
         this.protocol = new HeaderBytes();
         this.headers = new Headers();
-        this.parameters = new Parameters();
+    }
+
+    @Override
+    public void setInputBuffer(InputBuffer inputBuffer) {
+        if (inputBuffer == null) {
+            throw new IllegalStateException("internal.InputBuffer is null");
+        }
+        this.inputBuffer = inputBuffer;
+    }
+
+    @Override
+    public void recycle() {
+        this.method.recycle();
+        this.requestPath.recycle();
+        this.queryString.recycle();
+        this.uri.recycle();
+        this.protocol.recycle();
+        this.headers.recycle();
+        this.contentLength = null;
+        this.contentType = null;
+        this.characterEncoding = null;
+        this.charset = null;
     }
 
     public HeaderBytes method() { return this.method; }
@@ -43,8 +63,6 @@ public final class RequestHeader {
     public HeaderBytes protocol() { return this.protocol; }
 
     public Headers headers() { return this.headers; }
-
-    public Parameters parameters() { return this.parameters; }
 
     public String getContentType() {
         if (this.contentType == null || contentType.isNull()) {
@@ -70,10 +88,6 @@ public final class RequestHeader {
         return this.charset;
     }
 
-    public String getHeader(String name) {
-        return this.headers.getHeader(name);
-    }
-
     public String getCharacterEncoding() {
         if (this.characterEncoding == null || this.characterEncoding.isEmpty()) {
             this.characterEncoding = getCharsetEncodingFromContentType(this.getContentType());
@@ -88,17 +102,30 @@ public final class RequestHeader {
         return MediaType.parseMediaType(contentType).getCharset();
     }
 
-    public void recycle() {
-        this.method.recycle();
-        this.requestPath.recycle();
-        this.queryString.recycle();
-        this.uri.recycle();
-        this.protocol.recycle();
-        this.headers.recycle();
-        this.parameters.recycle();
-        this.contentLength = null;
-        this.contentType = null;
-        this.characterEncoding = null;
-        this.charset = null;
+    // Low-High Level을 잇는 역할의 Adapter는 각 서버 인스턴스 별로 하나 존재
+    // internal.Request(Internal Request)과 connector.Request(External Request)는 1대1로 매칭되어야함
+    // 방법 1. Adapter에서 External Request Pool 가지고 있음
+    //  * 장점: 완전한 계층 분리
+    //  * 단점: 동시성 로직으로 인한 성능 저하 (WAS 부적합)
+    // 방법 2. internal.Request애 connector.Request를 매핑
+    //  * 장점: 간단하고 1:1 매칭 구조 적합
+    //  * 단점: low-level 객체가 high level 객체를 역참조
+    //    * internal.Request 가지고 외관(facade)으로 사용하는 단 하나는 객체 생성 허용
+    //    * WAS 에서 외부로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
+    private RequestFacade facade;
+
+    public RequestFacade getFacade() {
+        return this.facade;
+    }
+
+    public void setFacade(RequestFacade facade) {
+        if (facade == null) {
+            throw new NullPointerException("Facade cannot be null");
+        }
+        if (this.facade != null) {
+            throw new IllegalStateException("Facade already set");
+        }
+        facade.setInputBuffer(this.inputBuffer);
+        this.facade = facade;
     }
 }

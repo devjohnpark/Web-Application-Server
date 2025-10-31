@@ -43,7 +43,8 @@ public abstract class AbstractHttpApiHandler implements HttpApiHandler {
         } else if (method.equalsIgnoreCase("DELETE")) {
             doDelete(request, response);
         } else {
-            response.sendError(HttpStatus.NOT_IMPLEMENTED);
+//            response.sendError(HttpStatus.NOT_IMPLEMENTED);
+            sendDefaultError(request, response);
         }
     }
 

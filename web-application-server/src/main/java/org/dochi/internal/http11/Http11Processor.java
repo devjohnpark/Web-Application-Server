@@ -1,7 +1,7 @@
 package org.dochi.internal.http11;
 
 import org.dochi.http.utils.ResponseHeaders;
-import org.dochi.internal.mapper.HttpMapper;
+import org.dochi.connector.HttpDispatcher;
 import org.dochi.connector.TmpBufferedOutputStream;
 import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
@@ -20,12 +20,12 @@ public class Http11Processor extends AbstractHttpProcessor {
     private final Http11InputBuffer inputBuffer;
     private final TmpBufferedOutputStream tempBufferOutputStream;
 
-    public Http11Processor(HttpMapper mapper, HttpConfig config) {
+    public Http11Processor(HttpDispatcher mapper, HttpConfig config) {
         super(mapper, config);
         this.inputBuffer = new Http11InputBuffer(config.getHttpReqConfig().getRequestHeaderMaxSize());
-        this.requestFacade.setInputBuffer(this.inputBuffer);
+        this.request.setInputBuffer(this.inputBuffer);
         this.tempBufferOutputStream = new TmpBufferedOutputStream();
-        this.responseFacade.setOutputStream(this.tempBufferOutputStream);
+        this.response.setOutputStream(tempBufferOutputStream);
     }
 
     @Override
@@ -41,12 +41,12 @@ public class Http11Processor extends AbstractHttpProcessor {
 
     private boolean shouldKeepAlive(SocketWrapper<?> socketWrapper) {
         boolean isKeepAlive = isKeepAlive(socketWrapper);
-        responseFacade.setConnection(isKeepAlive ? "keep-alive" : "close");
+        response.setConnection(isKeepAlive ? "keep-alive" : "close");
         if (isKeepAlive) {
             int timeout = socketWrapper.getConfigKeepAliveTimeout();
             int maxRequests = socketWrapper.getConfigMaxKeepAliveRequests();
             String keepAliveValue = "timeout=" + (timeout / 1000) + ", max=" + maxRequests;
-            responseFacade.setHeader(ResponseHeaders.KEEP_ALIVE, keepAliveValue);
+            response.setKeepAlive(keepAliveValue);
         }
         return isKeepAlive;
     }
@@ -59,12 +59,20 @@ public class Http11Processor extends AbstractHttpProcessor {
         return currentCount >= maxCount;
     }
 
+//    private boolean isRequestKeepAlive() {
+//        String connectionValue = this.requestFacade.getHeader("connection");
+//        if (this.requestFacade.getProtocol().equals("HTTP/1.1")) {
+//            return !(connectionValue != null && connectionValue.equals("close"));
+//        }
+//        return this.requestFacade.getProtocol().equals("HTTP/1.0") && (connectionValue != null && connectionValue.equals("keep-alive"));
+//    }
+
     private boolean isRequestKeepAlive() {
-        String connectionValue = this.requestFacade.getHeader("connection");
-        if (this.requestFacade.getProtocol().equals("HTTP/1.1")) {
+        String connectionValue = this.request.headers().getHeader("connection");
+        if (this.request.protocol().equalsIgnoreCase("HTTP/1.1")) {
             return !(connectionValue != null && connectionValue.equals("close"));
         }
-        return this.requestFacade.getProtocol().equals("HTTP/1.0") && (connectionValue != null && connectionValue.equals("keep-alive"));
+        return this.request.protocol().equalsIgnoreCase("HTTP/1.0") && (connectionValue != null && connectionValue.equals("keep-alive"));
     }
 
     @Override
@@ -78,7 +86,7 @@ public class Http11Processor extends AbstractHttpProcessor {
         while (isKeepAlive) {
             socketWrapper.setConnectionTimeout(socketWrapper.getConfigKeepAliveTimeout());
 
-            if (!inputBuffer.parseHeader(requestFacade.getRequestHeader())) {
+            if (!inputBuffer.parseHeader(request)) {
                 // EOF -> read -1 -> false -> client close -> disconnection
                 return CLOSED;
             }
@@ -96,23 +104,27 @@ public class Http11Processor extends AbstractHttpProcessor {
                 isKeepAlive = false;
             }
 
-            getHttpMapper().getHttpApiHandler(requestFacade.getPath()).service(requestFacade, responseFacade);
-            responseFacade.flush();
+            getDispatcher().service(request, response);
+
+            response.flush();
+
+
+
             // Response object provides OutputStream object to developer, so it need flush() after processing HTTP API
             // flush() has system call cost, it needs to remove inefficient action.
             // 1. Rapping flush method by custom OutputStream.
             // 2. The custom OutputStream declares boolean-isFlushed variable.
             // 3. If call rapped flush method, According to isFlushed value(true/false), flush() to be called or not.
-            recycle();
+            this.recycle(); // low-level recycle
         }
         return CLOSED;
     }
 
     private boolean isUpgradeRequest(SocketWrapper<?> socketWrapper) {
-        return requestFacade.getHeader("connection") != null &&
-                requestFacade.getHeader("connection").equalsIgnoreCase("upgrade") &&
-                requestFacade.getHeader("upgrade") != null &&
-                requestFacade.getHeader("upgrade").equalsIgnoreCase("h2c");
+        String connectionValue = this.request.headers().getHeader("connection");
+        String upgradeValue = this.request.headers().getHeader("upgrade");
+        return connectionValue.equalsIgnoreCase("upgrade") &&
+                upgradeValue.equalsIgnoreCase("h2c");
     }
 
 //    private void sendUpgrade() {

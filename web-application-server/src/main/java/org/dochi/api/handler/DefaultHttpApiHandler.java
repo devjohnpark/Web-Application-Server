@@ -16,7 +16,7 @@ public class DefaultHttpApiHandler extends AbstractHttpApiHandler {
     public void doGet(ExternalRequest request, ExternalResponse response) throws IOException {
         Resource resource = webResourceProvider.getResource(request.getPath());
         if (!resource.isEmpty()) {
-            response.send(HttpStatus.OK, resource.getData(), resource.getContentType("UTF-8"));
+            response.send(resource.getData(), resource.getContentType("UTF-8"));
         } else {
             response.sendError(HttpStatus.NOT_FOUND);
         }

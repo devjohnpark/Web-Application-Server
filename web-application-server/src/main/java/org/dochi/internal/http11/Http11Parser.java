@@ -1,6 +1,6 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.RequestHeader;
+import org.dochi.internal.request.Request;
 import org.dochi.internal.buffer.HeaderField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class Http11Parser {
         return this.source.getHeaderByteBuffer().get();
     }
 
-    public boolean parseRequestLine(RequestHeader requestHeader) throws IOException {
+    public boolean parseRequestLine(Request request) throws IOException {
         int elementCnt = 0;
         int querySeparator = -1;
         byte previousByte = -1;
@@ -48,17 +48,17 @@ public class Http11Parser {
             if (currentByte == WHITE_SPACE) {
                 elementCnt++;
                 if (elementCnt == 1) {
-                    requestHeader.method().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                    request.method().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
                 } else if (elementCnt == 2) {
-                    requestHeader.requestURI().setCharset(StandardCharsets.UTF_8);
-                    requestHeader.requestURI().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
-                    requestHeader.requestPath().setCharset(StandardCharsets.UTF_8);
+                    request.requestURI().setCharset(StandardCharsets.UTF_8);
+                    request.requestURI().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                    request.requestPath().setCharset(StandardCharsets.UTF_8);
                     if (querySeparator != -1) {
-                        requestHeader.requestPath().setBytes(buffer.array(), start, querySeparator - start - SEPARATOR_SIZE);
-                        requestHeader.queryString().setCharset(StandardCharsets.UTF_8);
-                        requestHeader.queryString().setBytes(buffer.array(), querySeparator, buffer.position() - querySeparator - SEPARATOR_SIZE);
+                        request.requestPath().setBytes(buffer.array(), start, querySeparator - start - SEPARATOR_SIZE);
+                        request.queryString().setCharset(StandardCharsets.UTF_8);
+                        request.queryString().setBytes(buffer.array(), querySeparator, buffer.position() - querySeparator - SEPARATOR_SIZE);
                     } else {
-                        requestHeader.requestPath().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
+                        request.requestPath().setBytes(buffer.array(), start, buffer.position() - start - SEPARATOR_SIZE);
                     }
                 }
                 start = buffer.position();
@@ -68,7 +68,7 @@ public class Http11Parser {
                 if (elementCnt != 2) {
                     throw new IllegalArgumentException("Invalid requestHeader line");
                 }
-                requestHeader.protocol().setBytes(buffer.array(), start, buffer.position() - start - CRLF_SIZE);
+                request.protocol().setBytes(buffer.array(), start, buffer.position() - start - CRLF_SIZE);
                 return true;
             }
             previousByte = currentByte;
@@ -76,15 +76,15 @@ public class Http11Parser {
         return false;
     }
 
-    public boolean parseHeaders(RequestHeader requestHeader) throws IOException {
+    public boolean parseHeaders(Request request) throws IOException {
         HeaderParseStatus status;
         do {
-            status = parseHeaderField(requestHeader);
+            status = parseHeaderField(request);
         } while (status == HeaderParseStatus.NEED_MORE);
-        return status == HeaderParseStatus.DONE && requestHeader.headers().size() > 0;
+        return status == HeaderParseStatus.DONE && request.headers().size() > 0;
     }
 
-    private HeaderParseStatus parseHeaderField(RequestHeader requestHeader) throws IOException {
+    private HeaderParseStatus parseHeaderField(Request request) throws IOException {
         byte previousByte = -1;
         byte currentByte;
         ByteBuffer buffer = source.getHeaderByteBuffer();
@@ -105,7 +105,7 @@ public class Http11Parser {
             } else if (previousByte == CR && currentByte == LF) {
                 valueEnd = buffer.position() - 2;
                 if (nameStart < nameEnd && nameEnd < valueStart && valueStart < valueEnd) {
-                    HeaderField headerField = requestHeader.headers().createHeader();
+                    HeaderField headerField = request.headers().createHeader();
                     headerField.name().setBytes(buffer.array(), nameStart, nameEnd - nameStart);
                     headerField.getValue().setBytes(buffer.array(), valueStart, valueEnd - valueStart);
                     return HeaderParseStatus.NEED_MORE;

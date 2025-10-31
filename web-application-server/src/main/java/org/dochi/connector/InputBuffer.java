@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 
 // 클라이언트(소켓)당 스레드 하나가 공유 자원이 없는 작업을 처리하기 때문에 동기화 로직이 필요없음
 public class InputBuffer implements ApplicationBufferHandler, Closeable {
-    private org.dochi.internal.buffer.InputBuffer internalInputBuffer;
+    private org.dochi.internal.buffer.InputBuffer inputbuffer;
     private ByteBuffer buffer; // 시스템 콜 비용을 줄이기 위해서 내부 버퍼 사용
     private boolean isClosed;
 
@@ -23,7 +23,10 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
 
     // 지연 초기화(lazy init)
     public void setInputBuffer(org.dochi.internal.buffer.InputBuffer internalInputBuffer) {
-        this.internalInputBuffer = internalInputBuffer;
+        if (internalInputBuffer == null) {
+            throw new IllegalStateException("InternalInputBuffer cannot be null");
+        }
+        this.inputbuffer = internalInputBuffer;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
         if (!this.buffer.hasRemaining()) { // pos >= limit
             this.buffer.position(0);
             this.buffer.limit(0);
-            return internalInputBuffer.doRead(this); // 헤더가 알아서 버퍼 조작
+            return inputbuffer.doRead(this); // 헤더가 알아서 버퍼 조작
         }
         // 버퍼에 아직 읽지 않은 데이터가 있다면 0 반환
         return 0;

@@ -43,6 +43,14 @@ public class ResponseHeaders {
         return contentLength != null ? Integer.parseInt(headers.get(CONTENT_LENGTH)) : 0;
     }
 
+    public String getContentType() {
+        return headers.get(CONTENT_TYPE);
+    }
+
+    public String getDate() {
+        return headers.get(ResponseHeaders.DATE);
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

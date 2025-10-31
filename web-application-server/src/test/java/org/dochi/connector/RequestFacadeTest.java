@@ -34,7 +34,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
     void getParameter_queryString() throws IOException {
         String header = "GET /user?name=john%20park&age=20 HTTP/1.1\r\nConnection: keep-alive\r\n\r\n";
         httpClient.doRequest(header.getBytes(StandardCharsets.UTF_8));
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         assertThat(requestFacade.getMethod()).isEqualTo("GET");
         assertThat(requestFacade.getPath()).isEqualTo("/user");
         assertThat(requestFacade.getQueryString()).isEqualTo("name=john%20park&age=20");
@@ -54,7 +54,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
 
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         assertThat(requestFacade.getContentLength()).isEqualTo(contentLength);
         assertThat(requestFacade.getContentType()).isEqualTo("application/x-www-form-urlencoded; charset=utf-8");
         assertThat(requestFacade.getMethod()).isEqualTo("POST");
@@ -93,7 +93,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
 
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         assertThat(requestFacade.getContentLength()).isEqualTo(contentLength);
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", requestFacade.getContentType());
         assertThat(requestFacade.getParameter("boundary")).isEqualTo("----WebKitFormBoundarylwQGqAAJBIOZfE7B");
@@ -126,7 +126,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
 
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", requestFacade.getContentType());
         assertThat(requestFacade.getHeader("Connection")).isEqualTo("keep-alive");
         assertThat(requestFacade.getPart("username").getContent()).isEqualTo("john".getBytes(StandardCharsets.UTF_8));
@@ -144,7 +144,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
 
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         InputStream in = requestFacade.getInputStream();
         for (byte b: buf) {
             assertEquals(b, in.read());
@@ -159,7 +159,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         InputStream in = requestFacade.getInputStream();
         byte[] actualBuf = new byte[buf.length];
         in.read(actualBuf);
@@ -174,7 +174,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         InputStream in = requestFacade.getInputStream();
         byte[] actualBuf = new byte[buf.length];
         int off = 2;
@@ -191,8 +191,8 @@ class RequestFacadeTest extends Http11InputBufferTest {
     }
 
     @Test
-    void getRequestHeader() {
-        assertNotNull(requestFacade.getRequestHeader());
+    void header() {
+        assertNotNull(requestFacade.header());
     }
 
     @Test
@@ -221,7 +221,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         String message = header + body;
         httpClient.doRequest(message.getBytes(StandardCharsets.UTF_8));
 
-        assertTrue(inputBuffer.parseHeader(requestFacade.getRequestHeader()));
+        assertTrue(inputBuffer.parseHeader(requestFacade.header()));
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", requestFacade.getContentType());
         assertThat(requestFacade.getHeader("Connection")).isEqualTo("keep-alive");
         assertThat(requestFacade.getPart("username").getContent()).isEqualTo("john".getBytes(StandardCharsets.UTF_8));
@@ -232,7 +232,7 @@ class RequestFacadeTest extends Http11InputBufferTest {
         requestFacade.recycle();
 
         assertDoesNotThrow(requestFacade::getInputStream);
-        assertTrue(requestFacade.getRequestHeader().method().isNull());
-        assertNull(requestFacade.getRequestHeader().parameters().getValue("boundary"));
+        assertTrue(requestFacade.header().method().isNull());
+        assertNull(requestFacade.header().parameters().getValue("boundary"));
     }
 }

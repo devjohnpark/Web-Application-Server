@@ -1,59 +1,95 @@
 package org.dochi.connector;
 
 import org.dochi.external.ExternalRequest;
-import org.dochi.internal.RequestHeader;
-import org.dochi.http.multipart.Part;
-import org.dochi.http.utils.MediaType;
 import org.dochi.http.multipart.MultiPartParser;
 import org.dochi.http.multipart.Multipart;
 import org.dochi.http.multipart.MultipartStream;
+import org.dochi.http.multipart.Part;
+import org.dochi.http.utils.MediaType;
+import org.dochi.http.utils.Parameters;
+import org.dochi.internal.request.RequestFacade;
 import org.dochi.webserver.config.HttpReqConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class RequestFacade implements InternalRequest, ExternalRequest {
-    private static final Logger log = LoggerFactory.getLogger(RequestFacade.class);
-
-    private final RequestHeader requestHeader;
-    private InternalInputStream inputStream;
-    private final InputBuffer inputBuffer;
-    private final Multipart multipart;
+public class Request extends RequestFacade implements ExternalRequest {
+    protected final InputBuffer inputBuffer;
+    protected final Multipart multipart;
     private final HttpReqConfig config;
-    private boolean parametersParsed = false;
-    private boolean multipartParsed = false;
+    protected final Parameters parameters;
+    protected InternalInputStream inputStream;
+    protected boolean parametersParsed = false;
+    protected boolean multipartParsed = false;
 
-    public RequestFacade(HttpReqConfig httpReqConfig) {
-        this.requestHeader = new RequestHeader();
+    public Request(org.dochi.internal.request.Request request, HttpReqConfig httpReqConfig) {
+        super(request);
         this.inputBuffer = new InputBuffer();
         this.multipart = new Multipart();
+        this.parameters = new Parameters();
         this.config = httpReqConfig;
     }
 
-    // injection low level input buffer object (HTTP Version Coupling)
     @Override
     public void setInputBuffer(org.dochi.internal.buffer.InputBuffer inputBuffer) {
         if (inputBuffer == null) {
-            throw new IllegalArgumentException("internal.InputBuffer is null");
+            throw new IllegalArgumentException("Input buffer cannot be null");
         }
         this.inputBuffer.setInputBuffer(inputBuffer);
     }
 
     @Override
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
-    }
-
-    // 지속 연결에서 매요청마다 요청 관련 객체를 재활용해서 GC 사이클 낮춘다.
-    @Override
     public void recycle() {
-        this.requestHeader.recycle();
         this.inputBuffer.recycle();
+        this.parameters.recycle();
         this.multipart.recycle();
         this.parametersParsed = false;
         this.multipartParsed = false;
+    }
+
+    @Override
+    public String getMethod() { return request.method().toString(); }
+
+    @Override
+    public String getRequestURI() { return request.requestURI().toString(); }
+
+    @Override
+    public String getPath() { return request.requestPath().toString(); }
+
+    @Override
+    public String getQueryString() {
+        return request.queryString().toString();
+    }
+
+    @Override
+    public String getProtocol() { return request.protocol().toString(); }
+
+    @Override
+    public String getHeader(String key) {
+        return request.headers().getHeader(key);
+    }
+
+    @Override
+    public String getContentType() {
+        return request.getContentType();
+    }
+
+    @Override
+    public int getContentLength() {
+        return request.getContentLength();
+    }
+
+    @Override
+    public String getCharacterEncoding() {
+        return request.getCharacterEncoding();
+    }
+
+    @Override
+    public String getParameter(String key) throws IOException {
+        if (!this.parametersParsed) {
+            parseParameters();
+        }
+        return parameters.getValue(key);
     }
 
     @Override
@@ -67,51 +103,6 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
             multipartParsed = true;
         }
         return multipart.getPart(partName);
-    }
-
-    @Override
-    public String getMethod() { return requestHeader.method().toString(); }
-
-    @Override
-    public String getRequestURI() { return requestHeader.requestURI().toString(); }
-
-    @Override
-    public String getPath() { return requestHeader.requestPath().toString(); }
-
-    @Override
-    public String getQueryString() {
-        return requestHeader.queryString().toString();
-    }
-
-    @Override
-    public String getProtocol() { return requestHeader.protocol().toString(); }
-
-    @Override
-    public String getHeader(String key) {
-        return requestHeader.headers().getHeader(key);
-    }
-
-    @Override
-    public String getContentType() {
-        return requestHeader.getContentType();
-    }
-
-    @Override
-    public int getContentLength() {
-        return requestHeader.getContentLength();
-    }
-
-    @Override
-    public String getCharacterEncoding() {
-        return requestHeader.getCharacterEncoding();
-    }
-
-    @Override
-    public String getParameter(String key) throws IOException {
-        if (!this.parametersParsed) {
-            parseParameters();
-        }
-        return requestHeader.parameters().getValue(key);
     }
 
     @Override
@@ -132,7 +123,7 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
             parseBodyRequestParameters(); // header와 body의 request parameter 중복시 body 값으로 덮어씌움
         } else if ("multipart/form-data".equalsIgnoreCase(mediaType.getFullType())) {
             // getPart() 메서드 주석에서 로직에서 확인
-            requestHeader.parameters().addParameter(mediaType.getParameterName(), mediaType.getParameterValue()); // boundary
+            parameters.addParameter(mediaType.getParameterName(), mediaType.getParameterValue()); // boundary
         }
         this.parametersParsed = true;
     }
@@ -145,12 +136,12 @@ public class RequestFacade implements InternalRequest, ExternalRequest {
         while (n < contentLength) {
             n += in.read(buf, n, contentLength - n);
         }
-        requestHeader.parameters().addRequestParameters(new String(buf, requestHeader.getCharsetFromContentType()));
+        parameters.addRequestParameters(new String(buf, request.getCharsetFromContentType()));
     }
 
     private void parseHeaderRequestParameters() {
-        if (!requestHeader.queryString().isNull()) {
-            requestHeader.parameters().addRequestParameters(this.getQueryString());
+        if (!request.queryString().isNull()) {
+            parameters.addRequestParameters(this.getQueryString());
         }
     }
 }

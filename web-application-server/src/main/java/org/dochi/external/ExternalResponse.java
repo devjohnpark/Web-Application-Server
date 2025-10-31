@@ -1,9 +1,9 @@
 package org.dochi.external;
 
 import org.dochi.http.utils.HttpStatus;
-
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public interface ExternalResponse {
     ExternalResponse setStatus(HttpStatus status);
@@ -12,15 +12,13 @@ public interface ExternalResponse {
     ExternalResponse setConnection(String connection);
     ExternalResponse setContentType(String contentType);
     ExternalResponse setContentLength(int contentLength);
-    ExternalResponse setDateHeader(String date);
-    ExternalResponse inActiveDateHeader();
-    ExternalResponse activeDateHeader();
-
-    void send(HttpStatus status) throws IOException;
-    void send(HttpStatus status, byte[] body, String contentType) throws IOException;
-
+    void send() throws IOException;
+    void send(byte[] body, String contentType) throws IOException;
+    void send(String body, String contentType) throws IOException;
+    void send(String body, Charset charset, String contentType) throws IOException;
+    void send(char[] body, String contentType) throws IOException;
+    void send(char[] body, Charset charset, String contentType) throws IOException;
     void sendError(HttpStatus status) throws IOException;
     void sendError(HttpStatus status, String errorMessage) throws IOException;
-
     OutputStream getOutputStream() throws IOException;
 }

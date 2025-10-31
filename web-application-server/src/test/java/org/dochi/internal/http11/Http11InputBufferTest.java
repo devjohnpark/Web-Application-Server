@@ -1,6 +1,5 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.RequestHeader;
 import org.dochi.webserver.socket.HttpClient;
 import org.dochi.webserver.socket.BioSocketWrapperConnectionTest;
 import org.junit.jupiter.api.AfterEach;

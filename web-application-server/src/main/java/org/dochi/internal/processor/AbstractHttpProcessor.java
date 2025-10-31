@@ -1,9 +1,12 @@
 package org.dochi.internal.processor;
 
-import org.dochi.connector.*;
+//import org.dochi.connector.Http11ResponseFacade;
+//import org.dochi.connector.Http11ResponseFacade;
 import org.dochi.http.utils.HttpStatus;
-import org.dochi.internal.mapper.HttpMapper;
-import org.dochi.connector.RequestFacade;
+import org.dochi.internal.request.Request;
+import org.dochi.internal.response.Response;
+import org.dochi.connector.HttpDispatcher;
+
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapper;
 import org.dochi.webserver.socket.SocketState;
@@ -18,14 +21,16 @@ import static org.dochi.webserver.socket.SocketState.CLOSED;
 
 public abstract class AbstractHttpProcessor implements HttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpProcessor.class);
-    protected final RequestFacade requestFacade;
-    protected final Http11ResponseFacade responseFacade;
-    protected final HttpMapper mapper;
+    protected final Request request;
+    protected final Response response;
+    protected final HttpDispatcher dispatcher;
 
-    protected AbstractHttpProcessor(HttpMapper mapper, HttpConfig config) {
-        this.mapper = mapper;
-        this.requestFacade = new RequestFacade(config.getHttpReqConfig());
-        this.responseFacade = new Http11ResponseFacade(config.getHttpResConfig());
+    protected AbstractHttpProcessor(HttpDispatcher dispatcher, HttpConfig config) {
+        this.dispatcher = dispatcher;
+        this.request = new Request();
+        this.response = new Response();
+//        this.requestFacade = new AbstractRequestFacade(config.getHttpReqConfig());
+//        this.responseFacade = new Http11ResponseFacade(config.getHttpResConfig());
     }
 
     @Override
@@ -42,13 +47,14 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         return CLOSED;
     }
 
+    // 해당 클래스에서 생성하고 소유하는 객체의 컨텍스트 담당
     protected void recycle() {
-        requestFacade.recycle();
-        responseFacade.recycle();
+        request.recycle();
+        response.recycle();
     }
 
-    protected HttpMapper getHttpMapper() {
-        return mapper;
+    protected HttpDispatcher getDispatcher() {
+        return dispatcher;
     }
 
     abstract protected void setSocketWrapper(SocketWrapper<?> socketWrapper);
@@ -82,9 +88,10 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private void sendClosedError(HttpStatus status, String errorMessage) {
         log.error("HTTP status: {} {}, Reason: {}", String.valueOf(status.getCode()), status.getMessage(), errorMessage);
         try {
-            responseFacade.setConnection("close"); // 408, 500 close 
-            responseFacade.sendError(status, errorMessage);
-            responseFacade.flush();
+            response.setStatus(status);
+            response.setConnection("close");
+            response.commit();
+            response.flush();
         } catch (IOException e) {
             log.error("Failed to send error response: {}", e.getMessage());
         }
