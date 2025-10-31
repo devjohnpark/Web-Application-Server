@@ -12,8 +12,8 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Connection {
-    private static final Logger log = LoggerFactory.getLogger(Connection.class);
+public class Connector {
+    private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private volatile SocketWrapper<?> serverConnectedSocket;
     private SocketWrapper<?> clientConnectedSocket;

@@ -1,7 +1,7 @@
 package org.dochi.internal.parser;
 
 import org.dochi.internal.http11.Http11Parser;
-import org.dochi.webserver.connect.TestConnectionBase;
+import org.dochi.webserver.connect.TestConnectorBase;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Http11ParserTest extends TestConnectionBase {
+public class Http11ParserTest extends TestConnectorBase {
     private Http11Parser parser;
 
     @Override

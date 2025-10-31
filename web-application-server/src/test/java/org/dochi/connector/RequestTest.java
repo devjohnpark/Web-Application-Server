@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferWrapper;
-import org.dochi.webserver.connect.TestConnectionBase;
+import org.dochi.webserver.connect.TestConnectorBase;
 import org.dochi.webserver.attribute.HttpReqAttribute;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RequestTest extends TestConnectionBase {
+class RequestTest extends TestConnectorBase {
     private final Request externalRequest = new Request(request, new HttpReqAttribute());
     private final Http11InputBufferWrapper inputBufferWrapper = new Http11InputBufferWrapper(inputBuffer);
 
@@ -28,7 +28,7 @@ class RequestTest extends TestConnectionBase {
 
     @Test
     void getParameter_queryString() throws IOException {
-        String header = "GET /user?name=john%20park&age=20 HTTP/1.1\r\nConnection: keep-alive\r\n\r\n";
+        String header = "GET /user?name=john%20park&age=20 HTTP/1.1\r\nConnector: keep-alive\r\n\r\n";
         client.doRequest(header.getBytes(StandardCharsets.UTF_8));
         assertTrue(inputBufferWrapper.parseHeader(request));
         assertThat(externalRequest.getMethod()).isEqualTo("GET");
@@ -38,7 +38,7 @@ class RequestTest extends TestConnectionBase {
         assertThat(externalRequest.getProtocol()).isEqualTo("HTTP/1.1");
         assertThat(externalRequest.getParameter("name")).isEqualTo("john park");
         assertThat(externalRequest.getParameter("age")).isEqualTo("20");
-        assertThat(externalRequest.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(externalRequest.getHeader("Connector")).isEqualTo("keep-alive");
     }
 
     @Test
@@ -46,7 +46,7 @@ class RequestTest extends TestConnectionBase {
         String body = "username=john+park&age=20";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length; // 30
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
 
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
@@ -60,7 +60,7 @@ class RequestTest extends TestConnectionBase {
         assertThat(externalRequest.getCharacterEncoding()).isEqualTo("utf-8");
         assertThat(externalRequest.getParameter("username")).isEqualTo("john park");
         assertThat(externalRequest.getParameter("age")).isEqualTo("20");
-        assertThat(externalRequest.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(externalRequest.getHeader("Connector")).isEqualTo("keep-alive");
     }
 
     @Test
@@ -84,7 +84,7 @@ class RequestTest extends TestConnectionBase {
                 + "------WebKitFormBoundarylwQGqAAJBIOZfE7B--\r\n";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
 
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
@@ -93,7 +93,7 @@ class RequestTest extends TestConnectionBase {
         assertThat(externalRequest.getContentLength()).isEqualTo(contentLength);
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", externalRequest.getContentType());
         assertThat(externalRequest.getParameter("boundary")).isEqualTo("----WebKitFormBoundarylwQGqAAJBIOZfE7B");
-        assertThat(externalRequest.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(externalRequest.getHeader("Connector")).isEqualTo("keep-alive");
     }
 
     @Test
@@ -117,14 +117,14 @@ class RequestTest extends TestConnectionBase {
                 + "------WebKitFormBoundarylwQGqAAJBIOZfE7B--\r\n";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length; // 30
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
 
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
 
         assertTrue(inputBufferWrapper.parseHeader(request));
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", externalRequest.getContentType());
-        assertThat(externalRequest.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(externalRequest.getHeader("Connector")).isEqualTo("keep-alive");
         assertThat(externalRequest.getPart("username").getContent()).isEqualTo("john".getBytes(StandardCharsets.UTF_8));
         assertThat(externalRequest.getPart("age").getContent()).isEqualTo("4".getBytes(StandardCharsets.UTF_8));
         assertThat(externalRequest.getPart("file").getContent()).isEqualTo("21312445321553451234213412341234234124234".getBytes(StandardCharsets.UTF_8));
@@ -136,7 +136,7 @@ class RequestTest extends TestConnectionBase {
         String body = "hello world";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
 
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
@@ -152,7 +152,7 @@ class RequestTest extends TestConnectionBase {
         String body = "hello world";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
         assertTrue(inputBufferWrapper.parseHeader(request));
@@ -167,7 +167,7 @@ class RequestTest extends TestConnectionBase {
         String body = "hello world";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length; // 30
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: text/plain\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
         assertTrue(inputBufferWrapper.parseHeader(request));
@@ -212,14 +212,14 @@ class RequestTest extends TestConnectionBase {
                         + "------WebKitFormBoundarylwQGqAAJBIOZfE7B--\r\n";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length; // 30
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B\r\n" + String.format("Content-Length: %d\r\n\r\n", contentLength);
 
         String message = header + body;
         client.doRequest(message.getBytes(StandardCharsets.UTF_8));
 
         assertTrue(inputBufferWrapper.parseHeader(request));
         assertEquals("multipart/form-data; boundary=----WebKitFormBoundarylwQGqAAJBIOZfE7B", externalRequest.getContentType());
-        assertThat(externalRequest.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(externalRequest.getHeader("Connector")).isEqualTo("keep-alive");
         assertThat(externalRequest.getPart("username").getContent()).isEqualTo("john".getBytes(StandardCharsets.UTF_8));
         assertThat(externalRequest.getPart("age").getContent()).isEqualTo("4".getBytes(StandardCharsets.UTF_8));
         assertThat(externalRequest.getPart("file").getContent()).isEqualTo("21312445321553451234213412341234234124234".getBytes(StandardCharsets.UTF_8));

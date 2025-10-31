@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferWrapper;
-import org.dochi.webserver.connect.TestConnectionBase;
+import org.dochi.webserver.connect.TestConnectorBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
-class InternalInputStreamTest extends TestConnectionBase {
+class InternalInputStreamTest extends TestConnectorBase {
     private static final Logger log = LoggerFactory.getLogger(InternalInputStreamTest.class);
     private final InputBuffer inputBuffer = new InputBuffer();
     private final InternalInputStream internalInputStream = new InternalInputStream(this.inputBuffer);
@@ -35,7 +35,7 @@ class InternalInputStreamTest extends TestConnectionBase {
         String body = "name=john%20park&password=1234";
         byte[] buf = body.getBytes(StandardCharsets.UTF_8);
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         client.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
         assertTrue(this.inputBufferWrapper.parseHeader(request));
@@ -47,7 +47,7 @@ class InternalInputStreamTest extends TestConnectionBase {
         String body = "name=john%20park&password=1234";
         byte[] buf = new byte[1024];
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         client.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
         assertTrue(this.inputBufferWrapper.parseHeader(request));
@@ -61,7 +61,7 @@ class InternalInputStreamTest extends TestConnectionBase {
         String body = "name=john%20park&password=1234";
         byte[] buf = new byte[1024];
         int contentLength = buf.length;
-        String header = "POST /user HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
+        String header = "POST /user HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: application/x-www-form-urlencoded; charset=utf-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
         String message = header + "\r\n" + body;
         client.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
         assertTrue(this.inputBufferWrapper.parseHeader(request));
@@ -74,7 +74,7 @@ class InternalInputStreamTest extends TestConnectionBase {
         String body = "Hello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello world";
         byte[] buf = body.getBytes(StandardCharsets.ISO_8859_1);
         int contentLength = buf.length;
-        String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
+        String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
 
         String message = header + "\r\n" + body;
         client.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
@@ -90,7 +90,7 @@ class InternalInputStreamTest extends TestConnectionBase {
         String body = "Hello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello worldHello world";
         byte[] buf = body.getBytes(StandardCharsets.ISO_8859_1);
         int contentLength = buf.length;
-        String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnection: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
+        String header = "GET /user?name=john%20park&password=1234 HTTP/1.1\r\nConnector: keep-alive\r\nContent-Type: text/plain; charset=UTF-8\r\n" + String.format("Content-Length: %d\r\n", contentLength);
 
         String message = header + "\r\n" + body;
         client.doRequest(message.getBytes(StandardCharsets.ISO_8859_1));
