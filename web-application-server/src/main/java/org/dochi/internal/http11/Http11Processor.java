@@ -1,8 +1,7 @@
 package org.dochi.internal.http11;
 
-import org.dochi.http.utils.ResponseHeaders;
-import org.dochi.connector.HttpDispatcher;
-import org.dochi.connector.TmpBufferedOutputStream;
+import org.dochi.connector.InternalAdapter;
+import org.dochi.internal.buffer.TmpBufferedOutputStream;
 import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapper;
@@ -20,7 +19,7 @@ public class Http11Processor extends AbstractHttpProcessor {
     private final Http11InputBuffer inputBuffer;
     private final TmpBufferedOutputStream tempBufferOutputStream;
 
-    public Http11Processor(HttpDispatcher mapper, HttpConfig config) {
+    public Http11Processor(InternalAdapter mapper, HttpConfig config) {
         super(mapper, config);
         this.inputBuffer = new Http11InputBuffer(config.getHttpReqConfig().getRequestHeaderMaxSize());
         this.request.setInputBuffer(this.inputBuffer);

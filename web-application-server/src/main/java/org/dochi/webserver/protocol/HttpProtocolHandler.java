@@ -1,6 +1,6 @@
 package org.dochi.webserver.protocol;
 
-import org.dochi.connector.HttpDispatcher;
+import org.dochi.connector.InternalAdapter;
 import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.internal.http11.Http11Processor;
 import org.dochi.internal.processor.HttpProcessor;
@@ -10,10 +10,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class HttpProtocolHandler {
     private final HttpConfig config;
-    private final HttpDispatcher mapper;
+    private final InternalAdapter mapper;
     private final ConcurrentLinkedDeque<Http11Processor> http11Pool;
 
-    public HttpProtocolHandler(HttpDispatcher mapper, HttpConfig config) {
+    public HttpProtocolHandler(InternalAdapter mapper, HttpConfig config) {
         this.mapper = mapper;
         this.config = config;
         // 락 프리(lock-free) 알고리즘을 사용하여 높은 동시성 성능: CAS(Compare-And-Swap) 연산으로 CAS는 CPU가 메모리 위치(V)의 현재 값을 읽어서 메모리 값을 기대 값과 비교해 일치하면 새 값으로 원자적으로 교체하는 동시성 기법

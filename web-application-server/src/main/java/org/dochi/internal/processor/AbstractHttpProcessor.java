@@ -2,10 +2,10 @@ package org.dochi.internal.processor;
 
 //import org.dochi.connector.Http11ResponseFacade;
 //import org.dochi.connector.Http11ResponseFacade;
+import org.dochi.connector.InternalAdapter;
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.internal.request.Request;
 import org.dochi.internal.response.Response;
-import org.dochi.connector.HttpDispatcher;
 
 import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.socket.SocketWrapper;
@@ -23,9 +23,9 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(AbstractHttpProcessor.class);
     protected final Request request;
     protected final Response response;
-    protected final HttpDispatcher dispatcher;
+    protected final InternalAdapter dispatcher;
 
-    protected AbstractHttpProcessor(HttpDispatcher dispatcher, HttpConfig config) {
+    protected AbstractHttpProcessor(InternalAdapter dispatcher, HttpConfig config) {
         this.dispatcher = dispatcher;
         this.request = new Request();
         this.response = new Response();
@@ -53,7 +53,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         response.recycle();
     }
 
-    protected HttpDispatcher getDispatcher() {
+    protected InternalAdapter getDispatcher() {
         return dispatcher;
     }
 

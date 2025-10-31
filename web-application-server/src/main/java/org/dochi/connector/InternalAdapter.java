@@ -8,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
-public class HttpDispatcher {
-    private static final Logger log = LoggerFactory.getLogger(HttpDispatcher.class);
+public class InternalAdapter implements Adapter {
+    private static final Logger log = LoggerFactory.getLogger(InternalAdapter.class);
     private final WebService webService;
 
     // HttpDispatcher를 HttpAdapter로 변경 (service 메서드 정의한 Adapter 인터페이스 정의)
     // WebService: 컨테이너와 요청/응답 설정 정보를 포함한 객체로 변경
-    public HttpDispatcher(WebService webService) {
+    // Connector: WebService 컨테이너와 요청/응답 설정 정보를 포함한 객체로 생성
+    public InternalAdapter(WebService webService) {
         this.webService = webService;
     }
 

@@ -1,5 +1,6 @@
 package org.dochi.webserver.connect;
 
+import org.dochi.internal.buffer.TmpBufferedOutputStream;
 import org.dochi.internal.http11.Http11InputBuffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

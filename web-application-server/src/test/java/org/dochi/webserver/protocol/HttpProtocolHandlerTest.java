@@ -1,6 +1,6 @@
 package org.dochi.webserver.protocol;
 
-import org.dochi.connector.HttpDispatcher;
+import org.dochi.connector.InternalAdapter;
 import org.dochi.internal.processor.HttpProcessor;
 import org.dochi.webserver.config.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,11 +12,11 @@ class HttpProtocolHandlerTest {
     HttpProtocolHandler protocolHandler;
     ServerConfig serverConfig = new ServerConfig();
     HttpConfig httpConfig = new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute());
-    HttpDispatcher httpDispatcher = new HttpDispatcher(serverConfig.getWebService());
+    InternalAdapter internalAdapter = new InternalAdapter(serverConfig.getWebService());
 
     @BeforeEach
     void init() {
-        protocolHandler = new HttpProtocolHandler(httpDispatcher, httpConfig);
+        protocolHandler = new HttpProtocolHandler(internalAdapter, httpConfig);
     }
 
     @Test

@@ -1,6 +1,6 @@
 package org.dochi.webserver.executor;
 
-import org.dochi.connector.HttpDispatcher;
+import org.dochi.connector.InternalAdapter;
 import org.dochi.webserver.protocol.HttpProtocolHandler;
 import org.dochi.webserver.config.*;
 import org.dochi.webserver.socket.SocketTaskHandler;
@@ -15,10 +15,14 @@ public class SocketTaskExecutorFactory {
         return INSTANCE;
     }
 
+    // Connector에 공통의 서버 설정 값을 들고있는다.
+    // Adapter에는 Connector를 주입
+    // HttpProtocolHandler에는 각 프로토콜별로 상이한 설정값을 주입
+    // HttpProtocolHandler에서 설정 값과 함꼐 각 프로토콜 별 입력 버퍼링 및 파서 객체 생성
     public SocketTaskPoolExecutor createExecutor(ServerConfig serverConfig) {
         return createSocketTaskExecutor(
             serverConfig.getThreadPool(),
-            new HttpProtocolHandler(new HttpDispatcher(serverConfig.getWebService()), new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute()))
+            new HttpProtocolHandler(new InternalAdapter(serverConfig.getWebService()), new HttpConfigImpl(serverConfig.getHttpReqAttribute(), serverConfig.getHttpResAttribute()))
         );
     }
 
