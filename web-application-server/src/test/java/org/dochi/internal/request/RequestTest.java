@@ -1,6 +1,5 @@
-package org.dochi.internal;
+package org.dochi.internal.request;
 
-import org.dochi.http.utils.Parameters;
 import org.dochi.internal.buffer.HeaderBytes;
 import org.dochi.internal.buffer.Headers;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,29 +10,28 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RequestHeaderTest {
+class RequestTest {
 
-    private RequestHeader requestHeader;
+    private Request request;
 
     @BeforeEach
     void setUp() {
-        requestHeader = new RequestHeader();
+        request = new Request();
     }
 
     @Test
     void constructorInitializesAllComponents() {
-        assertNotNull(requestHeader.method());
-        assertNotNull(requestHeader.requestPath());
-        assertNotNull(requestHeader.queryString());
-        assertNotNull(requestHeader.requestURI());
-        assertNotNull(requestHeader.protocol());
-        assertNotNull(requestHeader.headers());
-        assertNotNull(requestHeader.parameters());
+        assertNotNull(request.method());
+        assertNotNull(request.requestPath());
+        assertNotNull(request.queryString());
+        assertNotNull(request.requestURI());
+        assertNotNull(request.protocol());
+        assertNotNull(request.headers());
     }
 
     @Test
     void methodReturnsMessageBytesInstance() {
-        HeaderBytes method = requestHeader.method();
+        HeaderBytes method = request.method();
         assertNotNull(method);
 
         method.setString("GET");
@@ -42,7 +40,7 @@ class RequestHeaderTest {
 
     @Test
     void requestPathReturnsMessageBytesInstance() {
-        HeaderBytes requestPath = requestHeader.requestPath();
+        HeaderBytes requestPath = request.requestPath();
         assertNotNull(requestPath);
 
         requestPath.setString("/api/users");
@@ -51,7 +49,7 @@ class RequestHeaderTest {
 
     @Test
     void queryStringReturnsMessageBytesInstance() {
-        HeaderBytes queryString = requestHeader.queryString();
+        HeaderBytes queryString = request.queryString();
         assertNotNull(queryString);
 
         queryString.setString("name=john&age=30");
@@ -60,7 +58,7 @@ class RequestHeaderTest {
 
     @Test
     void requestURIReturnsMessageBytesInstance() {
-        HeaderBytes uri = requestHeader.requestURI();
+        HeaderBytes uri = request.requestURI();
         assertNotNull(uri);
 
         uri.setString("/api/users?name=john");
@@ -69,7 +67,7 @@ class RequestHeaderTest {
 
     @Test
     void protocolReturnsMessageBytesInstance() {
-        HeaderBytes protocol = requestHeader.protocol();
+        HeaderBytes protocol = request.protocol();
         assertNotNull(protocol);
 
         protocol.setString("HTTP/1.1");
@@ -78,109 +76,101 @@ class RequestHeaderTest {
 
     @Test
     void headersReturnsMimeHeadersInstance() {
-        Headers headers = requestHeader.headers();
+        Headers headers = request.headers();
         assertNotNull(headers);
         assertEquals(0, headers.size());
     }
 
     @Test
-    void parametersReturnsParametersInstance() {
-        Parameters parameters = requestHeader.parameters();
-        assertNotNull(parameters);
-    }
-
-    @Test
     void getContentTypeReturnsNullWhenHeaderNotSet() {
-        String contentType = requestHeader.getContentType();
+        String contentType = request.getContentType();
         assertNull(contentType);
     }
 
     @Test
     void getContentTypeReturnsValueFromHeaders() {
         // 헤더에 content-type 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("application/json");
 
-        String contentType = requestHeader.getContentType();
+        String contentType = request.getContentType();
         assertEquals("application/json", contentType);
     }
 
     @Test
     void getContentTypeCachesResult() {
-        // 헤더에 content-type 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("application/json");
 
-        String contentType1 = requestHeader.getContentType();
-        String contentType2 = requestHeader.getContentType();
+        String contentType1 = request.getContentType();
+        String contentType2 = request.getContentType();
 
         assertEquals("application/json", contentType1);
         assertEquals("application/json", contentType2);
-        // 같은 HeaderBytes 인스턴스 참조하는지 확인은 구현상 어려우므로 값만 확인
     }
 
     @Test
     void getContentLengthReturnsNegativeWhenHeaderNotSet() {
-        int contentLength = requestHeader.getContentLength();
+        int contentLength = request.getContentLength();
         assertEquals(-1, contentLength);
     }
 
     @Test
     void getHeaderReturnsValueFromHeaders() {
         // 헤더 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("Authorization");
         header.getValue().setString("Bearer token123");
 
-        String headerValue = requestHeader.getHeader("Authorization");
+        String headerValue = request.headers().getHeader("Authorization");
         assertEquals("Bearer token123", headerValue);
     }
 
     @Test
     void getHeaderReturnsNullForNonExistentHeader() {
-        String headerValue = requestHeader.getHeader("Non-Existent");
+        String headerValue = request.headers().getHeader("Non-Existent");
         assertNull(headerValue);
     }
 
     @Test
     void getCharacterEncodingReturnsNullWhenContentTypeNotSet() {
-        String encoding = requestHeader.getCharacterEncoding();
+        String encoding = request.getCharacterEncoding();
         assertNull(encoding);
     }
 
     @Test
     void getCharacterEncodingReturnsEncodingFromContentType() {
         // content-type 헤더에 charset 포함하여 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("text/html; charset=UTF-8");
 
-        String encoding = requestHeader.getCharacterEncoding();
+        String encoding = request.getCharacterEncoding();
         assertEquals("UTF-8", encoding);
     }
 
     @Test
     void getCharacterEncodingReturnsEmptyStringWhenContentTypeHasNoCharset() {
         // charset 없는 content-type 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("application/json");
 
-        String encoding = requestHeader.getCharacterEncoding();
+        String encoding = request.getCharacterEncoding();
         assertNull(encoding);
     }
 
     @Test
     void getCharacterEncodingCachesResult() {
         // content-type 헤더 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("text/plain; charset=ISO-8859-1");
 
-        String encoding1 = requestHeader.getCharacterEncoding();
-        String encoding2 = requestHeader.getCharacterEncoding();
+        String encoding1 = request.getCharacterEncoding();
+        String encoding2 = request.getCharacterEncoding();
 
         assertEquals("ISO-8859-1", encoding1);
         assertEquals("ISO-8859-1", encoding2);
@@ -188,30 +178,30 @@ class RequestHeaderTest {
 
     @Test
     void getCharsetFromContentTypeReturnsNullWhenEncodingNull() {
-        Charset charset = requestHeader.getCharsetFromContentType();
+        Charset charset = request.getCharsetFromContentType();
         assertNull(charset);
     }
 
     @Test
     void getCharsetFromContentTypeReturnsCharsetInstance() {
         // content-type 헤더 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("text/html; charset=UTF-8");
 
-        Charset charset = requestHeader.getCharsetFromContentType();
+        Charset charset = request.getCharsetFromContentType();
         assertEquals(StandardCharsets.UTF_8, charset);
     }
 
     @Test
     void getCharsetFromContentTypeCachesResult() {
         // content-type 헤더 설정
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("application/xml; charset=UTF-16");
 
-        Charset charset1 = requestHeader.getCharsetFromContentType();
-        Charset charset2 = requestHeader.getCharsetFromContentType();
+        Charset charset1 = request.getCharsetFromContentType();
+        Charset charset2 = request.getCharsetFromContentType();
 
         assertEquals(StandardCharsets.UTF_16, charset1);
         assertEquals(StandardCharsets.UTF_16, charset2);
@@ -221,86 +211,86 @@ class RequestHeaderTest {
     @Test
     void recycleResetsAllFields() {
         // 모든 필드에 값 설정
-        requestHeader.method().setString("POST");
-        requestHeader.requestPath().setString("/api/test");
-        requestHeader.queryString().setString("param=value");
-        requestHeader.requestURI().setString("/api/test?param=value");
-        requestHeader.protocol().setString("HTTP/1.1");
+        request.method().setString("POST");
+        request.requestPath().setString("/api/test");
+        request.queryString().setString("param=value");
+        request.requestURI().setString("/api/test?param=value");
+        request.protocol().setString("HTTP/1.1");
 
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-type");
         header.getValue().setString("application/json; charset=UTF-8");
 
         // 캐시된 값들 생성
-        requestHeader.getContentType();
-        requestHeader.getContentLength();
-        requestHeader.getCharacterEncoding();
-        requestHeader.getCharsetFromContentType();
+        request.getContentType();
+        request.getContentLength();
+        request.getCharacterEncoding();
+        request.getCharsetFromContentType();
 
         // recycle 호출
-        requestHeader.recycle();
+        request.recycle();
 
         // 모든 MessageBytes가 리셋되었는지 확인
-        assertEquals("", requestHeader.method().toString());
-        assertEquals("", requestHeader.requestPath().toString());
-        assertEquals("", requestHeader.queryString().toString());
-        assertEquals("", requestHeader.requestURI().toString());
-        assertEquals("", requestHeader.protocol().toString());
+        assertEquals("", request.method().toString());
+        assertEquals("", request.requestPath().toString());
+        assertEquals("", request.queryString().toString());
+        assertEquals("", request.requestURI().toString());
+        assertEquals("", request.protocol().toString());
         
-        assertTrue(requestHeader.method().isNull());
-        assertTrue(requestHeader.requestPath().isNull());
-        assertTrue(requestHeader.queryString().isNull());
-        assertTrue(requestHeader.requestURI().isNull());
-        assertTrue(requestHeader.protocol().isNull());
+        assertTrue(request.method().isNull());
+        assertTrue(request.requestPath().isNull());
+        assertTrue(request.queryString().isNull());
+        assertTrue(request.requestURI().isNull());
+        assertTrue(request.protocol().isNull());
 
         // 헤더가 리셋되었는지 확인
-        assertEquals(0, requestHeader.headers().size());
+        assertEquals(0, request.headers().size());
 
         // 캐시된 값들이 초기화되었는지 확인
-        assertNull(requestHeader.getCharacterEncoding());
-        assertNull(requestHeader.getCharsetFromContentType());
+        assertNull(request.getCharacterEncoding());
+        assertNull(request.getCharsetFromContentType());
     }
 
     @Test
     void multipleHeadersHandling() {
         // 여러 헤더 설정
-        var header1 = requestHeader.headers().createHeader();
+        var header1 = request.headers().createHeader();
         header1.name().setString("Accept");
         header1.getValue().setString("application/json");
 
-        var header2 = requestHeader.headers().createHeader();
+        var header2 = request.headers().createHeader();
         header2.name().setString("User-Agent");
         header2.getValue().setString("TestClient/1.0");
 
-        var header3 = requestHeader.headers().createHeader();
+        var header3 = request.headers().createHeader();
         header3.name().setString("content-type");
         header3.getValue().setString("text/html; charset=UTF-8");
 
-        assertEquals("application/json", requestHeader.getHeader("Accept"));
-        assertEquals("TestClient/1.0", requestHeader.getHeader("User-Agent"));
-        assertEquals("text/html; charset=UTF-8", requestHeader.getContentType());
-        assertEquals("UTF-8", requestHeader.getCharacterEncoding());
+        assertEquals("application/json", request.headers().getHeader("Accept"));
+        assertEquals("TestClient/1.0", request.headers().getHeader("User-Agent"));
+        assertEquals("text/html; charset=UTF-8", request.getContentType());
+        assertEquals("UTF-8", request.getCharacterEncoding());
     }
 
     @Test
     void caseInsensitiveHeaderAccess() {
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("Content-Type");
         header.getValue().setString("application/json");
 
-        assertEquals("application/json", requestHeader.getHeader("content-type"));
-        assertEquals("application/json", requestHeader.getHeader("CONTENT-TYPE"));
-        assertEquals("application/json", requestHeader.getHeader("Content-Type"));
+        assertEquals("application/json", request.headers().getHeader("content-type"));
+        assertEquals("application/json", request.headers().getHeader("CONTENT-TYPE"));
+        assertEquals("application/json", request.headers().getHeader("Content-Type"));
     }
 
 
     @Test
     void invalidContentLengthHandling() {
-        var header = requestHeader.headers().createHeader();
+        var header = request.headers().createHeader();
         header.name().setString("content-length");
         header.getValue().setString("invalid");
 
-        int contentLength = requestHeader.getContentLength();
+        int contentLength = request.getContentLength();
         assertEquals(0, contentLength);
     }
 }

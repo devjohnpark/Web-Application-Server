@@ -1,6 +1,8 @@
-package org.dochi.webserver.socket;
+package org.dochi.webserver.connect;
 
 import org.dochi.webserver.attribute.SocketAttribute;
+import org.dochi.webserver.socket.BioSocketWrapper;
+import org.dochi.webserver.socket.SocketWrapper;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -10,17 +12,25 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BioSocketWrapperConnectionTest {
-    private static final Logger log = LoggerFactory.getLogger(BioSocketWrapperConnectionTest.class);
+public class Connection {
+    private static final Logger log = LoggerFactory.getLogger(Connection.class);
 
-    protected volatile BioSocketWrapper serverConnectedSocket;
-    protected BioSocketWrapper clientConnectedSocket;
+    private volatile SocketWrapper<?> serverConnectedSocket;
+    private SocketWrapper<?> clientConnectedSocket;
 
     private Thread serverThread;
     private ServerSocket serverSocket;
 
+    public SocketWrapper<?> getServerConnectedSocket() {
+        return serverConnectedSocket;
+    }
+
+    public SocketWrapper<?> getClientConnectedSocket() {
+        return clientConnectedSocket;
+    }
+
     @BeforeEach
-    void connect() throws IOException {
+    public void connect() throws IOException {
 
         serverSocket = new ServerSocket(0); // 사용 가능한 포트 자동 할당
 
@@ -59,7 +69,7 @@ public class BioSocketWrapperConnectionTest {
     }
 
     @AfterEach
-    void disconnect() throws IOException {
+    public void disconnect() throws IOException {
         if (clientConnectedSocket != null && !clientConnectedSocket.isClosed()) {
             clientConnectedSocket.close();
             log.debug("Client socket close");
@@ -80,4 +90,6 @@ public class BioSocketWrapperConnectionTest {
             log.debug("server thread interrupted");
         }
     }
+
+
 }

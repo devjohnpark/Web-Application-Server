@@ -1,5 +1,7 @@
 package org.dochi.internal.http11;
 
+import org.dochi.internal.request.Request;
+
 import java.io.IOException;
 
 public class Http11InputBufferWrapper {
@@ -9,7 +11,7 @@ public class Http11InputBufferWrapper {
         this.inputBuffer = inputBuffer;
     }
 
-    public boolean parseHeader(RequestHeader requestHeader) throws IOException {
-        return inputBuffer.parseHeader(requestHeader);
+    public boolean parseHeader(Request request) throws IOException {
+        return inputBuffer.parseHeader(request);
     }
 }

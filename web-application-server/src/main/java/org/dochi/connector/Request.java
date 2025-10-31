@@ -118,6 +118,8 @@ public class Request extends RequestFacade implements ExternalRequest {
         // 1. query string 파싱
         parseHeaderRequestParameters();
         // 2.content-type에 따라 파싱 (multipart/form-data와 application/x-www-form-urlencoded 기본 파싱)
+
+        String media = this.getContentType();
         MediaType mediaType = MediaType.parseMediaType(this.getContentType()); // type/subtype 없으면 null 반환
         if ("application/x-www-form-urlencoded".equalsIgnoreCase(mediaType.getFullType())) {
             parseBodyRequestParameters(); // header와 body의 request parameter 중복시 body 값으로 덮어씌움

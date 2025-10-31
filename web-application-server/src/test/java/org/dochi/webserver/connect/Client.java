@@ -1,11 +1,13 @@
-package org.dochi.webserver.socket;
+package org.dochi.webserver.connect;
+
+import org.dochi.webserver.socket.SocketWrapper;
 
 import java.io.IOException;
 
-public class HttpClient {
+public class Client {
     private final SocketWrapper<?> clientSocket;
 
-    public HttpClient(SocketWrapper<?> clientSocketWrapper) {
+    public Client(SocketWrapper<?> clientSocketWrapper) {
         this.clientSocket = clientSocketWrapper;
     }
 
