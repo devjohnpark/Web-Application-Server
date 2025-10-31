@@ -23,4 +23,11 @@ public class Connector {
         return webService.getServices();
     }
 
+    public HttpResConfig getHttpResConfig() {
+        return httpResConfig;
+    }
+
+    public HttpReqConfig getHttpReqConfig() {
+        return httpReqConfig;
+    }
 }

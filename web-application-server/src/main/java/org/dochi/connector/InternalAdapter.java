@@ -73,7 +73,7 @@ public class InternalAdapter implements Adapter {
     private Request ensureRequestFacade(org.dochi.internal.request.Request internalRequest) {
         Request externalRequest = (Request) internalRequest.getFacade();
         if (externalRequest == null) {
-            externalRequest = new Request(internalRequest, new HttpReqAttribute());
+            externalRequest = new Request(internalRequest, connector.getHttpReqConfig());
             internalRequest.setFacade(externalRequest);
         }
         return externalRequest;
@@ -82,7 +82,7 @@ public class InternalAdapter implements Adapter {
     private Response ensureResponseFacade(org.dochi.internal.response.Response internalResponse) {
         Response externalResponse = (Response) internalResponse.getFacade();
         if (externalResponse == null) {
-            externalResponse = new Response(internalResponse, new HttpResAttribute());
+            externalResponse = new Response(internalResponse, connector.getHttpResConfig());
             internalResponse.setFacade(externalResponse);
         }
         return externalResponse;
