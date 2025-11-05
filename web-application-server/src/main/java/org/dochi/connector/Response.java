@@ -2,7 +2,7 @@ package org.dochi.connector;
 
 import org.dochi.external.ExternalResponse;
 import org.dochi.http.utils.HttpStatus;
-import org.dochi.internal.response.ResponseFacade;
+import org.dochi.internal.ResponseFacade;
 import org.dochi.webresource.ResourceType;
 import org.dochi.webserver.config.HttpResConfig;
 
@@ -20,14 +20,13 @@ public class Response extends ResponseFacade implements ExternalResponse {
     private final HttpResConfig httpResConfig;
     private OutputStream out;
 
-    public Response(org.dochi.internal.response.Response response, HttpResConfig httpResConfig) {
+    public Response(org.dochi.internal.Response response, HttpResConfig httpResConfig) {
         super(response);
         this.httpResConfig = httpResConfig;
     }
 
     @Override
     public void setOutputStream(OutputStream out) {
-        checkOutputStream(out);
         this.out = out;
     }
 
@@ -67,7 +66,6 @@ public class Response extends ResponseFacade implements ExternalResponse {
     }
 
     public OutputStream getOutputStream() throws IOException {
-        checkOutputStream(this.out);
         response.commit();
         return this.out;
     }
@@ -117,23 +115,19 @@ public class Response extends ResponseFacade implements ExternalResponse {
         return body.getBytes(charset);
     }
 
-    private byte[] getCharArrayBytes(char[] body, Charset charset) {
+    private byte[] getCharArrayBytes(char[] body, Charset charset) throws CharacterCodingException {
         if (body == null) {
             return null;
         }
-        try {
-            CharsetEncoder encoder = charset.newEncoder();
-            ByteBuffer buffer = encoder.encode(CharBuffer.wrap(body));
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            return bytes;
-        } catch (CharacterCodingException e) {
-            throw new IllegalStateException("Failed to encode char[] with charset=" + charset, e);
-        }
+        CharsetEncoder encoder = charset.newEncoder();
+        ByteBuffer buffer = encoder.encode(CharBuffer.wrap(body));
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return bytes;
     }
 
     private static void checkHttpStatusError(HttpStatus status) {
-        if (status.getCode() < 400) throw new IllegalStateException("HTTP status code is not error" + status.getCode());;
+        if (status.getCode() < 400) throw new IllegalArgumentException("HTTP status code is not error" + status.getCode());;
     }
 
     private void setDefaultHeader(byte[] body, String contentType) {
@@ -146,10 +140,6 @@ public class Response extends ResponseFacade implements ExternalResponse {
         if (isNotEmptyContentType(contentType) && hasNotContentType()) {
             setContentType(contentType);
         }
-    }
-
-    private void checkOutputStream(OutputStream out) {
-        if (out == null) throw new IllegalArgumentException("OutputStream cannot be null");
     }
 
     private boolean hasNotContentType() {

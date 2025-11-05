@@ -1,13 +1,13 @@
 package org.dochi.internal.buffer;
 
-import org.dochi.webserver.socket.SocketWrapper;
+import org.dochi.webserver.net.SocketWrapperBase;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class TmpBufferedOutputStream extends OutputStream {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
-    private SocketWrapper<?> socketWrapper;
+    private SocketWrapperBase<?> socketWrapper;
     private final byte[] buffer;
     private int bufferPosition = 0;
 
@@ -16,16 +16,10 @@ public class TmpBufferedOutputStream extends OutputStream {
     }
 
     public TmpBufferedOutputStream(int bufferSize) {
-        if (bufferSize <= 0) {
-            throw new IllegalArgumentException("buffer size need to be positive");
-        }
         this.buffer = new byte[bufferSize];
     }
 
-    public void init(SocketWrapper<?> socketWrapper) {
-        if (socketWrapper == null) {
-            throw new IllegalStateException("socketWrapper is null");
-        }
+    public void init(SocketWrapperBase<?> socketWrapper) {
         this.socketWrapper = socketWrapper;
     }
 

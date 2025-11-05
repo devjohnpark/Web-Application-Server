@@ -23,9 +23,6 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
 
     // 지연 초기화(lazy init)
     public void setInputBuffer(org.dochi.internal.buffer.InputBuffer internalInputBuffer) {
-        if (internalInputBuffer == null) {
-            throw new IllegalStateException("InternalInputBuffer cannot be null");
-        }
         this.inputbuffer = internalInputBuffer;
     }
 
@@ -85,7 +82,7 @@ public class InputBuffer implements ApplicationBufferHandler, Closeable {
     public int read(byte[] b, int off, int len) throws IOException {
         throwIfClosed();
         if (b == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException();
         }
         if (off < 0 || len < 0 || off + len > b.length) {
             throw new IndexOutOfBoundsException();

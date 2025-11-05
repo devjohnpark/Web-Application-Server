@@ -25,8 +25,8 @@ public abstract class LifecycleBase implements Lifecycle {
     @Override
     public void stop() throws LifecycleException {
         for (Lifecycle lifecycle : lifecycles) {
-            lifecycle.destroy();
             lifecycle.stop();
+            lifecycle.destroy();
         }
     }
 

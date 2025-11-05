@@ -1,26 +1,25 @@
 package org.dochi.internal.http11;
 
-import org.dochi.connector.InternalAdapter;
+import org.dochi.connector.Adapter;
+import org.dochi.internal.HttpProcessorBase;
 import org.dochi.internal.buffer.TmpBufferedOutputStream;
-import org.dochi.internal.processor.AbstractHttpProcessor;
 import org.dochi.webserver.config.HttpConfig;
-import org.dochi.webserver.socket.SocketWrapper;
-import org.dochi.webserver.socket.SocketState;
+import org.dochi.webserver.net.SocketWrapperBase;
+import org.dochi.webserver.net.EndpointBase.Handler.SocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.dochi.webserver.socket.SocketState.*;
 
-public class Http11Processor extends AbstractHttpProcessor {
+public class Http11Processor extends HttpProcessorBase {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Http11InputBuffer inputBuffer;
     private final TmpBufferedOutputStream tempBufferOutputStream;
 
-    public Http11Processor(InternalAdapter mapper, HttpConfig config) {
-        super(mapper, config);
+    public Http11Processor(Adapter adapter, HttpConfig config) {
+        super(adapter, config);
         this.inputBuffer = new Http11InputBuffer(config.getHttpReqConfig().getRequestHeaderMaxSize());
         this.request.setInputBuffer(this.inputBuffer);
         this.tempBufferOutputStream = new TmpBufferedOutputStream();
@@ -28,30 +27,30 @@ public class Http11Processor extends AbstractHttpProcessor {
     }
 
     @Override
-    protected void recycle() {
+    public void recycle() {
         inputBuffer.recycle();
         tempBufferOutputStream.recycle();
         super.recycle();
     }
 
-    protected boolean isKeepAlive(SocketWrapper<?> socketWrapper) {
+    protected boolean isKeepAlive(SocketWrapperBase<?> socketWrapper) {
         return isRequestKeepAlive() && isSeverKeepAlive(socketWrapper);
     }
 
-    private boolean shouldKeepAlive(SocketWrapper<?> socketWrapper) {
+    private boolean shouldKeepAlive(SocketWrapperBase<?> socketWrapper) {
         boolean isKeepAlive = isKeepAlive(socketWrapper);
         response.setConnection(isKeepAlive ? "keep-alive" : "close");
         if (isKeepAlive) {
-            int timeout = socketWrapper.getConfigKeepAliveTimeout();
-            int maxRequests = socketWrapper.getConfigMaxKeepAliveRequests();
+            int timeout = socketWrapper.getKeepAliveTimeout();
+            int maxRequests = socketWrapper.getMaxKeepAliveRequests();
             String keepAliveValue = "timeout=" + (timeout / 1000) + ", max=" + maxRequests;
             response.setKeepAlive(keepAliveValue);
         }
         return isKeepAlive;
     }
 
-    private boolean isSeverKeepAlive(SocketWrapper<?> socketWrapper) {
-        return !isReachedMax(socketWrapper.incrementKeepAliveCount(), socketWrapper.getConfigMaxKeepAliveRequests());
+    private boolean isSeverKeepAlive(SocketWrapperBase<?> socketWrapper) {
+        return !isReachedMax(socketWrapper.incrementKeepAliveCount(), socketWrapper.getMaxKeepAliveRequests());
     }
 
     private boolean isReachedMax(int currentCount, int maxCount) {
@@ -75,19 +74,19 @@ public class Http11Processor extends AbstractHttpProcessor {
     }
 
     @Override
-    protected void setSocketWrapper(SocketWrapper<?> socketWrapper) {
+    protected void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
         inputBuffer.init(socketWrapper);
         tempBufferOutputStream.init(socketWrapper); // later -> outputBuffer.init(socketWrapper);
     }
 
-    protected SocketState service(SocketWrapper<?> socketWrapper) throws IOException {
+    protected SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException {
         boolean isKeepAlive = true;
         while (isKeepAlive) {
-            socketWrapper.setConnectionTimeout(socketWrapper.getConfigKeepAliveTimeout());
+            socketWrapper.setConnectionTimeout(socketWrapper.getKeepAliveTimeout());
 
             if (!inputBuffer.parseHeader(request)) {
                 // EOF -> read -1 -> false -> client close -> disconnection
-                return CLOSED;
+                return SocketState.CLOSED;
             }
 
             if (isUpgradeRequest(socketWrapper)) {
@@ -96,14 +95,14 @@ public class Http11Processor extends AbstractHttpProcessor {
                     // (1) upgradeToken(); // upgradeToken = getHeader(Upgrade) & getHeader(HTTP2-Settings);
                     // (2) sendUpgrade(); // HTTP/1.1 response 101 Switching Protocols
                 // 2. response as HTTP/2.0 using Http2Processor
-                return UPGRADING; // not need http api
+                return SocketState.UPGRADING; // not need http api
             }
 
             if (!shouldKeepAlive(socketWrapper)) {
                 isKeepAlive = false;
             }
 
-            getDispatcher().service(request, response);
+            getAdapter().service(request, response);
 
             response.flush();
 
@@ -116,10 +115,10 @@ public class Http11Processor extends AbstractHttpProcessor {
             // 3. If call rapped flush method, According to isFlushed value(true/false), flush() to be called or not.
             this.recycle(); // low-level recycle
         }
-        return CLOSED;
+        return SocketState.CLOSED;
     }
 
-    private boolean isUpgradeRequest(SocketWrapper<?> socketWrapper) {
+    private boolean isUpgradeRequest(SocketWrapperBase<?> socketWrapper) {
         String connectionValue = this.request.headers().getHeader("connection");
         String upgradeValue = this.request.headers().getHeader("upgrade");
         return connectionValue.equalsIgnoreCase("upgrade") &&

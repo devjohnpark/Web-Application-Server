@@ -80,14 +80,18 @@ public class MultiPartParser {
 
     private boolean parseBodyUntilBoundary(MultipartBodyUntilBoundary bodyUntilBoundary) throws IOException {
         byte[] bytes;
-        while ((bytes = stream.readCRLFLine(bodyMaxSize)) != null) {
-            if (boundaryValidator.isBoundary(bytes)|| boundaryValidator.isEndBoundary(bytes)) {
-                bodyUntilBoundary.setBoundary(bytes);
-                return true;
+        try {
+            while ((bytes = stream.readCRLFLine(bodyMaxSize)) != null) {
+                if (boundaryValidator.isBoundary(bytes)|| boundaryValidator.isEndBoundary(bytes)) {
+                    bodyUntilBoundary.setBoundary(bytes);
+                    return true;
+                }
+                bodyUntilBoundary.setBody(bytes);
             }
-            bodyUntilBoundary.setBody(bytes);
+            return false;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Multipart body " + e.getMessage());
         }
-        return false;
     }
 
     private void storePart(Multipart multipart) throws IOException {

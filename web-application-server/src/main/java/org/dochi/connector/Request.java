@@ -7,7 +7,7 @@ import org.dochi.http.multipart.MultipartStream;
 import org.dochi.http.multipart.Part;
 import org.dochi.http.utils.MediaType;
 import org.dochi.http.utils.Parameters;
-import org.dochi.internal.request.RequestFacade;
+import org.dochi.internal.RequestFacade;
 import org.dochi.webserver.config.HttpReqConfig;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class Request extends RequestFacade implements ExternalRequest {
     protected boolean parametersParsed = false;
     protected boolean multipartParsed = false;
 
-    public Request(org.dochi.internal.request.Request request, HttpReqConfig httpReqConfig) {
+    public Request(org.dochi.internal.Request request, HttpReqConfig httpReqConfig) {
         super(request);
         this.inputBuffer = new InputBuffer();
         this.multipart = new Multipart();
@@ -32,9 +32,6 @@ public class Request extends RequestFacade implements ExternalRequest {
 
     @Override
     public void setInputBuffer(org.dochi.internal.buffer.InputBuffer inputBuffer) {
-        if (inputBuffer == null) {
-            throw new IllegalArgumentException("Input buffer cannot be null");
-        }
         this.inputBuffer.setInputBuffer(inputBuffer);
     }
 

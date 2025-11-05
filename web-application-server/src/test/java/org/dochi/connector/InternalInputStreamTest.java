@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferWrapper;
-import org.dochi.webserver.connect.TestConnectorBase;
+import org.dochi.webserver.connect.TestAcceptorBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
-class InternalInputStreamTest extends TestConnectorBase {
+class InternalInputStreamTest extends TestAcceptorBase {
     private static final Logger log = LoggerFactory.getLogger(InternalInputStreamTest.class);
     private final InputBuffer inputBuffer = new InputBuffer();
     private final InternalInputStream internalInputStream = new InternalInputStream(this.inputBuffer);

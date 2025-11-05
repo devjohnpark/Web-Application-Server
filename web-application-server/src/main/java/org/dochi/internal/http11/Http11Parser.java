@@ -1,7 +1,7 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.request.Request;
-import org.dochi.internal.buffer.HeaderField;
+import org.dochi.internal.Request;
+import org.dochi.internal.HeaderField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +20,7 @@ public class Http11Parser {
     private static final byte QUERY_SP = '?';
     private static final byte HEADER_KEY_VALUE_SP = ':';
     private final HeaderDataSource source;
+    private final int cnt = 0;
     private final int headerMaxSize;
 
     public Http11Parser(HeaderDataSource source, int headerMasSize) {

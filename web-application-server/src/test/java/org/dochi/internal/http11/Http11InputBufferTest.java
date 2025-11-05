@@ -1,6 +1,6 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.request.Request;
+import org.dochi.internal.Request;
 import org.dochi.webserver.connect.Client;
 import org.dochi.webserver.connect.Connector;
 import org.junit.jupiter.api.AfterEach;
@@ -75,7 +75,6 @@ public class Http11InputBufferTest {
         assertEquals("HTTP/1.1", request.protocol().toString());
         assertEquals("keep-alive", request.headers().getHeader("Connector"));
         assertEquals("localhost:8080", request.headers().getHeader("host"));
-        assertEquals("keep-alive", request.headers().getHeader("connector"));
         assertEquals("max-age=0", request.headers().getHeader("cache-control"));
         assertEquals("1", request.headers().getHeader("upgrade-insecure-requests"));
         assertTrue(request.headers().getHeader("user-agent").contains("Mozilla/5.0"));

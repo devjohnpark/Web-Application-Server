@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
-import org.dochi.internal.request.Request;
-import org.dochi.internal.response.Response;
+import org.dochi.internal.Request;
+import org.dochi.internal.Response;
 
 import java.io.IOException;
 

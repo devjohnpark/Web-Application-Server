@@ -16,6 +16,16 @@ public class WebServiceLifecycle implements Lifecycle {
     }
 
     @Override
+    public void start() throws LifecycleException {
+
+    }
+
+    @Override
+    public void stop() throws LifecycleException {
+
+    }
+
+    @Override
     public void init() throws LifecycleException {
         for (HttpApiHandler service: webService.getServices().values()) {
             service.init(webService.getServiceConfig());

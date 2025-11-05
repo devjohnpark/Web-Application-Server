@@ -14,7 +14,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResponseTest {
-    private final org.dochi.internal.response.Response internalResponse = new org.dochi.internal.response.Response();
+    private final org.dochi.internal.Response internalResponse = new org.dochi.internal.Response();
     private final Response externalResponse = new Response(internalResponse, new HttpResAttribute());
     private ByteArrayOutputStream out;
 
@@ -103,7 +103,7 @@ class ResponseTest {
 
     @Test
     void sendErrorWithNonErrorStatusThrows() {
-        assertThrows(IllegalStateException.class, () -> externalResponse.sendError(HttpStatus.OK));
+        assertThrows(IllegalArgumentException.class, () -> externalResponse.sendError(HttpStatus.OK));
     }
 
     @Test

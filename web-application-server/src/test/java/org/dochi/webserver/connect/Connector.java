@@ -1,8 +1,8 @@
 package org.dochi.webserver.connect;
 
 import org.dochi.webserver.attribute.SocketAttribute;
-import org.dochi.webserver.socket.BioSocketWrapper;
-import org.dochi.webserver.socket.SocketWrapper;
+import org.dochi.webserver.net.BioSocketWrapper;
+import org.dochi.webserver.net.SocketWrapperBase;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
@@ -15,17 +15,17 @@ import org.slf4j.LoggerFactory;
 public class Connector {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
-    private volatile SocketWrapper<?> serverConnectedSocket;
-    private SocketWrapper<?> clientConnectedSocket;
+    private volatile SocketWrapperBase<?> serverConnectedSocket;
+    private SocketWrapperBase<?> clientConnectedSocket;
 
     private Thread serverThread;
     private ServerSocket serverSocket;
 
-    public SocketWrapper<?> getServerConnectedSocket() {
+    public SocketWrapperBase<?> getServerConnectedSocket() {
         return serverConnectedSocket;
     }
 
-    public SocketWrapper<?> getClientConnectedSocket() {
+    public SocketWrapperBase<?> getClientConnectedSocket() {
         return clientConnectedSocket;
     }
 

@@ -1,7 +1,7 @@
 package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferWrapper;
-import org.dochi.webserver.connect.TestConnectorBase;
+import org.dochi.webserver.connect.TestAcceptorBase;
 import org.dochi.webserver.attribute.HttpReqAttribute;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RequestTest extends TestConnectorBase {
+class RequestTest extends TestAcceptorBase {
     private final Request externalRequest = new Request(request, new HttpReqAttribute());
     private final Http11InputBufferWrapper inputBufferWrapper = new Http11InputBufferWrapper(inputBuffer);
 
@@ -179,11 +179,6 @@ class RequestTest extends TestConnectorBase {
         for (int i = off; i < len; i++) {
             assertEquals(actualBuf[i], buf[i - off]);
         }
-    }
-
-    @Test
-    void setInputBuffer() {
-        assertThrows(IllegalArgumentException.class, () -> this.externalRequest.setInputBuffer(null));
     }
 
     @Test

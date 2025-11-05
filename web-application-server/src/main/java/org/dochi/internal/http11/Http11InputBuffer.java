@@ -1,9 +1,9 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.request.Request;
+import org.dochi.internal.Request;
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
-import org.dochi.webserver.socket.SocketWrapper;
+import org.dochi.webserver.net.SocketWrapperBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     }
 
     @Override
-    public void init(SocketWrapper<?> socketWrapper) {
+    public void init(SocketWrapperBase<?> socketWrapper) {
         this.socketInputBuffer.init(socketWrapper);
     }
 
@@ -75,14 +75,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
     private static class SocketInputBuffer implements InputBuffer {
 
-        private SocketWrapper<?> socketWrapper;
+        private SocketWrapperBase<?> socketWrapper;
 
         @Override
-        public void init(SocketWrapper<?> socketWrapper) {
-            if (socketWrapper == null) {
-                log.debug("socketWrapper cannot be null");
-                throw new IllegalArgumentException("socketWrapper cannot be null");
-            }
+        public void init(SocketWrapperBase<?> socketWrapper) {
             this.socketWrapper = socketWrapper;
         }
 
@@ -96,9 +92,6 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
             ByteBuffer buffer = handler.getByteBuffer();
             if (buffer == null) {
                 throw new IllegalStateException("buffer is null");
-            }
-            if (this.socketWrapper == null) {
-                throw new IllegalStateException("No socket wrapper is initialized");
             }
             int bytesRead = this.socketWrapper.read(buffer.array(), buffer.limit(), buffer.capacity() - buffer.limit());
             if (bytesRead > 0) {

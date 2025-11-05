@@ -2,21 +2,23 @@ package org.dochi.connector;
 
 import org.dochi.api.handler.HttpApiHandler;
 import org.dochi.webserver.attribute.WebService;
+import org.dochi.webserver.config.HttpConfig;
 import org.dochi.webserver.config.HttpReqConfig;
 import org.dochi.webserver.config.HttpResConfig;
 
 import java.util.Map;
 
 public class Connector {
-
     private final WebService webService;
-    private final HttpReqConfig httpReqConfig;
-    private final HttpResConfig httpResConfig;
+    private final HttpConfig httpConfig;
+//    private final HttpReqConfig httpReqConfig;
+//    private final HttpResConfig httpResConfig;
 
-    public Connector(WebService webService, HttpReqConfig reqConfig, HttpResConfig resConfig) {
+    public Connector(WebService webService, HttpConfig httpConfig) {
         this.webService = webService;
-        this.httpReqConfig = reqConfig;
-        this.httpResConfig = resConfig;
+        this.httpConfig = httpConfig;
+//        this.httpReqConfig = reqConfig;
+//        this.httpResConfig = resConfig;
     }
 
     public Map<String, HttpApiHandler> getServices() {
@@ -24,10 +26,10 @@ public class Connector {
     }
 
     public HttpResConfig getHttpResConfig() {
-        return httpResConfig;
+        return httpConfig.getHttpResConfig();
     }
 
     public HttpReqConfig getHttpReqConfig() {
-        return httpReqConfig;
+        return httpConfig.getHttpReqConfig();
     }
 }

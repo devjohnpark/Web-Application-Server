@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class DefaultHttpApiHandler extends AbstractHttpApiHandler {
+public class DefaultHttpApiHandler extends HttpApiHandlerBase {
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpApiHandler.class);
 
     @Override

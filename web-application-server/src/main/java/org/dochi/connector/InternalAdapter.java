@@ -1,9 +1,6 @@
 package org.dochi.connector;
 
 import org.dochi.api.handler.HttpApiHandler;
-import org.dochi.webserver.attribute.HttpReqAttribute;
-import org.dochi.webserver.attribute.HttpResAttribute;
-import org.dochi.webserver.attribute.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -15,8 +12,7 @@ public class InternalAdapter implements Adapter {
 
     // HttpDispatcher를 HttpAdapter로 변경 (service 메서드 정의한 Adapter 인터페이스 정의)
     // WebService: 컨테이너와 요청/응답 설정 정보를 포함한 객체로 변경
-    // Connector: WebService 컨테이너와 요청/응답 설정 정보를 포함한 connector 계층의 객체
-
+    // Adapter: WebService 컨테이너와 요청/응답 설정 정보를 포함한 connector 계층의 객체
     public InternalAdapter(Connector connector) {
         this.connector = connector;
     }
@@ -53,7 +49,7 @@ public class InternalAdapter implements Adapter {
     //  * Request/Response Facade 추상 클래스
     //  * External Request/Response 인터페이스로
 
-    public void service(org.dochi.internal.request.Request req, org.dochi.internal.response.Response res) throws IOException {
+    public void service(org.dochi.internal.Request req, org.dochi.internal.Response res) throws IOException {
         Request request = ensureRequestFacade(req);
         Response response = ensureResponseFacade(res);
 
@@ -70,7 +66,7 @@ public class InternalAdapter implements Adapter {
         response.recycle();
     }
 
-    private Request ensureRequestFacade(org.dochi.internal.request.Request internalRequest) {
+    private Request ensureRequestFacade(org.dochi.internal.Request internalRequest) {
         Request externalRequest = (Request) internalRequest.getFacade();
         if (externalRequest == null) {
             externalRequest = new Request(internalRequest, connector.getHttpReqConfig());
@@ -79,7 +75,7 @@ public class InternalAdapter implements Adapter {
         return externalRequest;
     }
 
-    private Response ensureResponseFacade(org.dochi.internal.response.Response internalResponse) {
+    private Response ensureResponseFacade(org.dochi.internal.Response internalResponse) {
         Response externalResponse = (Response) internalResponse.getFacade();
         if (externalResponse == null) {
             externalResponse = new Response(internalResponse, connector.getHttpResConfig());

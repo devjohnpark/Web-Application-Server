@@ -1,6 +1,6 @@
 package org.dochi.internal.http11;
 
-import org.dochi.internal.request.Request;
+import org.dochi.internal.Request;
 
 import java.io.IOException;
 
