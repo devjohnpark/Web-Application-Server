@@ -101,12 +101,12 @@ public final class Request implements RequestContext {
     // internal.Request(Internal Request)과 connector.Request(External Request)는 1대1로 매칭되어야함
     // 방법 1. Adapter에서 External Request Pool 가지고 있음
     //  * 장점: 완전한 계층 분리
-    //  * 단점: 동시성 로직으로 인한 성능 저하 (WAS 부적합)
+    //  * 단점: 동시성 로직으로 인한 성능 저하 (WebAppServer 부적합)
     // 방법 2. internal.Request애 connector.Request를 매핑
     //  * 장점: 간단하고 1:1 매칭 구조 적합
     //  * 단점: low-level 객체가 high level 객체를 역참조
     //    * internal.Request 가지고 외관(facade)으로 사용하는 단 하나는 객체 생성 허용
-    //    * WAS 에서 외부로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
+    //    * WebAppServer 에서 외부로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
     private RequestFacade facade;
 
     public RequestFacade getFacade() {

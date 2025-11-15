@@ -1,25 +1,25 @@
 package org.dochi.internal.http11;
 
 import org.dochi.connector.Adapter;
-import org.dochi.internal.HttpProcessorBase;
+import org.dochi.internal.AbstractHttpProcessor;
 import org.dochi.internal.buffer.TmpBufferedOutputStream;
+import org.dochi.net.AbstractSocketWrapper;
 import org.dochi.webserver.config.HttpConfig;
-import org.dochi.webserver.net.SocketWrapperBase;
-import org.dochi.webserver.net.EndpointBase.Handler.SocketState;
+import org.dochi.net.AbstractEndpoint.Handler.SocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 
-public class Http11Processor extends HttpProcessorBase {
+public class Http11Processor extends AbstractHttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Http11InputBuffer inputBuffer;
     private final TmpBufferedOutputStream tempBufferOutputStream;
 
     public Http11Processor(Adapter adapter, HttpConfig config) {
-        super(adapter, config);
+        super(adapter);
         this.inputBuffer = new Http11InputBuffer(config.getHttpReqConfig().getRequestHeaderMaxSize());
         this.request.setInputBuffer(this.inputBuffer);
         this.tempBufferOutputStream = new TmpBufferedOutputStream();
@@ -33,11 +33,11 @@ public class Http11Processor extends HttpProcessorBase {
         super.recycle();
     }
 
-    protected boolean isKeepAlive(SocketWrapperBase<?> socketWrapper) {
+    protected boolean isKeepAlive(AbstractSocketWrapper<?> socketWrapper) {
         return isRequestKeepAlive() && isSeverKeepAlive(socketWrapper);
     }
 
-    private boolean shouldKeepAlive(SocketWrapperBase<?> socketWrapper) {
+    private boolean shouldKeepAlive(AbstractSocketWrapper<?> socketWrapper) {
         boolean isKeepAlive = isKeepAlive(socketWrapper);
         response.setConnection(isKeepAlive ? "keep-alive" : "close");
         if (isKeepAlive) {
@@ -49,21 +49,13 @@ public class Http11Processor extends HttpProcessorBase {
         return isKeepAlive;
     }
 
-    private boolean isSeverKeepAlive(SocketWrapperBase<?> socketWrapper) {
+    private boolean isSeverKeepAlive(AbstractSocketWrapper<?> socketWrapper) {
         return !isReachedMax(socketWrapper.incrementKeepAliveCount(), socketWrapper.getMaxKeepAliveRequests());
     }
 
     private boolean isReachedMax(int currentCount, int maxCount) {
         return currentCount >= maxCount;
     }
-
-//    private boolean isRequestKeepAlive() {
-//        String connectionValue = this.requestFacade.getHeader("connection");
-//        if (this.requestFacade.getProtocol().equals("HTTP/1.1")) {
-//            return !(connectionValue != null && connectionValue.equals("close"));
-//        }
-//        return this.requestFacade.getProtocol().equals("HTTP/1.0") && (connectionValue != null && connectionValue.equals("keep-alive"));
-//    }
 
     private boolean isRequestKeepAlive() {
         String connectionValue = this.request.headers().getHeader("connection");
@@ -74,12 +66,12 @@ public class Http11Processor extends HttpProcessorBase {
     }
 
     @Override
-    protected void setSocketWrapper(SocketWrapperBase<?> socketWrapper) {
+    protected void setSocketWrapper(AbstractSocketWrapper<?> socketWrapper) {
         inputBuffer.init(socketWrapper);
         tempBufferOutputStream.init(socketWrapper); // later -> outputBuffer.init(socketWrapper);
     }
 
-    protected SocketState service(SocketWrapperBase<?> socketWrapper) throws IOException {
+    protected SocketState service(AbstractSocketWrapper<?> socketWrapper) throws IOException {
         boolean isKeepAlive = true;
         while (isKeepAlive) {
             socketWrapper.setConnectionTimeout(socketWrapper.getKeepAliveTimeout());
@@ -106,19 +98,12 @@ public class Http11Processor extends HttpProcessorBase {
 
             response.flush();
 
-
-
-            // Response object provides OutputStream object to developer, so it need flush() after processing HTTP API
-            // flush() has system call cost, it needs to remove inefficient action.
-            // 1. Rapping flush method by custom OutputStream.
-            // 2. The custom OutputStream declares boolean-isFlushed variable.
-            // 3. If call rapped flush method, According to isFlushed value(true/false), flush() to be called or not.
             this.recycle(); // low-level recycle
         }
         return SocketState.CLOSED;
     }
 
-    private boolean isUpgradeRequest(SocketWrapperBase<?> socketWrapper) {
+    private boolean isUpgradeRequest(AbstractSocketWrapper<?> socketWrapper) {
         String connectionValue = this.request.headers().getHeader("connection");
         String upgradeValue = this.request.headers().getHeader("upgrade");
         return connectionValue.equalsIgnoreCase("upgrade") &&

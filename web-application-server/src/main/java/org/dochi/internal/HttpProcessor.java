@@ -1,14 +1,11 @@
 package org.dochi.internal;
 
-//import org.dochi.http.api.InternalAdapter;
-//import org.dochi.http.api.mapper.InternalAdapter;
-import org.dochi.webserver.net.EndpointBase.Handler.SocketState;
-import org.dochi.webserver.net.SocketWrapperBase;
+import org.dochi.net.AbstractEndpoint.Handler.SocketState;
+import org.dochi.net.AbstractSocketWrapper;
 
 import java.io.IOException;
-//import org.dochi.webserver.socket.SocketState;
 
 public interface HttpProcessor {
-     SocketState process(SocketWrapperBase<?> socketWrapper) throws IOException;
+     SocketState process(AbstractSocketWrapper<?> socketWrapper) throws IOException;
      void recycle();
 }

@@ -1,13 +1,12 @@
 package org.dochi.webserver.connect;
 
-import org.dochi.webserver.attribute.SocketAttribute;
-import org.dochi.webserver.net.BioSocketWrapper;
-import org.dochi.webserver.net.SocketWrapperBase;
+import org.dochi.webserver.property.SocketProperty;
+import org.dochi.net.BioSocketWrapper;
+import org.dochi.net.AbstractSocketWrapper;
 import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +14,17 @@ import org.slf4j.LoggerFactory;
 public class Connector {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
-    private volatile SocketWrapperBase<?> serverConnectedSocket;
-    private SocketWrapperBase<?> clientConnectedSocket;
+    private volatile AbstractSocketWrapper<?> serverConnectedSocket;
+    private AbstractSocketWrapper<?> clientConnectedSocket;
 
     private Thread serverThread;
     private ServerSocket serverSocket;
 
-    public SocketWrapperBase<?> getServerConnectedSocket() {
+    public AbstractSocketWrapper<?> getServerConnectedSocket() {
         return serverConnectedSocket;
     }
 
-    public SocketWrapperBase<?> getClientConnectedSocket() {
+    public AbstractSocketWrapper<?> getClientConnectedSocket() {
         return clientConnectedSocket;
     }
 
@@ -38,7 +37,7 @@ public class Connector {
             log.debug("Start accept thread...");
             if (!serverSocket.isClosed()) {
                 try {
-                    serverConnectedSocket = new BioSocketWrapper(serverSocket.accept(), new SocketAttribute());
+                    serverConnectedSocket = new BioSocketWrapper(serverSocket.accept(), new SocketProperty());
                     serverConnectedSocket.setConnectionTimeout(1000);
                     log.debug("created server's connection socket");
                 } catch (IOException e) {
@@ -51,7 +50,7 @@ public class Connector {
 
         serverThread.start();
 
-        clientConnectedSocket = new BioSocketWrapper(new Socket("localhost", serverSocket.getLocalPort()), new SocketAttribute());
+        clientConnectedSocket = new BioSocketWrapper(new java.net.Socket("localhost", serverSocket.getLocalPort()), new SocketProperty());
 
         log.debug("Created client's connection socket");
 

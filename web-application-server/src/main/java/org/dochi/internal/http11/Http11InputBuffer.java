@@ -3,7 +3,7 @@ package org.dochi.internal.http11;
 import org.dochi.internal.Request;
 import org.dochi.internal.buffer.ApplicationBufferHandler;
 import org.dochi.internal.buffer.InputBuffer;
-import org.dochi.webserver.net.SocketWrapperBase;
+import org.dochi.net.AbstractSocketWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
     }
 
     @Override
-    public void init(SocketWrapperBase<?> socketWrapper) {
+    public void init(AbstractSocketWrapper<?> socketWrapper) {
         this.socketInputBuffer.init(socketWrapper);
     }
 
@@ -75,10 +75,10 @@ public class Http11InputBuffer implements InputBuffer, ApplicationBufferHandler,
 
     private static class SocketInputBuffer implements InputBuffer {
 
-        private SocketWrapperBase<?> socketWrapper;
+        private AbstractSocketWrapper<?> socketWrapper;
 
         @Override
-        public void init(SocketWrapperBase<?> socketWrapper) {
+        public void init(AbstractSocketWrapper<?> socketWrapper) {
             this.socketWrapper = socketWrapper;
         }
 

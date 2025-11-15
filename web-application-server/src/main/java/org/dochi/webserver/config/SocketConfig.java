@@ -1,5 +1,7 @@
 package org.dochi.webserver.config;
 
-public interface SocketConfig extends KeepAliveConfig {
+public interface SocketConfig {
     int getConnectionTimeout();
+    int getKeepAliveTimeout();
+    int getMaxKeepAliveRequests();
 }

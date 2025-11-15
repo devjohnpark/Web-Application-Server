@@ -1,13 +1,13 @@
 package org.dochi.internal.buffer;
 
-import org.dochi.webserver.net.SocketWrapperBase;
+import org.dochi.net.AbstractSocketWrapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class TmpBufferedOutputStream extends OutputStream {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
-    private SocketWrapperBase<?> socketWrapper;
+    private AbstractSocketWrapper<?> socketWrapper;
     private final byte[] buffer;
     private int bufferPosition = 0;
 
@@ -19,7 +19,7 @@ public class TmpBufferedOutputStream extends OutputStream {
         this.buffer = new byte[bufferSize];
     }
 
-    public void init(SocketWrapperBase<?> socketWrapper) {
+    public void init(AbstractSocketWrapper<?> socketWrapper) {
         this.socketWrapper = socketWrapper;
     }
 

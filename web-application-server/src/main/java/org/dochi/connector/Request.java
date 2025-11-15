@@ -40,6 +40,7 @@ public class Request extends RequestFacade implements ExternalRequest {
         this.inputBuffer.recycle();
         this.parameters.recycle();
         this.multipart.recycle();
+        this.inputStream = null;
         this.parametersParsed = false;
         this.multipartParsed = false;
     }
@@ -110,7 +111,7 @@ public class Request extends RequestFacade implements ExternalRequest {
         return this.inputStream;
     }
 
-    // WAS 기본 파라메터 파싱 (lazy loading and parsing)
+    // WebAppServer 기본 파라메터 파싱 (lazy loading and parsing)
     private void parseParameters() throws IOException {
         // 1. query string 파싱
         parseHeaderRequestParameters();

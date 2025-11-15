@@ -2,7 +2,7 @@ package org.dochi.connector;
 
 import org.dochi.internal.http11.Http11InputBufferWrapper;
 import org.dochi.webserver.connect.TestAcceptorBase;
-import org.dochi.webserver.attribute.HttpReqAttribute;
+import org.dochi.webserver.property.HttpRequestProperty;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RequestTest extends TestAcceptorBase {
-    private final Request externalRequest = new Request(request, new HttpReqAttribute());
+    private final Request externalRequest = new Request(request, new HttpRequestProperty());
     private final Http11InputBufferWrapper inputBufferWrapper = new Http11InputBufferWrapper(inputBuffer);
 
     @Override

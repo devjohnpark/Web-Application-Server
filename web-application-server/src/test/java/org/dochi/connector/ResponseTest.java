@@ -2,7 +2,7 @@ package org.dochi.connector;
 
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.webresource.ResourceType;
-import org.dochi.webserver.attribute.HttpResAttribute;
+import org.dochi.webserver.property.HttpResponseProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ResponseTest {
     private final org.dochi.internal.Response internalResponse = new org.dochi.internal.Response();
-    private final Response externalResponse = new Response(internalResponse, new HttpResAttribute());
+    private final Response externalResponse = new Response(internalResponse, new HttpResponseProperty());
     private ByteArrayOutputStream out;
 
     @BeforeEach

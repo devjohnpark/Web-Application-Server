@@ -1,6 +1,6 @@
 package org.dochi.webserver.config;
 
-import org.dochi.webserver.attribute.ThreadPoolAttribute;
+import org.dochi.webserver.property.ThreadPoolProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ThreadPoolAttributeTest {
 
-    private ThreadPoolAttribute threadPool;
+    private ThreadPoolProperty threadPool;
 
     @BeforeEach
     void setUp() {
-        threadPool = new ThreadPoolAttribute();
+        threadPool = new ThreadPoolProperty();
     }
 
     @Test
