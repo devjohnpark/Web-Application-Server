@@ -5,6 +5,7 @@ import org.dochi.webserver.bootstrap.WebService;
 import org.dochi.webserver.config.HttpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class InternalAdapter implements Adapter {

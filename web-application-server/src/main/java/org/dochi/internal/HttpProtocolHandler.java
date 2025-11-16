@@ -120,13 +120,12 @@ public class HttpProtocolHandler extends AbstractLifecycle {
         public SocketState process(AbstractSocketWrapper<S> socket) {
             SocketState state = OPEN;
             HttpProcessor processor = processorRecycler.getProcessor();
-            try {
-                while (state == OPEN) {
-                    state = processor.process(socket);
-                    if (state == CLOSED) {
-                        release(processor);
-                        processor = null;
-                    }
+            while (state == OPEN) {
+                state = processor.process(socket);
+                if (state == CLOSED) {
+                    release(processor);
+                    processor = null;
+                }
 //                    else if (state == UPGRADING) {
 //                        // 1. 파싱된 요청 데이터 객체(internal.RequestHeader)의 복사본을 가지고 헤더에서 h2 관련 데이터 가져와서(AbstractProcessor.getUpgradeToken()) HTTP/2 설정
 //                        // 2. 필요한 스트림의 개수 만큼 Http2Processor 생성
@@ -137,14 +136,9 @@ public class HttpProtocolHandler extends AbstractLifecycle {
 //                        // processor = getProcessor("HTTP/2.0");
 //                        // HttpProcessor.process() 비동기로 전환 필요
 //                    }
-                }
-            } catch (Throwable e) {
-                log.error(e.getMessage(), e);
-                return CLOSED;
-            } finally {
-                if (processor != null) {
-                    release(processor);
-                }
+            }
+            if (processor != null) {
+                release(processor);
             }
             return state;
         }

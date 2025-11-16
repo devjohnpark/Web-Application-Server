@@ -7,37 +7,29 @@ import org.dochi.http.multipart.MultipartStream;
 import org.dochi.http.multipart.Part;
 import org.dochi.http.utils.MediaType;
 import org.dochi.http.utils.Parameters;
-import org.dochi.internal.RequestFacade;
 import org.dochi.webserver.config.HttpReqConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class Request extends RequestFacade implements ExternalRequest {
-    protected final InputBuffer inputBuffer;
     protected final Multipart multipart;
-    private final HttpReqConfig config;
     protected final Parameters parameters;
     protected InternalInputStream inputStream;
     protected boolean parametersParsed = false;
     protected boolean multipartParsed = false;
+    private final HttpReqConfig config;
 
     public Request(org.dochi.internal.Request request, HttpReqConfig httpReqConfig) {
         super(request);
-        this.inputBuffer = new InputBuffer();
         this.multipart = new Multipart();
         this.parameters = new Parameters();
         this.config = httpReqConfig;
     }
 
     @Override
-    public void setInputBuffer(org.dochi.internal.buffer.InputBuffer inputBuffer) {
-        this.inputBuffer.setInputBuffer(inputBuffer);
-    }
-
-    @Override
     public void recycle() {
-        this.inputBuffer.recycle();
+        super.recycle();
         this.parameters.recycle();
         this.multipart.recycle();
         this.inputStream = null;

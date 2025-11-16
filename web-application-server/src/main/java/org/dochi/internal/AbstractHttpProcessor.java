@@ -28,22 +28,22 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
     }
 
     @Override
-    public SocketState process(AbstractSocketWrapper<?> socketWrapper) throws IOException {
+    public SocketState process(AbstractSocketWrapper<?> socketWrapper) {
         setSocketWrapper(socketWrapper);
         try {
             return service(socketWrapper);
         } catch (IllegalArgumentException e) { // WebAppServer internal input or parsing exception, I decide close connection
-            resolveClosedError(HttpStatus.BAD_REQUEST, e.getMessage());
+            processException(HttpStatus.BAD_REQUEST, e);
         } catch (SocketTimeoutException e) {
             // SocketTimeoutException: when valid time expires while being blocked by read() method of SocketInputStream object (write() is not related to setSoTimeout)
-            resolveClosedError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
+            processException(HttpStatus.REQUEST_TIMEOUT, e);
         } catch (SocketException e) {
             // ignore (CLOSED)
             // reference: NioSocketImpl.implRead()
             //  If call Socket.read() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Connection reset") internally in Socket
             //  If call Socket.write() after client close the socket after the client close the socket, occurred a situation that throws SocketException("Socket closed") internally in Socket
         } catch (Throwable t) { // remain all other exceptions as internal server error then close
-            resolveClosedError(HttpStatus.INTERNAL_SERVER_ERROR, t.getMessage());
+            processException(HttpStatus.INTERNAL_SERVER_ERROR, t);
         } finally {
             log.info("Process count: {}", socketWrapper.getKeepAliveCount());
         }
@@ -62,14 +62,23 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
 
     abstract protected void setSocketWrapper(AbstractSocketWrapper<?> socketWrapper);
 
-    protected abstract SocketState service(AbstractSocketWrapper<?> socketWrapper) throws IOException;
+    protected abstract SocketState service(AbstractSocketWrapper<?> socketWrapper) throws Exception;
 
     protected abstract boolean isKeepAlive(AbstractSocketWrapper<?> socketWrapper);
 
-    private void resolveClosedError(HttpStatus status, String errorMessage) throws IOException {
+    private void processException(HttpStatus status, Throwable t) {
+        log.error(t.getMessage(), t);
+        resolveClosedError(status);
+    }
+
+    private void resolveClosedError(HttpStatus status) {
         response.setStatus(status);
         response.setConnection("close");
-        response.commit();
-        response.flush();
+        try {
+            response.commit();
+            response.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

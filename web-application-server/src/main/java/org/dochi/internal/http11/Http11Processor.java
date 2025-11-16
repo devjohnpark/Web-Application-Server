@@ -9,9 +9,6 @@ import org.dochi.net.AbstractEndpoint.Handler.SocketState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-
 public class Http11Processor extends AbstractHttpProcessor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -71,7 +68,7 @@ public class Http11Processor extends AbstractHttpProcessor {
         tempBufferOutputStream.init(socketWrapper); // later -> outputBuffer.init(socketWrapper);
     }
 
-    protected SocketState service(AbstractSocketWrapper<?> socketWrapper) throws IOException {
+    protected SocketState service(AbstractSocketWrapper<?> socketWrapper) throws Exception {
         boolean isKeepAlive = true;
         while (isKeepAlive) {
             socketWrapper.setConnectionTimeout(socketWrapper.getKeepAliveTimeout());

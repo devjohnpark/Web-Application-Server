@@ -1,5 +1,6 @@
 package org.dochi.internal;
 
+import org.dochi.connector.ResponseFacade;
 import org.dochi.http.utils.DateFormatter;
 import org.dochi.http.utils.HttpStatus;
 import org.dochi.http.utils.HttpVersion;
@@ -115,13 +116,13 @@ public final class Response implements ResponseContext {
 
     public void setFacade(ResponseFacade facade) {
         this.facade = facade;
-        if (this.facade == null) {
-            throw new IllegalStateException("Facade cannot be null");
-        }
         if (this.out == null) {
             throw new IllegalStateException("Output stream cannot be null");
         }
-        facade.setOutputStream(this.out);
+        if (this.facade == null) {
+            throw new IllegalStateException("Facade cannot be null");
+        }
+        this.facade.setOutputStream(this.out);
     }
 
     private void onCommit(byte[] body) throws IOException {

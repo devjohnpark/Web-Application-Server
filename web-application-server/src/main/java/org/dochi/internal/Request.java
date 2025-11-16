@@ -101,25 +101,28 @@ public final class Request implements RequestContext {
     // internal.Request(Internal Request)과 connector.Request(External Request)는 1대1로 매칭되어야함
     // 방법 1. Adapter에서 External Request Pool 가지고 있음
     //  * 장점: 완전한 계층 분리
-    //  * 단점: 동시성 로직으로 인한 성능 저하 (WebAppServer 부적합)
-    // 방법 2. internal.Request애 connector.Request를 매핑
-    //  * 장점: 간단하고 1:1 매칭 구조 적합
+    //  * 단점: 싱글톤 객체인 InternalAdapter의 동시성 로직으로 인한 성능 저하
+    // 방법 2. internal.Request에 connector.Request를 매핑
+    //  * 장점: 간단하고 1:1 매핑 구조 적합
     //  * 단점: low-level 객체가 high level 객체를 역참조
     //    * internal.Request 가지고 외관(facade)으로 사용하는 단 하나는 객체 생성 허용
-    //    * WebAppServer 에서 외부로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
-    private RequestFacade facade;
+    //    * WAS에서 외부(개발자)로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
 
-    public RequestFacade getFacade() {
+    // 결정: RequestContext 인터페이스로 상위 계층에서 자기 자신(internal.Request)를 맵핑시켜서 가져다 사용할수있게함
+    // 효과: RequestContext 인터페이스로 각 계층 독립성 유지하면서 1:1 매핑 (완전한 계층 분리는 아니지만 성능을 위해 합리적인 결정)
+    private RequestContext facade;
+
+    public RequestContext getFacade() {
         return this.facade;
     }
 
-    public void setFacade(RequestFacade facade) {
+    public void setFacade(RequestContext facade) {
         this.facade = facade;
-        if (this.facade == null) {
-            throw new IllegalStateException("Facade cannot be null");
-        }
         if (this.inputBuffer == null) {
             throw new IllegalStateException("Input buffer cannot be null");
+        }
+        if (this.facade == null) {
+            throw new IllegalStateException("Facade cannot be null");
         }
         this.facade.setInputBuffer(this.inputBuffer);
     }

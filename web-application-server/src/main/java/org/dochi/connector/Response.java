@@ -2,7 +2,6 @@ package org.dochi.connector;
 
 import org.dochi.external.ExternalResponse;
 import org.dochi.http.utils.HttpStatus;
-import org.dochi.internal.ResponseFacade;
 import org.dochi.webresource.ResourceType;
 import org.dochi.webserver.config.HttpResConfig;
 
@@ -18,21 +17,10 @@ import java.nio.charset.StandardCharsets;
 // 개발자가 HTTP API에서 응답을 보내기 쉽도록 send 메서드로만 호출
 public class Response extends ResponseFacade implements ExternalResponse {
     private final HttpResConfig httpResConfig;
-    private OutputStream out;
 
     public Response(org.dochi.internal.Response response, HttpResConfig httpResConfig) {
         super(response);
         this.httpResConfig = httpResConfig;
-    }
-
-    @Override
-    public void setOutputStream(OutputStream out) {
-        this.out = out;
-    }
-
-    @Override
-    public void recycle() {
-        // not completed this obj, will write the code
     }
 
     public ExternalResponse setStatus(HttpStatus status) {
