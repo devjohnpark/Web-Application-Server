@@ -1,5 +1,7 @@
 package org.dochi.net;
 
+import org.dochi.thread.ForceTaskQueuePolicy;
+import org.dochi.thread.ScalableTaskQueue;
 import org.dochi.webserver.config.SocketConfig;
 import org.dochi.webserver.config.ThreadPoolConfig;
 import org.dochi.webserver.lifecycle.AbstractLifecycle;
@@ -172,14 +174,19 @@ public abstract class AbstractEndpoint<S> extends AbstractLifecycle {
         // ThreadPoolExecutor는 제출된 하나의 태스크를 단 하나의 워커 스레드에만 할당한다.
         // 소켓 작업은 하나의 워커 스레드에 할당되므로 소켓 작업 내에서 참조하는 객체의 동시성 문제는 없고 메모리 가시성만 신경 쓰면된다.
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            threadPoolConfig.getMinSpareThreads(),
-            threadPoolConfig.getMaxThreads(),
-            60L, // corePoolSize을 초과하는 스레드가 할당된 작업이 없는 경우 keepAliveTime이 경과한 뒤 제거
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>()
+                threadPoolConfig.getMinSpareThreads(),
+                threadPoolConfig.getMaxThreads(),
+                60L, // corePoolSize을 초과하는 스레드가 할당된 작업이 없는 경우 keepAliveTime이 경과한 뒤 제거
+                TimeUnit.SECONDS,
+                new ScalableTaskQueue(),
+                new ForceTaskQueuePolicy()
         );
 
-        executor.prestartCoreThread(); // non demon thread 이므로 was 인스턴스 실행 후 종료되지 않음
+        ScalableTaskQueue queue = (ScalableTaskQueue) executor.getQueue();
+
+        queue.setExecutor(executor);
+
+        executor.prestartCoreThread(); // non demon thread(user thread) 이므로 was 인스턴스 실행 후 종료되지 않음
 
         log.info("{} STARTED. [poolSize={}, active={}, queued={}]",
                 executor.getClass().getSimpleName(),

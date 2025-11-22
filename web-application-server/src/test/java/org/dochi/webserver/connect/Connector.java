@@ -61,7 +61,7 @@ public class Connector {
         while (serverConnectedSocket == null) {
             Thread.onSpinWait(); // 무한 루프 -> CPU 자원을 계속 낭비 -> 과도한 CPU 사용 방지 -> 루프가 busy-wait임을 알린다.
             // 1. CPU에게 힌트를 줌: 현재 스레드는 짧은 시간 안에 다시 실행될 것이며, 다른 스레드의 작업 결과를 기다리고 있다는 것을 알린다. 그럼 CPU는 전력 소비를 줄이고, 발열을 낮출 수 있음.
-            // 2. JIT 컴파일러 최적화 유도: JIT 컴파일러는 whileg 루프를 busy-wait로 인식하고, 불필요한 루프 제거를 막고 적절한 기계어 인스트럭션(YIELD 등)을 삽입한다. 따라서 같은 코어에 있는 다른 스레드에게 다른 스레드에게 CPU를 더 잘 양보함으로써 전체 시스템 성능 향상.
+            // 2. JIT 컴파일러 최적화 유도: JIT 컴파일러는 while 루프를 busy-wait로 인식하고, 불필요한 루프 제거를 막고 적절한 기계어 인스트럭션(YIELD 등)을 삽입한다. 따라서 같은 코어에 있는 다른 스레드에게 다른 스레드에게 CPU를 더 잘 양보함으로써 전체 시스템 성능 향상.
         }
 
         log.debug("Client and Server connection ready.");
