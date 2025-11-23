@@ -28,6 +28,11 @@ public class Response extends ResponseFacade implements ExternalResponse {
         return this;
     }
 
+    @Override
+    public HttpStatus getStatus() {
+        return response.getStatus();
+    }
+
     public ExternalResponse setHeader(String key, String value) {
         response.addHeader(key, value);
         return this;

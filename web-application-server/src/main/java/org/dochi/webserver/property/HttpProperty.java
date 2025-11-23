@@ -12,11 +12,11 @@ public class HttpProperty implements HttpConfig {
         this.httpResConfig = httpResConfig;
     }
 
-    public HttpRequestProperty getHttpReqConfig() {
+    public HttpRequestProperty getReqConfig() {
         return httpReqConfig;
     }
 
-    public HttpResponseProperty getHttpResConfig() {
+    public HttpResponseProperty getResConfig() {
         return httpResConfig;
     }
 }

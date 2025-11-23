@@ -3,8 +3,8 @@ package org.dochi.webserver.property;
 import org.dochi.webserver.config.SocketConfig;
 
 public class SocketProperty implements SocketConfig {
-    private static final int DEFAULT_KEEP_ALIVE_TIMEOUT = 20000; // default: 20000 ms
-    private static final int DEFAULT_MAX_REQUESTS = 50; // default: 100
+    private static final int DEFAULT_KEEP_ALIVE_TIMEOUT = 5000; // default: 5000 ms
+    private static final int DEFAULT_MAX_REQUESTS = 50; // default: 50
 
     private int keepAliveTimeout = DEFAULT_KEEP_ALIVE_TIMEOUT;
     private int maxKeepAliveRequests = DEFAULT_MAX_REQUESTS;

@@ -32,7 +32,7 @@ public class BioSocketWrapper extends AbstractSocketWrapper<Socket> {
         if (socket.isClosed()) return;
         try {
             socket.close();
-            log.info(getClass().getSimpleName() + " closed [Client: {}, Port: {}]",
+            log.debug(getClass().getSimpleName() + " closed [Client: {}, Port: {}]",
                     socket.getInetAddress(), socket.getPort());
         } catch (IOException e) {
             log.error("Failed to close socket [Client: {}, Port: {}]", socket.getInetAddress().getHostAddress(), socket.getPort(), e);

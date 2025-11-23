@@ -20,7 +20,6 @@ public class Http11Parser {
     private static final byte QUERY_SP = '?';
     private static final byte HEADER_KEY_VALUE_SP = ':';
     private final HeaderDataSource source;
-    private final int cnt = 0;
     private final int headerMaxSize;
 
     public Http11Parser(HeaderDataSource source, int headerMasSize) {

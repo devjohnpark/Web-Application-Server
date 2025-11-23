@@ -9,6 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 // init -> start -> stop -> destroy
 // fail시 rollback
 // 여러 스레드에서 객체가 호출될수있으므로 상태 synchronized
+// 1. WebAppServer 객체를 Main Class의 main method에서 start()만 호출해도 동시성 이슈 발생
+//  -> 메인 스레드에서 Server.start()가 실행중인데, JVM의 셧다운훅 스레드가 실행되어 Server.stop() 실행
+// 2. 사용자가 WebAppServer 객체를 공유 자원으로 사용하는 순간 동시성 이슈 발생
 public abstract class AbstractLifecycle implements Lifecycle {
     private static final Logger log = LoggerFactory.getLogger(AbstractLifecycle.class);
 
@@ -64,7 +67,7 @@ public abstract class AbstractLifecycle implements Lifecycle {
 
     @Override
     public final synchronized void init() throws LifecycleException {
-        if (state != State.NEW) return;
+        if (state != State.NEW || state == State.INITIALIZED) return;
 
         try {
             initInternal();
@@ -93,7 +96,7 @@ public abstract class AbstractLifecycle implements Lifecycle {
 
     @Override
     public final synchronized void stop() throws LifecycleException {
-        if (state != State.STARTED) return;
+        if (state != State.STARTED || state == State.STOPPED) return;
 
         try {
             stopInternal();
@@ -109,7 +112,7 @@ public abstract class AbstractLifecycle implements Lifecycle {
     public final synchronized void destroy() throws LifecycleException {
         if (state == State.STARTED) stop();
 
-        if (state == State.DESTROYED || state == State.NEW) return;
+        if (state == State.DESTROYED) return;
 
         try {
             destroyInternal();

@@ -59,13 +59,23 @@ public class InternalAdapter implements Adapter {
             httpApi = webService.getService("/");
         }
         httpApi.service(request, response);
+        logAccess(request, response);
         recycle(request, response);
+    }
+
+    private void logAccess(Request request, Response response) {
+        String requestLine = String.format("%s %s %s",
+                request.getMethod(),
+                request.getRequestURI(),
+                request.getProtocol()
+        );
+        log.info("{} -> {}", requestLine, response.getStatus().getCode());
     }
 
     private Request ensureRequestFacade(org.dochi.internal.Request internalRequest) {
         Request externalRequest = (Request) internalRequest.getFacade();
         if (externalRequest == null) {
-            externalRequest = new Request(internalRequest, httpConfig.getHttpReqConfig());
+            externalRequest = new Request(internalRequest, httpConfig.getReqConfig());
             internalRequest.setFacade(externalRequest);
         }
         return externalRequest;
@@ -74,7 +84,7 @@ public class InternalAdapter implements Adapter {
     private Response ensureResponseFacade(org.dochi.internal.Response internalResponse) {
         Response externalResponse = (Response) internalResponse.getFacade();
         if (externalResponse == null) {
-            externalResponse = new Response(internalResponse, httpConfig.getHttpResConfig());
+            externalResponse = new Response(internalResponse, httpConfig.getResConfig());
             internalResponse.setFacade(externalResponse);
         }
         return externalResponse;

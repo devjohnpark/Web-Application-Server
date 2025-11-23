@@ -118,9 +118,9 @@ public class HttpProtocolHandler extends AbstractLifecycle {
 
         @Override
         public SocketState process(AbstractSocketWrapper<S> socket) {
-            SocketState state = OPEN;
+            SocketState state;
             HttpProcessor processor = processorRecycler.getProcessor();
-            while (state == OPEN) {
+            do{
                 state = processor.process(socket);
                 if (state == CLOSED) {
                     release(processor);
@@ -136,10 +136,7 @@ public class HttpProtocolHandler extends AbstractLifecycle {
 //                        // processor = getProcessor("HTTP/2.0");
 //                        // HttpProcessor.process() 비동기로 전환 필요
 //                    }
-            }
-            if (processor != null) {
-                release(processor);
-            }
+            } while (state != CLOSED);
             return state;
         }
 

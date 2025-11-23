@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration>
 <configuration>
-
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <!-- 콘솔에 로그 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -36,7 +36,7 @@
     <root level="INFO">
 <!--    <root level="OFF">-->
 <!--        <appender-ref ref="STDOUT"/>-->
-        <appender-ref ref="CONSOLE"/>
+<!--        <appender-ref ref="CONSOLE"/>-->
         <appender-ref ref="FILE" />
     </root>
 

@@ -160,15 +160,6 @@ class AbstractLifecycleTest {
     }
 
     @Test
-    void destroy_is_noop_when_state_is_NEW() throws Exception {
-        lifecycle.destroy();
-
-        // 구현상 NEW면 return (destroyInternal 호출 안 함)
-        assertThat(lifecycle.getState()).isEqualTo(State.NEW);
-        assertThat(lifecycle.destroyCount).isZero();
-    }
-
-    @Test
     void destroy_from_INITIALIZED_transitions_to_DESTROYED() throws Exception {
         lifecycle.init();
         lifecycle.destroy();

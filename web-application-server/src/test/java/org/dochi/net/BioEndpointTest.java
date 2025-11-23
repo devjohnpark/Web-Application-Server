@@ -82,7 +82,7 @@ class BioEndpointTest {
 
         endpoint.processSocketTask(new Socket());
 
-        assertFalse(endpoint.socketTaskCache.isEmpty());
+        assertFalse(endpoint.socketTaskPool.isEmpty());
     }
 
     @Test
@@ -92,11 +92,11 @@ class BioEndpointTest {
 
         endpoint.processSocketTask(new Socket());
 
-        int sizeAfterFirst = endpoint.socketTaskCache.size();
+        int sizeAfterFirst = endpoint.socketTaskPool.size();
 
         endpoint.processSocketTask(new Socket());
 
-        int sizeAfterSecond = endpoint.socketTaskCache.size();
+        int sizeAfterSecond = endpoint.socketTaskPool.size();
 
         assertEquals(1, sizeAfterFirst);
         assertEquals(1, sizeAfterSecond);

@@ -28,7 +28,7 @@ public class BioEndpoint extends AbstractEndpoint<Socket> {
     @Override
     public Socket serverSocketAccept() throws IOException {
         Socket socket = serverSocket.accept();
-        log.info("Accepted Client IP: {}, Port: {}", socket.getInetAddress().getHostAddress(), socket.getPort());
+        log.debug("Accepted Client IP: {}, Port: {}", socket.getInetAddress().getHostAddress(), socket.getPort());
         return socket;
     }
 
@@ -43,7 +43,7 @@ public class BioEndpoint extends AbstractEndpoint<Socket> {
             if (handler.process(socketWrapper) == Handler.SocketState.CLOSED) {
                 socketWrapper.close();
             }
-            socketTaskCache.addFirst(this);
+            socketTaskPool.addFirst(this);
         }
     }
 
@@ -54,13 +54,13 @@ public class BioEndpoint extends AbstractEndpoint<Socket> {
 
     @Override
     protected AbstractSocketWrapper<Socket> wrapSocket(Socket socket) {
-        return new BioSocketWrapper(socket, getConnectionConfig());
+        return new BioSocketWrapper(socket, socketConfig);
     }
 
     @Override
     public void closeServerSocket() throws IOException {
         if (serverSocket != null && !serverSocket.isClosed()) {
-            serverSocket.close(); // accept 깨움
+            serverSocket.close();
         }
     }
 }

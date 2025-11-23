@@ -21,4 +21,5 @@ public interface ExternalResponse {
     void sendError(HttpStatus status) throws IOException;
     void sendError(HttpStatus status, String errorMessage) throws IOException;
     OutputStream getOutputStream() throws IOException;
+    HttpStatus getStatus();
 }

@@ -61,8 +61,8 @@ class ScalableTaskQueueTest {
                 new LinkedBlockingQueue<>());
         executor.prestartCoreThread();
 
-        executor.submit(blockingTask());
-        executor.submit(blockingTask());
+        executor.execute(blockingTask());
+        executor.execute(blockingTask());
         waitForActiveCount(executor, 2);
 
         testQueue.setExecutor(executor);
@@ -82,7 +82,7 @@ class ScalableTaskQueueTest {
         executor.prestartAllCoreThreads();
 
         for (int i = 0; i < 4; i++) {
-            executor.submit(blockingTask());
+            executor.execute(blockingTask());
         }
         waitForActiveCount(executor,4);
 
@@ -107,9 +107,37 @@ class ScalableTaskQueueTest {
         executor.prestartAllCoreThreads();
 
         for (int i = 0; i < 4; i++) {
-            executor.submit(blockingTask());
+            executor.execute(blockingTask());
         }
         waitForActiveCount(executor, 4);
+
+        testQueue.setExecutor(executor);
+
+        // when
+        boolean result = testQueue.offer(dummyTask);
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(testQueue.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("작업 제출 이후, 유휴 스레드가 추가로 생성되고 큐에 적재하고 true를 반환한다")
+    void offer_whenPoolIsNotEmptyAfterExecute_shouldReturnTrue() {
+        // given
+        // core=max=4로 설정하여 poolSize와 maxPoolSize가 동일한 상황 구성
+        // activeCount=4 → 유휴=0, poolSize(4) == maxPoolSize(4)
+        executor = new ThreadPoolExecutor(4, 4, 60L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>());
+        executor.prestartAllCoreThreads();
+
+        executor.execute(() -> {}); // 유후 스레드 생성됨
+
+        for (int i = 0; i < 3; i++) {
+            executor.execute(blockingTask());
+        }
+
+        waitForActiveCount(executor, 3);
 
         testQueue.setExecutor(executor);
 
@@ -149,7 +177,7 @@ class ScalableTaskQueueTest {
                 new LinkedBlockingQueue<>());
         executor.prestartAllCoreThreads();
         for (int i = 0; i < 4; i++) {
-            executor.submit(blockingTask());
+            executor.execute(blockingTask());
         }
         waitForActiveCount(executor, 4);
         testQueue.setExecutor(executor);

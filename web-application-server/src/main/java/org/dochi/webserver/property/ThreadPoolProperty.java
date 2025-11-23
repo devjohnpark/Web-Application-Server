@@ -3,11 +3,12 @@ package org.dochi.webserver.property;
 import org.dochi.webserver.config.ThreadPoolConfig;
 
 public class ThreadPoolProperty implements ThreadPoolConfig {
-    private static final int DEFAULT_CORE_POOL_SIZE = 500; // default 1000
-    private static final int DEFAULT_MAX_POOL_SIZE = 2000; // default 20000
+    private static final int DEFAULT_CORE_POOL_SIZE = 500;
+    private static final int DEFAULT_MAX_POOL_SIZE = 3000;
 
     private int minSpareThreads = DEFAULT_CORE_POOL_SIZE;
     private int maxThreads = DEFAULT_MAX_POOL_SIZE;
+    private boolean useVirtualThreads = false;
 
     public void setMinSpareThreads(int minSpareThreads) {
         if (minSpareThreads < 1) {
@@ -29,5 +30,13 @@ public class ThreadPoolProperty implements ThreadPoolConfig {
 
     public int getMaxThreads() {
         return maxThreads;
+    }
+
+    public void setUseVirtualThreads(boolean useVirtualThreads) {
+        this.useVirtualThreads = useVirtualThreads;
+    }
+
+    public boolean getUseVirtualThreads() {
+        return useVirtualThreads;
     }
 }

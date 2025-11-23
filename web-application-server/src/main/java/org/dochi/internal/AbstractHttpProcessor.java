@@ -45,7 +45,7 @@ public abstract class AbstractHttpProcessor implements HttpProcessor {
         } catch (Throwable t) { // remain all other exceptions as internal server error then close
             processException(HttpStatus.INTERNAL_SERVER_ERROR, t);
         } finally {
-            log.info("Process count: {}", socketWrapper.getKeepAliveCount());
+            log.debug("Process count: {}", socketWrapper.getKeepAliveCount());
         }
         return SocketState.CLOSED;
     }
