@@ -18,9 +18,9 @@ public class Http11Processor extends AbstractHttpProcessor {
     public Http11Processor(Adapter adapter, HttpConfig config) {
         super(adapter);
         this.inputBuffer = new Http11InputBuffer(config.getReqConfig().getRequestHeaderMaxSize());
-        this.request.setInputBuffer(this.inputBuffer);
+        this.request.init(this.inputBuffer);
         this.tempBufferOutputStream = new TmpBufferedOutputStream();
-        this.response.setOutputStream(tempBufferOutputStream);
+        this.response.init(tempBufferOutputStream);
     }
 
     @Override

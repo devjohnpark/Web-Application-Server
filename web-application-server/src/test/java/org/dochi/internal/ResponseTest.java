@@ -19,7 +19,7 @@ class ResponseTest {
     @BeforeEach
     void setUp() {
         out = new ByteArrayOutputStream();
-        response.setOutputStream(out);
+        response.init(out);
     }
 
     @AfterEach
@@ -92,7 +92,7 @@ class ResponseTest {
     void recycleResetsState() throws Exception {
         Response res = new Response();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        res.setOutputStream(out);
+        res.init(out);
 
         res.setVersion(HttpVersion.HTTP_1_0);
         res.setStatus(HttpStatus.NOT_FOUND);

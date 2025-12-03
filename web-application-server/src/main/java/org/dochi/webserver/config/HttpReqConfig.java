@@ -2,5 +2,5 @@ package org.dochi.webserver.config;
 
 public interface HttpReqConfig {
     int getRequestHeaderMaxSize();
-    int getRequestPayloadMaxSize();
+    int getRequestBodyMaxSize();
 }

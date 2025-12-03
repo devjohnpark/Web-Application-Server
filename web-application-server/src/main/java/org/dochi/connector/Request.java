@@ -88,7 +88,7 @@ public class Request extends RequestFacade implements ExternalRequest {
             parseParameters();
         }
         if (!this.multipartParsed) {
-            MultiPartParser parser = new MultiPartParser(new MultipartStream(getInputStream()), config.getRequestHeaderMaxSize(), config.getRequestPayloadMaxSize());
+            MultiPartParser parser = new MultiPartParser(new MultipartStream(getInputStream()), config.getRequestHeaderMaxSize(), config.getRequestBodyMaxSize());
             parser.parseParts(getParameter("boundary"), multipart);
             multipartParsed = true;
         }

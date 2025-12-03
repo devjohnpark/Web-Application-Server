@@ -14,7 +14,7 @@ import java.util.Set;
 // Low-level Response
 // 한 번 커밋되면 메세지 변경 불가
 // OutputStream은 내부 요청 처리자가 주입
-public final class Response implements ResponseContext {
+public final class Response implements ResponseLifecycle {
     private HttpVersion version = HttpVersion.HTTP_1_1;
     private HttpStatus status = HttpStatus.OK;
     private final ResponseHeaders headers = new ResponseHeaders();
@@ -22,7 +22,7 @@ public final class Response implements ResponseContext {
     private OutputStream out;
 
     @Override
-    public void setOutputStream(OutputStream out) {
+    public void init(OutputStream out) {
         this.out = out;
     }
 
@@ -122,7 +122,7 @@ public final class Response implements ResponseContext {
         if (this.facade == null) {
             throw new IllegalStateException("Facade cannot be null");
         }
-        this.facade.setOutputStream(this.out);
+        this.facade.init(this.out);
     }
 
     private void onCommit(byte[] body) throws IOException {

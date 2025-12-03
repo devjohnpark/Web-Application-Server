@@ -4,9 +4,9 @@ import org.dochi.http.utils.MediaType;
 import org.dochi.internal.buffer.InputBuffer;
 import java.nio.charset.Charset;
 
-// 요청 메세지의 메타데이터를 파싱한것을 버퍼 구간으로 설정하고 디코딩한 메타데이터를 가져올수있는 객체
+// 바이트 단위 파싱과 디코딩하도록 제공하는 저수준의 내부 요청 객체
 // 헤더 필드는 메모리 주소를 직접 참조해서 처음 조회 O(N) 이후에 다음번 조회시 O(1)
-public final class Request implements RequestContext {
+public final class Request implements RequestLifecycle {
     private final HeaderBytes method;
     private final HeaderBytes requestPath;
     private final HeaderBytes queryString;
@@ -29,7 +29,7 @@ public final class Request implements RequestContext {
     }
 
     @Override
-    public void setInputBuffer(InputBuffer inputBuffer) {
+    public void init(InputBuffer inputBuffer) {
         this.inputBuffer = inputBuffer;
     }
 
@@ -108,15 +108,15 @@ public final class Request implements RequestContext {
     //    * internal.Request 가지고 외관(facade)으로 사용하는 단 하나는 객체 생성 허용
     //    * WAS에서 외부(개발자)로 노출되는 HTTP API 에 제공할 객체이므로 의미 부합
 
-    // 결정: RequestContext 인터페이스로 상위 계층에서 자기 자신(internal.Request)를 맵핑시켜서 가져다 사용할수있게함
-    // 효과: RequestContext 인터페이스로 각 계층 독립성 유지하면서 1:1 매핑 (완전한 계층 분리는 아니지만 성능을 위해 합리적인 결정)
-    private RequestContext facade;
+    // 결정: RequestLifecycle 인터페이스로 상위 계층에서 자기 자신(internal.Request)를 맵핑시켜서 가져다 사용할수있게함
+    // 효과: RequestLifecycle 인터페이스로 각 계층 독립성 유지하면서 1:1 매핑 (완전한 계층 분리는 아니지만 성능을 위해 합리적인 결정)
+    private RequestLifecycle facade;
 
-    public RequestContext getFacade() {
+    public RequestLifecycle getFacade() {
         return this.facade;
     }
 
-    public void setFacade(RequestContext facade) {
+    public void setFacade(RequestLifecycle facade) {
         this.facade = facade;
         if (this.inputBuffer == null) {
             throw new IllegalStateException("Input buffer cannot be null");
@@ -124,6 +124,6 @@ public final class Request implements RequestContext {
         if (this.facade == null) {
             throw new IllegalStateException("Facade cannot be null");
         }
-        this.facade.setInputBuffer(this.inputBuffer);
+        this.facade.init(this.inputBuffer);
     }
 }

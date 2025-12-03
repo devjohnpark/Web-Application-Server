@@ -21,7 +21,7 @@ class ResponseTest {
     @BeforeEach
     void setUp() {
         out = new ByteArrayOutputStream();
-        internalResponse.setOutputStream(out);
+        internalResponse.init(out);
 
         // low-level(interna.Response) facade 연결 (set OutputStrea, can commit )
         internalResponse.setFacade(externalResponse);

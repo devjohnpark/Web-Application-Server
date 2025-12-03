@@ -18,7 +18,7 @@ class RequestTest extends TestAcceptorBase {
 
     @Override
     protected void setUpInternal() throws IOException {
-        externalRequest.setInputBuffer(inputBuffer);
+        externalRequest.init(inputBuffer);
     }
 
     @Override
