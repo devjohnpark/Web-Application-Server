@@ -599,41 +599,43 @@ WebService --> HttpApiHandler : dispatches
 ---
 ## 핵심 문제 해결
 
-**상세 위키**: https://github.com/devjohnpark/Dochi-WAS/wiki
+Dochi WAS를 개발하면서 발생한 성능 병목을 계측하고, 원인을 분석한 뒤 구조적으로 개선했습니다. 이에 대한 상세한 실험 과정, 병목 분석, 구현 내용, 성능 비교는 다음 위키 문서에서 확인할 수 있습니다.
+
+> **상세 위키 문서**: [Dochi WAS Wiki](https://github.com/devjohnpark/Dochi-WAS/wiki)
 
 ### 1. 워커 스레드 풀 증가 실험 기반으로 확장 스레드 풀 구현
 
-* 문제 현상: 부하 테스트시 P99 Latency 높고 일정 주기로 급증/급감 패턴 발생
-* 병목 계측: 문제 발생 시점의 로그로 작업이 큐에 주기적으로 밀렸다가 한꺼번에 비워지는 것을 확인
-* 원인 분석: 동접자의 수가 스레드풀의 크기보다 컸을때 스레드 풀 병목 발생
+* **문제 현상**: 부하 테스트시 P99 Latency 높고 일정 주기로 급증/급감 패턴 발생
+* **병목 계측**: 문제 발생 시점의 로그로 작업이 큐에 주기적으로 밀렸다가 한꺼번에 비워지는 것을 확인
+* **원인 분석**: 동접자의 수가 스레드풀의 크기보다 컸을때 스레드 풀 병목 발생
 	1. 모든 스레드가 동시에 블로킹 되는 순간이 발생
 	2. 스레드 풀이 일시적으로 멈춤
 	3. 그 시간 동안 큐에 요청 작업이 계속 쌓여서 P99 급증
 	4. 요청이 수신되고 스레드들이 깨어나면서 한꺼번에 처리하여 P99 급락
-* 해결 방안: 동접자 수와 비례하는 동적으로 확장가능한 워커 스레드 풀 필요 
-* 개선 성과: P99 Latency 급증/급감 패턴 완화와 약 4.81배 개선 및 메모리 효율화
-* 상세 과정:  [1. 스레드 풀 증가 실험 기반 확장 스레드 풀 구현](https://github.com/devjohnpark/Dochi-WAS/wiki/1.-%EC%8A%A4%EB%A0%88%EB%93%9C-%ED%92%80-%EC%A6%9D%EA%B0%80-%EC%8B%A4%ED%97%98-%EA%B8%B0%EB%B0%98-%ED%99%95%EC%9E%A5-%EC%8A%A4%EB%A0%88%EB%93%9C-%ED%92%80-%EA%B5%AC%ED%98%84)
+* **해결 방안**: 동접자 수와 비례하는 동적으로 확장가능한 워커 스레드 풀 필요 
+* **개선 성과**: P99 Latency 급증/급감 패턴 완화와 약 4.81배 개선 및 메모리 효율화
+* **상세 과정**:  [1. 스레드 풀 증가 실험 기반 확장 스레드 풀 구현](https://github.com/devjohnpark/Dochi-WAS/wiki/1.-%EC%8A%A4%EB%A0%88%EB%93%9C-%ED%92%80-%EC%A6%9D%EA%B0%80-%EC%8B%A4%ED%97%98-%EA%B8%B0%EB%B0%98-%ED%99%95%EC%9E%A5-%EC%8A%A4%EB%A0%88%EB%93%9C-%ED%92%80-%EA%B5%AC%ED%98%84)
 
 ### 2. 요청 처리 로직에서 병목 지점 발견 후 응답 속도 향상
 
-* 문제 현상: 워커 스레드풀 동적 확장과 Keep-Alive 옵션 조정 후 요청 처리 로직에서 병목 분석 및 발견
-* 병목 계측:  요청 헤더 파싱 로직이 CPU 사용량의 대략 47% 차지 + Minor GC 부하
-* 원인 분석: HTTP/1.1 요청 헤더를 CRLF 단위로 읽고 문자열 변환 후 정규 표현식으로 파싱해서 헤더 저장
-* 해결 방안: 빠른 바이트 파싱과 `String` 객체 생성 최소화를 위해 Lazy Decoding이 가능한 구조 설계 및 구현
-* 개선 성과: P99 Latency 약 2.21배 개선
-* 상세 과졍: 
+* **문제 현상**: 워커 스레드풀 동적 확장과 Keep-Alive 옵션 조정 후 요청 처리 로직에서 병목 분석 및 발견
+* **병목 계측**: 요청 헤더 파싱 로직이 CPU 사용량의 대략 47% 차지 + Minor GC 부하
+* **원인 분석**: HTTP/1.1 요청 헤더를 CRLF 단위로 읽고 문자열 변환 후 정규 표현식으로 파싱해서 헤더 저장
+* **해결 방안**: 빠른 바이트 파싱과 `String` 객체 생성 최소화를 위해 Lazy Decoding이 가능한 구조 설계 및 구현
+* **개선 성과**: P99 Latency 약 2.21배 개선
+* **상세 과졍**: 
 	* [1. 요청 처리 로직의 병목 분석](https://github.com/devjohnpark/Dochi-WAS/wiki/1.-%EC%9A%94%EC%B2%AD-%EC%B2%98%EB%A6%AC-%EB%A1%9C%EC%A7%81%EC%9D%98-%EB%B3%91%EB%AA%A9-%EB%B6%84%EC%84%9D)
 	* [2. 요청 처리 로직의 병목 개선](https://github.com/devjohnpark/Dochi-WAS/wiki/2.-%EC%9A%94%EC%B2%AD-%EC%B2%98%EB%A6%AC-%EB%A1%9C%EC%A7%81%EC%9D%98-%EB%B3%91%EB%AA%A9-%EA%B0%9C%EC%84%A0)
 	* [3. 요청 처리 로직의 병목 개선 후 성능 비교](https://github.com/devjohnpark/Dochi-WAS/wiki/3.-%EC%9A%94%EC%B2%AD-%EC%B2%98%EB%A6%AC-%EB%A1%9C%EC%A7%81%EC%9D%98-%EB%B3%91%EB%AA%A9-%EA%B0%9C%EC%84%A0-%ED%9B%84-%EC%84%B1%EB%8A%A5-%EB%B9%84%EA%B5%90)
 
 ### 3. Blocking I/O 병목 해소
 
-* 문제 현상: 동접자 수가 늘어남에 따라 Tail Latency 증가
-* 병목 계측: 동접자와 비례하게 워커 스레드가 늘어나도 P99 Latency 증가
-* 원인 분석: 커널 스레드 수가 늘어남에 따라 컨텍스트 스위칭 비용도 증가
-* 해결 방안: 동접자 증가에도 커널 스레드 풀의 확장없이 요청순 처리
-* 개선 성과: P99 Latency 약 6.95배 개선
-* 상세 과정:
+* **문제 현상**: 동접자 수가 늘어남에 따라 Tail Latency 증가
+* **병목 계측**: 동접자와 비례하게 워커 스레드가 늘어나도 P99 Latency 증가
+* **원인 분석**: 커널 스레드 수가 늘어남에 따라 컨텍스트 스위칭 비용도 증가
+* **해결 방안**: 동접자 증가에도 커널 스레드 풀의 확장없이 요청순 처리
+* **개선 성과**: P99 Latency 약 6.95배 개선
+* **상세 과정**:
 	* [3. Blocking 병목 해소](https://github.com/devjohnpark/Dochi-WAS/wiki/3.-Blocking-%EB%B3%91%EB%AA%A9-%ED%95%B4%EC%86%8C)
 	* [4. Virtual Thread 도입 후 성능 비교와 한계](https://github.com/devjohnpark/Dochi-WAS/wiki/4.-Virtual-Thread-%EB%8F%84%EC%9E%85-%ED%9B%84-%EC%84%B1%EB%8A%A5-%EB%B9%84%EA%B5%90%EC%99%80-%ED%95%9C%EA%B3%84)
 
@@ -928,3 +930,4 @@ protected void doPost(ExternalRequest request, ExternalResponse response) throws
 ## 라이선스
 
 이 프로젝트는 학습과 실험 목적으로 제작되었습니다.
+
